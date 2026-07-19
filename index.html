@@ -345,7 +345,8 @@ section{padding:100px 0;}
 .collection-card{padding:clamp(24px,5vw,42px);border-radius:28px;box-shadow:var(--shadow-lift)}.quiz-progress{display:flex;gap:6px;margin-bottom:34px}.quiz-progress span{height:4px;flex:1;background:var(--line);border-radius:4px;overflow:hidden}.quiz-progress i{display:block;height:100%;background:var(--gold);transition:width .35s}.quiz-q{font-size:clamp(24px,4vw,34px);line-height:1.2;letter-spacing:-.03em;margin:0 0 26px}.quiz-opts{display:grid;gap:10px}.quiz-opt{padding:16px 18px;border:1px solid var(--line);border-radius:16px;background:var(--paper-2);text-align:left;font-size:15px;font-weight:600;transition:.25s}.quiz-opt:hover{border-color:var(--gold);transform:translateX(4px)}.tag{display:inline-block;padding:7px 11px;border-radius:999px;background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--gold);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:18px}
 
 /* ---------- Product detail ---------- */
-.pd-media-2{margin-top:18px}.pd-facts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:26px}.pd-fact{padding:13px 15px;border:1px solid var(--line);border-radius:14px;color:var(--ink-soft);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.pd-fact b{display:block;color:var(--ink);font-size:13px;text-transform:none;letter-spacing:0;margin-top:4px}.notes-pyramid{display:grid;gap:12px;margin:0 0 28px}.notes-row{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:start}.notes-row .lbl{font-size:11px;color:var(--ink-soft);text-transform:uppercase;padding-top:7px}.notes-tags{display:flex;gap:6px;flex-wrap:wrap}.note-tag{padding:6px 9px;border-radius:999px;background:var(--paper-2);font-size:11px}.size-select{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.pd-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.unverified-note{margin-top:24px;padding:14px;border-left:2px solid var(--gold);background:var(--paper-2);color:var(--ink-soft);font-size:12px;line-height:1.6}
+.pd-media-2{margin-top:18px}.pd-facts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:26px}.pd-fact{padding:13px 15px;border:1px solid var(--line);border-radius:14px;color:var(--ink-soft);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.pd-fact b{display:block;color:var(--ink);font-size:13px;text-transform:none;letter-spacing:0;margin-top:4px}.notes-pyramid{display:grid;gap:12px;margin:0 0 28px}.notes-row{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:start}.notes-row .lbl{font-size:11px;color:var(--ink-soft);text-transform:uppercase;padding-top:7px}.notes-tags{display:flex;gap:6px;flex-wrap:wrap}.note-tag{padding:6px 9px;border-radius:999px;background:var(--paper-2);font-size:11px}.size-select{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.pd-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.dupe-label{display:inline-flex;margin:-3px 0 12px;padding:5px 9px;border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);border-radius:999px;color:var(--gold-2);background:color-mix(in srgb,var(--gold) 8%,transparent);font-size:10px;font-weight:650;letter-spacing:.025em;line-height:1.25}.pd-inspiration{display:inline-flex;gap:6px;align-items:center;margin:-8px 0 22px;padding:8px 12px;border:1px solid color-mix(in srgb,var(--gold) 42%,transparent);border-radius:999px;color:var(--ink);background:color-mix(in srgb,var(--gold) 7%,transparent);font-size:12px}.pd-inspiration span{color:var(--gold-2);font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:9px}
 
 /* ---------- Panels, search results, cart ---------- */
 .panel-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(5px)}.panel-backdrop.open{opacity:1;pointer-events:auto}.side-panel{position:fixed;top:0;right:0;bottom:0;width:min(430px,92vw);z-index:401;background:var(--paper);box-shadow:var(--shadow-lift);transform:translateX(105%);visibility:hidden;transition:transform .42s var(--ease),visibility 0s linear .42s;display:flex;flex-direction:column}.side-panel.open{transform:none;visibility:visible;transition:transform .42s var(--ease),visibility 0s}.panel-head{height:76px;padding:0 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.panel-head h3{margin:0;font-size:20px}.panel-body{padding:20px;overflow:auto;flex:1}.panel-foot{padding:20px;border-top:1px solid var(--line)}
@@ -560,6 +561,7 @@ section{padding:100px 0;}
     <div class="footer-bottom">
       <p>&copy; 2026 Decant Dynasty. All rights reserved.</p>
       <p>Hand-poured in the Philippines. · <button id="soundToggle" style="color:inherit;font-size:inherit;text-decoration:underline;text-underline-offset:3px" aria-pressed="false">Sound on</button></p>
+      <p><a href="https://sketchfab.com/3d-models/atomizador-para-perfume-1eb44518f21f4da78d26fe40e94b82c7" target="_blank" rel="noopener">3D atomizer by LEOLATO</a> · CC BY 4.0</p>
     </div>
   </div>
 </footer>
@@ -567,7 +569,9 @@ section{padding:100px 0;}
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="data.js?v=20260719-4"></script>
-<script src="app.js?v=20260719-4"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="data.js?v=20260719-5"></script>
+<script src="catalog-research.js?v=20260719-1"></script>
+<script src="app.js?v=20260719-5"></script>
 </body>
 </html>

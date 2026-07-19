@@ -7,7 +7,7 @@
 //   id: string; brandId: string; brand: string; name: string; image: string;
 //   prices: PriceMap; concentration: string; gender: "Men"|"Women"|"Unisex";
 //   description: string; topNotes: string[]; heartNotes: string[]; baseNotes: string[];
-//   longevity: string; projection: string; recommended: boolean; verified: boolean;
+//   longevity: string; projection: string; inspiredBy: string|null; recommended: boolean;
 // }
 // interface Brand { id: string; name: string; logo: string; }
 // ============================================================
@@ -58,8 +58,8 @@ function P(brandId, brandName, name, opts) {
     baseNotes: opts.baseNotes || [],
     longevity: opts.longevity || "Moderate (6-8 hours)",
     projection: opts.projection || "Moderate",
+    inspiredBy: opts.inspiredBy || null,
     recommended: !!opts.recommended,
-    verified: !!opts.verified,
   };
 }
 
@@ -67,13 +67,13 @@ const PRODUCTS = [];
 const add = (p) => PRODUCTS.push(p);
 
 /* ---------------------------- AFNAN ---------------------------- */
-add(P("afnan","Afnan","9PM Night Out",{gender:"Unisex",verified:true,recommended:true,
+add(P("afnan","Afnan","9PM Night Out",{gender:"Unisex",recommended:true,
   topNotes:["Dragon Fruit","Bergamot","Cognac","Lavender","Apple"],
   heartNotes:["Cardamom","Mahonial","Suede","Toffee","Cedar"],
   baseNotes:["Tonka Bean","Akigalawood","Ambrofix","Patchouli"],
   longevity:"Long (8-10 hours)", projection:"Strong",
   description:"A fruity-sweet, suede-laced take on the 9PM line — dragon fruit and cognac up top, settling into a warm, shadowed suede and toffee heart."}));
-add(P("afnan","Afnan","9PM",{gender:"Men",verified:true,recommended:true,concentration:"Eau de Parfum",
+add(P("afnan","Afnan","9PM",{gender:"Men",recommended:true,concentration:"Eau de Parfum",
   topNotes:["Apple","Cinnamon","Wild Lavender","Bergamot"],
   heartNotes:["Orange Blossom","Lily-of-the-Valley"],
   baseNotes:["Vanilla","Tonka Bean","Amber","Patchouli"],
@@ -115,13 +115,13 @@ add(P("afnan","Afnan","Zimaya Rose of Dreams",{gender:"Women",
 add(P("armaf","Armaf","Club de Nuit Sillage",{gender:"Unisex",concentration:"Extrait de Parfum",
   topNotes:["Lemon","Pineapple","Bergamot"],heartNotes:["Birch","Jasmine","Rose"],baseNotes:["Ambergris","Musk","Patchouli"],
   description:"A sillage-boosted extrait built on the legendary Club de Nuit DNA — louder and longer than the original EDT."}));
-add(P("armaf","Armaf","Club de Nuit Intense Man EDT",{gender:"Men",verified:true,recommended:true,concentration:"Eau de Toilette",
+add(P("armaf","Armaf","Club de Nuit Intense Man EDT",{gender:"Men",recommended:true,concentration:"Eau de Toilette",
   topNotes:["Lemon","Pineapple","Bergamot","Black Currant","Apple"],
   heartNotes:["Birch","Jasmine","Rose"],
   baseNotes:["Ambergris","Musk","Patchouli","Vanilla"],
   longevity:"Long (8-12 hours)", projection:"Strong",
   description:"The fragrance that redefined the budget-luxury category — a citrus-fruit blast over smoky birch, worn by millions as an Aventus alternative."}));
-add(P("armaf","Armaf","Club de Nuit Intense Man Limited Edition",{gender:"Men",verified:true,concentration:"Parfum",
+add(P("armaf","Armaf","Club de Nuit Intense Man Limited Edition",{gender:"Men",concentration:"Parfum",
   topNotes:["Lemon","Pineapple","Lime","Black Pepper","Bergamot","Pink Pepper"],
   heartNotes:["Jasmine","Rose","Lily-of-the-Valley","Freesia"],
   baseNotes:["White Musk","Ambroxan","Ambergris","Cedar","Leather","Patchouli"],
@@ -145,7 +145,7 @@ add(P("jpg","Jean Paul Gaultier","Le Male Elixir Absolu",{gender:"Men",concentra
   topNotes:["Cardamom","Bergamot"],heartNotes:["Lavender","Cinnamon"],baseNotes:["Vanilla","Tonka Bean","Amberwood"],
   longevity:"Very Long (10+ hours)", projection:"Very Strong",
   description:"The most concentrated, resinous expression of the Le Male family — a dense vanilla-tonka amber built for cold nights."}));
-add(P("jpg","Jean Paul Gaultier","Le Male Le Parfum",{gender:"Men",verified:true,recommended:true,concentration:"Eau de Parfum",
+add(P("jpg","Jean Paul Gaultier","Le Male Le Parfum",{gender:"Men",recommended:true,concentration:"Eau de Parfum",
   topNotes:["Cardamom"],heartNotes:["Lavender","Iris"],baseNotes:["Vanilla","Oriental Notes","Woodsy Notes"],
   longevity:"Long (8-10 hours)", projection:"Strong",
   description:"A darker, iris-inflected reading of Le Male — smooth cardamom and lavender resolving into a powdery, vanilla-woods dry-down."}));
@@ -155,7 +155,7 @@ add(P("jpg","Jean Paul Gaultier","Ultramale",{gender:"Men",concentration:"Eau de
   description:"A sweeter, caramel-forward twist on the Le Male DNA that became a modern classic in its own right."}));
 
 /* ---------------------------- VERSACE ---------------------------- */
-add(P("versace","Versace","Eros EDP",{gender:"Men",verified:true,recommended:true,concentration:"Eau de Parfum",
+add(P("versace","Versace","Eros EDP",{gender:"Men",recommended:true,concentration:"Eau de Parfum",
   topNotes:["Mint","Lemon","Green Apple","Mandarin Orange"],
   heartNotes:["Ambroxan","Geranium","Clary Sage"],
   baseNotes:["Vanilla","Cedar","Sandalwood","Bitter Orange","Patchouli","Leather"],
@@ -214,19 +214,19 @@ add(P("lattafa","Lattafa","Fakhar",{gender:"Men",
 add(P("lattafa","Lattafa","Hayaati Florence",{gender:"Women",
   topNotes:["Bergamot","Peach"],heartNotes:["Rose","Jasmine"],baseNotes:["Musk","Vanilla","Sandalwood"],
   description:"A floral homage to Florence — soft rose and jasmine over a musky base."}));
-add(P("lattafa","Lattafa","Khamrah",{gender:"Unisex",verified:true,recommended:true,concentration:"Eau de Parfum",
+add(P("lattafa","Lattafa","Khamrah",{gender:"Unisex",recommended:true,concentration:"Eau de Parfum",
   topNotes:["Cinnamon","Nutmeg","Bergamot"],
   heartNotes:["Dates","Praline","Tuberose","Mahonial"],
   baseNotes:["Vanilla","Tonka Bean","Benzoin","Myrrh","Amberwood","Akigalawood"],
   longevity:"Long (8-10 hours)", projection:"Strong",
   description:"Lattafa's breakout gourmand-oriental — a rare date-praline accord over cinnamon and creamy vanilla-amberwood, honoring Gulf hospitality traditions."}));
-add(P("lattafa","Lattafa","Khamrah Qahwa",{gender:"Unisex",verified:true,recommended:true,concentration:"Eau de Parfum",
+add(P("lattafa","Lattafa","Khamrah Qahwa",{gender:"Unisex",recommended:true,concentration:"Eau de Parfum",
   topNotes:["Cinnamon","Cardamom","Ginger"],
   heartNotes:["Praline","Candied Fruits","White Flowers"],
   baseNotes:["Vanilla","Coffee","Tonka Bean","Benzoin","Musk"],
   longevity:"Long (8-10 hours)", projection:"Strong",
   description:"The coffee-laced flanker of Khamrah — warm cinnamon and cardamom meeting a dark roast coffee note before settling into praline-vanilla richness."}));
-add(P("lattafa","Lattafa","Khamrah Waha",{gender:"Unisex",verified:true,concentration:"Eau de Parfum",
+add(P("lattafa","Lattafa","Khamrah Waha",{gender:"Unisex",concentration:"Eau de Parfum",
   topNotes:["Bergamot","Yuzu","Juniper","Ginger"],
   heartNotes:["Cucumber","Sea Salt","Iris","Sage"],
   baseNotes:["Vanilla","Tonka Bean","Musk","Akigalawood","Ambrofix"],
@@ -407,7 +407,7 @@ add(P("maison-alhambra","Maison Alhambra","Yeah!",{gender:"Unisex",recommended:t
   description:"A playful, upbeat gourmand designed to feel exactly like its name."}));
 
 /* ---------------------------- RASASI ---------------------------- */
-add(P("rasasi","Rasasi","Hawas for Him",{gender:"Men",verified:true,recommended:true,concentration:"Eau de Parfum",
+add(P("rasasi","Rasasi","Hawas for Him",{gender:"Men",recommended:true,concentration:"Eau de Parfum",
   topNotes:["Bergamot","Apple","Cinnamon","Lemon"],
   heartNotes:["Watery Notes","Plum","Orange Blossom","Cardamom"],
   baseNotes:["Ambergris","Musk","Driftwood","Patchouli"],
@@ -493,13 +493,13 @@ add(P("maison-asrar","Maison Asrar","Regent",{gender:"Men",concentration:"Eau de
   description:"A regal, leather-tobacco composition designed for commanding presence."}));
 
 /* ---------------------------- NAUTICA ---------------------------- */
-add(P("nautica","Nautica","Voyage",{gender:"Men",verified:true,recommended:true,concentration:"Eau de Toilette",
+add(P("nautica","Nautica","Voyage",{gender:"Men",recommended:true,concentration:"Eau de Toilette",
   topNotes:["Green Leaves","Apple"],heartNotes:["Lotus","Mimosa"],baseNotes:["Musk","Cedar","Oakmoss","Amber"],
   longevity:"Moderate (5-7 hours)", projection:"Moderate",
   description:"An enduring aquatic-woody classic — a fresh, salty sea breeze carrying apple and lotus over cedar and amber."}));
 
 /* ---------------------------- MONTBLANC ---------------------------- */
-add(P("montblanc","Montblanc","Explorer",{gender:"Men",verified:true,recommended:true,concentration:"Eau de Parfum",
+add(P("montblanc","Montblanc","Explorer",{gender:"Men",recommended:true,concentration:"Eau de Parfum",
   topNotes:["Bergamot","Pink Pepper"],heartNotes:["Vetiver","Patchouli"],baseNotes:["Leather","Ambroxan","Vanilla"],
   longevity:"Long (8-10 hours)", projection:"Strong",
   description:"A rugged, adventurous woody-leather signature scent built around vetiver and warm ambroxan."}));

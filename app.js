@@ -31,62 +31,49 @@ function initHeroBottle(){
   const container=document.getElementById('heroBottleContainer');
   if(!container)return;
   if(bottleCleanup)bottleCleanup();
-  if(!window.THREE){container.innerHTML='<div class="ph">Interactive decant bottle</div>';return;}
+  if(!window.THREE||!THREE.GLTFLoader){container.innerHTML='<div class="ph">Interactive decant bottle</div>';return;}
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(34,container.clientWidth/Math.max(container.clientHeight,1),.1,100);
-  camera.position.set(0,.05,8.2);
+  camera.position.set(0,.05,8.8);
   const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));renderer.setSize(container.clientWidth,container.clientHeight);
   renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   container.querySelector('canvas')?.remove();container.prepend(renderer.domElement);
-  scene.add(new THREE.HemisphereLight(0xfffaf0,0x10131a,1.45));
-  const key=new THREE.DirectionalLight(0xffe3a0,2.6);key.position.set(4,6,6);scene.add(key);
-  const rim=new THREE.PointLight(0x91c8ff,2.2);rim.position.set(-4,2,-1);scene.add(rim);
-  const front=new THREE.PointLight(0xffffff,1.25);front.position.set(0,-1,5);scene.add(front);
+  scene.add(new THREE.HemisphereLight(0xfffaf0,0x10131a,1.65));
+  const key=new THREE.DirectionalLight(0xffe3a0,3);key.position.set(4,6,6);scene.add(key);
+  const rim=new THREE.PointLight(0x91c8ff,2.5);rim.position.set(-4,2,-1);scene.add(rim);
+  const front=new THREE.PointLight(0xffffff,1.5);front.position.set(0,-1,5);scene.add(front);
   const group=new THREE.Group();
   const disposables=[];
-  const glass=new THREE.MeshPhysicalMaterial({color:0xf8f4e9,metalness:0,roughness:.08,transmission:.96,thickness:.38,ior:1.48,transparent:true,opacity:.72,side:THREE.DoubleSide});
-  const clearPlastic=new THREE.MeshPhysicalMaterial({color:0xffffff,roughness:.16,transmission:.9,thickness:.22,transparent:true,opacity:.58,side:THREE.DoubleSide});
-  const whitePlastic=new THREE.MeshStandardMaterial({color:0xf2f0e9,roughness:.32,metalness:.06});
-  const sealMaterial=new THREE.MeshPhysicalMaterial({color:0xf4e8c5,roughness:.42,transmission:.28,transparent:true,opacity:.82});
-  const liquid=new THREE.MeshPhysicalMaterial({color:0xd8b66a,roughness:.18,transmission:.72,transparent:true,opacity:.42});
-  disposables.push(glass,clearPlastic,whitePlastic,sealMaterial,liquid);
-  const addMesh=(geometry,material,y=0)=>{const mesh=new THREE.Mesh(geometry,material);mesh.position.y=y;group.add(mesh);disposables.push(geometry);return mesh;};
-  addMesh(new THREE.CylinderGeometry(.53,.53,3.65,64,1,true),glass,-.55);
-  addMesh(new THREE.CylinderGeometry(.49,.49,.15,64),glass,-2.37);
-  addMesh(new THREE.TorusGeometry(.49,.045,12,64),glass,-2.29).rotation.x=Math.PI/2;
-  addMesh(new THREE.CylinderGeometry(.475,.475,1.05,64),liquid,-1.74);
-  addMesh(new THREE.CylinderGeometry(.31,.39,.48,48,1,true),glass,1.5);
-  addMesh(new THREE.TorusGeometry(.37,.055,12,48),glass,1.68).rotation.x=Math.PI/2;
-  addMesh(new THREE.CylinderGeometry(.405,.405,.28,64),sealMaterial,1.67);
-  for(let i=0;i<3;i++){const band=addMesh(new THREE.TorusGeometry(.415,.025,10,48),sealMaterial,1.56+i*.11);band.rotation.x=Math.PI/2;}
-  const dipTubeCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(0,1.55,0),new THREE.Vector3(0,.4,0),new THREE.Vector3(-.03,-1.3,0),new THREE.Vector3(-.22,-2.18,0)]);
-  addMesh(new THREE.TubeGeometry(dipTubeCurve,48,.026,10,false),clearPlastic,0);
-  addMesh(new THREE.CylinderGeometry(.42,.42,.38,48),whitePlastic,1.92);
-  addMesh(new THREE.CylinderGeometry(.48,.48,1.12,64,1,true),clearPlastic,2.34);
-  addMesh(new THREE.CylinderGeometry(.47,.47,.09,64),clearPlastic,2.88);
-  addMesh(new THREE.CylinderGeometry(.21,.21,.62,40),whitePlastic,2.42);
-  const springPoints=[];for(let i=0;i<=72;i++){const t=i/72;springPoints.push(new THREE.Vector3(Math.cos(t*Math.PI*9)*.13,1.78+t*.58,Math.sin(t*Math.PI*9)*.13));}
-  const springMaterial=new THREE.MeshStandardMaterial({color:0x696b6c,metalness:.88,roughness:.24});disposables.push(springMaterial);
-  addMesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(springPoints),96,.018,7,false),springMaterial,0);
-  addMesh(new THREE.CylinderGeometry(.115,.115,.34,32),whitePlastic,2.82);
-  const nozzle=addMesh(new THREE.CylinderGeometry(.075,.075,.28,24),whitePlastic,2.69);nozzle.rotation.z=Math.PI/2;nozzle.position.x=.18;
-  const nozzleTip=addMesh(new THREE.SphereGeometry(.055,20,12),new THREE.MeshStandardMaterial({color:0x282828,roughness:.5}),2.69);nozzleTip.position.x=.32;disposables.push(nozzleTip.material);
-
-  const labelCanvas=document.createElement('canvas');labelCanvas.width=2048;labelCanvas.height=768;
-  const labelContext=labelCanvas.getContext('2d');
-  const drawLabel=logo=>{labelContext.clearRect(0,0,2048,768);labelContext.fillStyle='rgba(248,246,240,.82)';labelContext.fillRect(0,0,2048,768);if(logo){labelContext.drawImage(logo,610,124,828,520);}};
-  drawLabel();const labelTexture=new THREE.CanvasTexture(labelCanvas);labelTexture.encoding=THREE.sRGBEncoding;
-  const labelMaterial=new THREE.MeshPhysicalMaterial({map:labelTexture,roughness:.5,transparent:true,opacity:.94,side:THREE.DoubleSide});disposables.push(labelTexture,labelMaterial);
-  const label=addMesh(new THREE.CylinderGeometry(.542,.542,1.35,64,1,true),labelMaterial,-.48);label.rotation.y=Math.PI;
-  const logoImage=new Image();logoImage.onload=()=>{drawLabel(logoImage);labelTexture.needsUpdate=true;};logoImage.src='images/bottle-logo.png';
   group.rotation.set(.035,-.12,-.025);scene.add(group);
-
-  const featurePoints={seal:new THREE.Vector3(.34,1.66,.05),atomizer:new THREE.Vector3(.32,2.52,.04),glass:new THREE.Vector3(.48,-1.32,.02)};
+  const featurePoints={seal:new THREE.Vector3(.3,.7,.05),atomizer:new THREE.Vector3(.3,1.9,.04),glass:new THREE.Vector3(.46,-1.25,.02)};
   const guideLines={seal:container.querySelector('[data-guide="seal"]'),atomizer:container.querySelector('[data-guide="atomizer"]'),glass:container.querySelector('[data-guide="glass"]')};
   const guideDots={seal:container.querySelector('[data-dot="seal"]'),atomizer:container.querySelector('[data-dot="atomizer"]'),glass:container.querySelector('[data-dot="glass"]')};
   const callouts={seal:container.querySelector('[data-callout="seal"]'),atomizer:container.querySelector('[data-callout="atomizer"]'),glass:container.querySelector('[data-callout="glass"]')};
   function updateGuides(){const rect=container.getBoundingClientRect();Object.keys(featurePoints).forEach(key=>{const p=group.localToWorld(featurePoints[key].clone()).project(camera);const x=(p.x*.5+.5)*rect.width,y=(-p.y*.5+.5)*rect.height;const calloutRect=callouts[key]?.getBoundingClientRect();const tx=calloutRect?calloutRect.left-rect.left+(calloutRect.width/2):x,ty=calloutRect?calloutRect.top-rect.top+(calloutRect.height/2):y;guideLines[key]?.setAttribute('x1',x);guideLines[key]?.setAttribute('y1',y);guideLines[key]?.setAttribute('x2',tx);guideLines[key]?.setAttribute('y2',ty);guideDots[key]?.setAttribute('cx',x);guideDots[key]?.setAttribute('cy',y);});}
+  const labelCanvas=document.createElement('canvas');labelCanvas.width=2048;labelCanvas.height=640;
+  const labelContext=labelCanvas.getContext('2d');
+  const drawLabel=logo=>{labelContext.clearRect(0,0,labelCanvas.width,labelCanvas.height);labelContext.fillStyle='rgba(248,246,240,.78)';labelContext.fillRect(0,0,labelCanvas.width,labelCanvas.height);if(logo)labelContext.drawImage(logo,650,68,748,504);};
+  drawLabel();
+  const labelTexture=new THREE.CanvasTexture(labelCanvas);labelTexture.encoding=THREE.sRGBEncoding;disposables.push(labelTexture);
+  const labelMaterial=new THREE.MeshPhysicalMaterial({map:labelTexture,roughness:.38,transparent:true,opacity:.93,side:THREE.DoubleSide,depthWrite:false});disposables.push(labelMaterial);
+  const logoImage=new Image();logoImage.onload=()=>{drawLabel(logoImage);labelTexture.needsUpdate=true;};logoImage.src='images/bottle-logo.png';
+  const loader=new THREE.GLTFLoader();
+  loader.load('models/decant.gltf',gltf=>{
+    const model=gltf.scene;
+    model.traverse(node=>{if(!node.isMesh)return;node.castShadow=false;node.receiveShadow=false;if(node.material){node.material=Array.isArray(node.material)?node.material.map(m=>m.clone()):node.material.clone();const materials=Array.isArray(node.material)?node.material:[node.material];materials.forEach(m=>{disposables.push(m);if(m.transparent){m.depthWrite=false;m.side=THREE.DoubleSide;}m.needsUpdate=true;});}});
+    const initialBox=new THREE.Box3().setFromObject(model),initialSize=initialBox.getSize(new THREE.Vector3());
+    const scale=4.85/Math.max(initialSize.x,initialSize.y,initialSize.z);model.scale.setScalar(scale);
+    const box=new THREE.Box3().setFromObject(model),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
+    model.position.sub(center);group.add(model);
+    const radius=Math.max(size.x,size.z)*.515;
+    const labelGeometry=new THREE.CylinderGeometry(radius,radius,size.y*.185,96,1,true);disposables.push(labelGeometry);
+    const label=new THREE.Mesh(labelGeometry,labelMaterial);label.position.y=-size.y*.12;label.rotation.y=Math.PI;group.add(label);
+    featurePoints.seal.set(radius*.52,size.y*.17,0);
+    featurePoints.atomizer.set(radius*.46,size.y*.39,0);
+    featurePoints.glass.set(radius*.92,-size.y*.24,0);
+    container.classList.add('model-ready');
+  },undefined,()=>{container.classList.add('model-error');showToast('The 3D bottle could not be loaded.');});
   let dragging=false,lastX=0,lastY=0,velocityX=0,velocityY=.004,raf=0;
   const down=e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;container.setPointerCapture?.(e.pointerId);};
   const move=e=>{if(!dragging)return;velocityY=(e.clientX-lastX)*.008;velocityX=(e.clientY-lastY)*.006;lastX=e.clientX;lastY=e.clientY;};
@@ -96,7 +83,7 @@ function initHeroBottle(){
   function animate(){raf=requestAnimationFrame(animate);if(!dragging){velocityX*=.94;velocityY*=.965;if(Math.abs(velocityY)<.001&&!reduced)velocityY=.0015;}group.rotation.y+=velocityY;group.rotation.x=Math.max(-.35,Math.min(.35,group.rotation.x+velocityX));updateGuides();renderer.render(scene,camera);}animate();
   const resize=()=>{const w=container.clientWidth,h=container.clientHeight;camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();renderer.setSize(w,h);};
   window.addEventListener('resize',resize,{passive:true});
-  bottleCleanup=()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);renderer.dispose();disposables.forEach(x=>x.dispose?.());};
+  bottleCleanup=()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);container.removeEventListener('pointerdown',down);container.removeEventListener('pointermove',move);container.removeEventListener('pointerup',up);container.removeEventListener('pointercancel',up);renderer.dispose();disposables.forEach(x=>x.dispose?.());};
 }
 
 /* ---------------- state ---------------- */
@@ -450,6 +437,7 @@ function productCardHTML(p){
     <div class="product-body">
       <div class="product-brand">${esc(p.brand)}</div>
       <div class="product-name">${esc(p.name)}</div>
+      ${p.inspiredBy?`<div class="dupe-label">Inspired by ${esc(p.inspiredBy)}</div>`:""}
       ${p.matchReason?`<div style="font-size:12px;color:var(--green);font-weight:650;margin:-4px 0 10px;">Matched for: ${esc(p.matchReason)}</div>`:""}
       <div class="product-meta-row">
         <div class="product-price">${peso(Math.min(...Object.values(p.prices)))} <small>from</small></div>
@@ -567,6 +555,7 @@ function renderProductDetail(productId){
       <div class="breadcrumb"><a href="#/">Home</a> / <a href="#/brand/${p.brandId}">${esc(p.brand)}</a> / ${esc(p.name)}</div>
       <div class="pd-brand">${esc(p.brand)}</div>
       <h1 class="pd-name">${esc(p.name)}</h1>
+      ${p.inspiredBy?`<div class="pd-inspiration"><span>Inspired by</span> ${esc(p.inspiredBy)}</div>`:""}
       <div class="pd-facts">
         <div class="pd-fact">Concentration<b>${esc(p.concentration)}</b></div>
         <div class="pd-fact">Gender<b>${esc(p.gender)}</b></div>
@@ -581,7 +570,6 @@ function renderProductDetail(productId){
         <button class="btn btn-primary" id="pdAddToCart">Add to Bag</button>
         <button class="btn btn-ghost" id="pdWishBtn" data-wish-toggle="${p.id}">${state.wishlist.includes(p.id) ? "♥ In Wishlist" : "♡ Add to Wishlist"}</button>
       </div>
-      ${!p.verified ? `<div class="unverified-note">Note pyramid pending final cross-check — verified by our sourcing team before shipping. Message us for confirmation.</div>` : ""}
     </div>
   </div>
   <section>
@@ -608,6 +596,7 @@ function openQuickView(productId){
       <div class="modal-body">
         <div class="pd-brand">${esc(p.brand)}</div>
         <h2 class="pd-name" style="font-size:26px;">${esc(p.name)}</h2>
+        ${p.inspiredBy?`<div class="pd-inspiration"><span>Inspired by</span> ${esc(p.inspiredBy)}</div>`:""}
         <p class="pd-desc" style="font-size:13.5px;">${esc(p.description)}</p>
         ${notesPyramid(p)}
         <div class="eyebrow" style="margin-bottom:10px;">Choose Size</div>
