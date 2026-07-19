@@ -33,32 +33,66 @@ function initHeroBottle(){
   if(bottleCleanup)bottleCleanup();
   if(!window.THREE){container.innerHTML='<div class="ph">Interactive decant bottle</div>';return;}
   const scene=new THREE.Scene();
-  const camera=new THREE.PerspectiveCamera(38,container.clientWidth/Math.max(container.clientHeight,1),.1,100);
-  camera.position.set(0,.15,6);
+  const camera=new THREE.PerspectiveCamera(34,container.clientWidth/Math.max(container.clientHeight,1),.1,100);
+  camera.position.set(0,.05,8.2);
   const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));renderer.setSize(container.clientWidth,container.clientHeight);
   renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
-  container.replaceChildren(renderer.domElement);
-  scene.add(new THREE.HemisphereLight(0xfff6df,0x151522,1.35));
-  const key=new THREE.DirectionalLight(0xffe3a0,2.3);key.position.set(4,5,5);scene.add(key);
-  const rim=new THREE.PointLight(0x8ebeff,1.8);rim.position.set(-4,1,-1);scene.add(rim);
+  container.querySelector('canvas')?.remove();container.prepend(renderer.domElement);
+  scene.add(new THREE.HemisphereLight(0xfffaf0,0x10131a,1.45));
+  const key=new THREE.DirectionalLight(0xffe3a0,2.6);key.position.set(4,6,6);scene.add(key);
+  const rim=new THREE.PointLight(0x91c8ff,2.2);rim.position.set(-4,2,-1);scene.add(rim);
+  const front=new THREE.PointLight(0xffffff,1.25);front.position.set(0,-1,5);scene.add(front);
   const group=new THREE.Group();
-  const bodyGeo=new THREE.CylinderGeometry(.78,.86,2.65,48);
-  const glass=new THREE.MeshPhysicalMaterial({color:0xf3d99b,metalness:.05,roughness:.12,transmission:.86,thickness:.65,transparent:true,opacity:.9});
-  group.add(new THREE.Mesh(bodyGeo,glass));
-  const neckGeo=new THREE.CylinderGeometry(.3,.34,.48,40);const neck=new THREE.Mesh(neckGeo,glass);neck.position.y=1.52;group.add(neck);
-  const capGeo=new THREE.CylinderGeometry(.38,.38,.62,40);const metal=new THREE.MeshStandardMaterial({color:0x151515,metalness:.88,roughness:.18});const cap=new THREE.Mesh(capGeo,metal);cap.position.y=1.98;group.add(cap);
-  group.rotation.z=-.04;scene.add(group);
+  const disposables=[];
+  const glass=new THREE.MeshPhysicalMaterial({color:0xf8f4e9,metalness:0,roughness:.08,transmission:.96,thickness:.38,ior:1.48,transparent:true,opacity:.72,side:THREE.DoubleSide});
+  const clearPlastic=new THREE.MeshPhysicalMaterial({color:0xffffff,roughness:.16,transmission:.9,thickness:.22,transparent:true,opacity:.58,side:THREE.DoubleSide});
+  const whitePlastic=new THREE.MeshStandardMaterial({color:0xf2f0e9,roughness:.32,metalness:.06});
+  const sealMaterial=new THREE.MeshPhysicalMaterial({color:0xf4e8c5,roughness:.42,transmission:.28,transparent:true,opacity:.82});
+  const liquid=new THREE.MeshPhysicalMaterial({color:0xd8b66a,roughness:.18,transmission:.72,transparent:true,opacity:.42});
+  disposables.push(glass,clearPlastic,whitePlastic,sealMaterial,liquid);
+  const addMesh=(geometry,material,y=0)=>{const mesh=new THREE.Mesh(geometry,material);mesh.position.y=y;group.add(mesh);disposables.push(geometry);return mesh;};
+  addMesh(new THREE.CylinderGeometry(.53,.53,3.65,64,1,true),glass,-.55);
+  addMesh(new THREE.CylinderGeometry(.49,.49,.15,64),glass,-2.37);
+  addMesh(new THREE.TorusGeometry(.49,.045,12,64),glass,-2.29).rotation.x=Math.PI/2;
+  addMesh(new THREE.CylinderGeometry(.475,.475,1.05,64),liquid,-1.74);
+  addMesh(new THREE.CylinderGeometry(.31,.39,.48,48,1,true),glass,1.5);
+  addMesh(new THREE.TorusGeometry(.37,.055,12,48),glass,1.68).rotation.x=Math.PI/2;
+  addMesh(new THREE.CylinderGeometry(.405,.405,.28,64),sealMaterial,1.67);
+  for(let i=0;i<3;i++){const band=addMesh(new THREE.TorusGeometry(.415,.025,10,48),sealMaterial,1.56+i*.11);band.rotation.x=Math.PI/2;}
+  addMesh(new THREE.CylinderGeometry(.095,.095,3.15,24),clearPlastic,-.18);
+  addMesh(new THREE.CylinderGeometry(.42,.42,.38,48),whitePlastic,1.92);
+  addMesh(new THREE.CylinderGeometry(.48,.48,1.12,64,1,true),clearPlastic,2.34);
+  addMesh(new THREE.CylinderGeometry(.47,.47,.09,64),clearPlastic,2.88);
+  addMesh(new THREE.CylinderGeometry(.21,.21,.62,40),whitePlastic,2.42);
+  addMesh(new THREE.CylinderGeometry(.115,.115,.34,32),whitePlastic,2.82);
+  const nozzle=addMesh(new THREE.CylinderGeometry(.075,.075,.28,24),whitePlastic,2.69);nozzle.rotation.z=Math.PI/2;nozzle.position.x=.18;
+  const nozzleTip=addMesh(new THREE.SphereGeometry(.055,20,12),new THREE.MeshStandardMaterial({color:0x282828,roughness:.5}),2.69);nozzleTip.position.x=.32;disposables.push(nozzleTip.material);
+
+  const labelCanvas=document.createElement('canvas');labelCanvas.width=1024;labelCanvas.height=640;
+  const labelContext=labelCanvas.getContext('2d');
+  const drawLabel=logo=>{labelContext.clearRect(0,0,1024,640);labelContext.fillStyle='rgba(247,243,233,.88)';labelContext.fillRect(0,0,1024,640);if(logo){labelContext.drawImage(logo,387,55,250,250);}labelContext.fillStyle='#171714';labelContext.textAlign='center';labelContext.font='700 54px -apple-system, BlinkMacSystemFont, sans-serif';labelContext.fillText('DECANT DYNASTY',512,390);labelContext.font='500 25px -apple-system, BlinkMacSystemFont, sans-serif';labelContext.letterSpacing='7px';labelContext.fillText('AUTHENTIC FRAGRANCE DECANT',512,450);};
+  drawLabel();const labelTexture=new THREE.CanvasTexture(labelCanvas);labelTexture.encoding=THREE.sRGBEncoding;
+  const labelMaterial=new THREE.MeshPhysicalMaterial({map:labelTexture,roughness:.55,transparent:true,opacity:.96,side:THREE.DoubleSide});disposables.push(labelTexture,labelMaterial);
+  const label=addMesh(new THREE.PlaneGeometry(1.02,1.28),labelMaterial,-.48);label.position.z=.535;
+  const logoImage=new Image();logoImage.onload=()=>{drawLabel(logoImage);labelTexture.needsUpdate=true;};logoImage.src='images/logo.png';
+  group.rotation.set(.035,-.12,-.025);scene.add(group);
+
+  const featurePoints={seal:new THREE.Vector3(.34,1.66,.05),atomizer:new THREE.Vector3(.32,2.52,.04),glass:new THREE.Vector3(.48,-1.32,.02)};
+  const guideLines={seal:container.querySelector('[data-guide="seal"]'),atomizer:container.querySelector('[data-guide="atomizer"]'),glass:container.querySelector('[data-guide="glass"]')};
+  const guideDots={seal:container.querySelector('[data-dot="seal"]'),atomizer:container.querySelector('[data-dot="atomizer"]'),glass:container.querySelector('[data-dot="glass"]')};
+  const callouts={seal:container.querySelector('[data-callout="seal"]'),atomizer:container.querySelector('[data-callout="atomizer"]'),glass:container.querySelector('[data-callout="glass"]')};
+  function updateGuides(){const rect=container.getBoundingClientRect();Object.keys(featurePoints).forEach(key=>{const p=group.localToWorld(featurePoints[key].clone()).project(camera);const x=(p.x*.5+.5)*rect.width,y=(-p.y*.5+.5)*rect.height;const calloutRect=callouts[key]?.getBoundingClientRect();const tx=calloutRect?calloutRect.left-rect.left+(calloutRect.width/2):x,ty=calloutRect?calloutRect.top-rect.top+(calloutRect.height/2):y;guideLines[key]?.setAttribute('x1',x);guideLines[key]?.setAttribute('y1',y);guideLines[key]?.setAttribute('x2',tx);guideLines[key]?.setAttribute('y2',ty);guideDots[key]?.setAttribute('cx',x);guideDots[key]?.setAttribute('cy',y);});}
   let dragging=false,lastX=0,lastY=0,velocityX=0,velocityY=.004,raf=0;
   const down=e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;container.setPointerCapture?.(e.pointerId);};
   const move=e=>{if(!dragging)return;velocityY=(e.clientX-lastX)*.008;velocityX=(e.clientY-lastY)*.006;lastX=e.clientX;lastY=e.clientY;};
   const up=()=>{dragging=false;};
   container.addEventListener('pointerdown',down);container.addEventListener('pointermove',move);container.addEventListener('pointerup',up);container.addEventListener('pointercancel',up);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function animate(){raf=requestAnimationFrame(animate);if(!dragging){velocityX*=.94;velocityY*=.965;if(Math.abs(velocityY)<.001&&!reduced)velocityY=.0015;}group.rotation.y+=velocityY;group.rotation.x=Math.max(-.45,Math.min(.45,group.rotation.x+velocityX));renderer.render(scene,camera);}animate();
+  function animate(){raf=requestAnimationFrame(animate);if(!dragging){velocityX*=.94;velocityY*=.965;if(Math.abs(velocityY)<.001&&!reduced)velocityY=.0015;}group.rotation.y+=velocityY;group.rotation.x=Math.max(-.35,Math.min(.35,group.rotation.x+velocityX));updateGuides();renderer.render(scene,camera);}animate();
   const resize=()=>{const w=container.clientWidth,h=container.clientHeight;camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();renderer.setSize(w,h);};
   window.addEventListener('resize',resize,{passive:true});
-  bottleCleanup=()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);renderer.dispose();[bodyGeo,neckGeo,capGeo,glass,metal].forEach(x=>x.dispose());};
+  bottleCleanup=()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);renderer.dispose();disposables.forEach(x=>x.dispose?.());};
 }
 
 /* ---------------- state ---------------- */
@@ -144,14 +178,14 @@ function slug(s){ return String(s).toLowerCase().replace(/[^a-z0-9]+/g,"-").repl
 function getBrand(id){
   return BRANDS.find(b=>b.id===id) || null;
 }
-function allBrands(){ return BRANDS.map(b=>getBrand(b.id)); }
+function allBrands(){ return BRANDS.map(b=>getBrand(b.id)).sort((a,b)=>a.name.localeCompare(b.name)); }
 function brandProductCount(id){ return PRODUCTS.filter(p=>p.brandId===id).length; }
 
 function getProduct(id){
   return PRODUCTS.find(p=>p.id===id) || null;
 }
-function allProducts(){ return PRODUCTS.map(p=>getProduct(p.id)); }
-function productsByBrand(brandId){ return allProducts().filter(p=>p.brandId===brandId); }
+function allProducts(){ return PRODUCTS.map(p=>getProduct(p.id)).sort((a,b)=>a.brand.localeCompare(b.brand)||a.name.localeCompare(b.name)); }
+function productsByBrand(brandId){ return PRODUCTS.map(p=>getProduct(p.id)).filter(p=>p.brandId===brandId).sort((a,b)=>a.name.localeCompare(b.name)); }
 
 function imgTag(src, alt, cls, fallbackText){
   const safeAlt = esc(alt);
@@ -294,7 +328,7 @@ function heroArtSVG(){
 }
 
 function renderHome(){
-  const arrivals = allProducts().slice(-8).reverse().slice(0,4);
+  const arrivals = PRODUCTS.slice(-8).reverse().slice(0,4).map(p=>getProduct(p.id));
   const brands = allBrands().slice(0,8);
   const c = state.content;
   return `
@@ -309,7 +343,16 @@ function renderHome(){
           <a href="#/build" class="btn btn-cta btn-cta-browse">Build My Collection</a>
         </div>
       </div>
-      <div class="hero-art" id="heroBottleContainer"></div>
+      <div class="hero-art" id="heroBottleContainer" aria-label="Interactive Decant Dynasty atomizer bottle. Drag to rotate.">
+        <svg class="bottle-guides" aria-hidden="true">
+          <line data-guide="seal"/><circle data-dot="seal" r="4"/>
+          <line data-guide="atomizer"/><circle data-dot="atomizer" r="4"/>
+          <line data-guide="glass"/><circle data-dot="glass" r="4"/>
+        </svg>
+        <div class="bottle-callout callout-seal" data-callout="seal"><b>Parafilm sealed</b><span>Locked in for a clean, leak-resistant journey.</span></div>
+        <div class="bottle-callout callout-atomizer" data-callout="atomizer"><b>Quality atomizer</b><span>A smooth, controlled mist with every press.</span></div>
+        <div class="bottle-callout callout-glass" data-callout="glass"><b>Hard glass bottle</b><span>Clear, durable glass protects every decant.</span></div>
+      </div>
     </div>
   </section>
 

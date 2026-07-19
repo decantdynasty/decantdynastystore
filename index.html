@@ -263,10 +263,15 @@ html[data-theme="dark"] .nav-stack.scrolled {
 @media(max-width:960px){.hero-actions{justify-content: center;}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
 
-.hero-art{position:relative;height:500px;opacity:0;animation:fadeUp 1.2s var(--ease) .3s forwards;touch-action:none;cursor:grab;filter:drop-shadow(0 35px 40px rgba(0,0,0,.28))}
-.hero-art:active{cursor:grabbing}.hero-art::after{content:"Drag to rotate";position:absolute;bottom:20px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);pointer-events:none}
+.hero-art{position:relative;height:540px;opacity:0;animation:fadeUp 1.2s var(--ease) .3s forwards;touch-action:none;cursor:grab;filter:drop-shadow(0 35px 40px rgba(0,0,0,.28));isolation:isolate}
+.hero-art:active{cursor:grabbing}.hero-art::after{content:"Drag to explore";position:absolute;bottom:14px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-soft);pointer-events:none;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:color-mix(in srgb,var(--paper) 75%,transparent);backdrop-filter:blur(12px);z-index:4}
 @media(max-width:960px){.hero-art{height:400px;}}
-.hero-art canvas{width: 100% !important; height: 100% !important;}
+.hero-art canvas{position:absolute;inset:0;width:100%!important;height:100%!important;z-index:1}
+.bottle-guides{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:2}.bottle-guides line{stroke:var(--gold);stroke-width:1.2;stroke-dasharray:4 6;animation:guideFlow 2.4s linear infinite}.bottle-guides circle{fill:var(--gold);stroke:color-mix(in srgb,var(--gold) 28%,transparent);stroke-width:8;animation:guidePulse 2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.bottle-callout{position:absolute;z-index:3;width:154px;padding:11px 12px;border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line));border-radius:14px;background:color-mix(in srgb,var(--paper) 76%,transparent);backdrop-filter:blur(18px) saturate(135%);box-shadow:var(--shadow);pointer-events:none;opacity:0;animation:calloutIn .7s var(--ease) forwards}.bottle-callout b{display:block;color:var(--ink);font-size:12px;letter-spacing:-.01em}.bottle-callout span{display:block;margin-top:3px;color:var(--ink-soft);font-size:9.5px;line-height:1.45}.callout-atomizer{top:9%;right:-2%;animation-delay:1.05s}.callout-seal{top:36%;left:-2%;animation-delay:1.25s}.callout-glass{right:-3%;bottom:18%;animation-delay:1.45s}
+@keyframes calloutIn{from{opacity:0;transform:translateY(9px) scale(.96)}to{opacity:1;transform:none}}@keyframes guideFlow{to{stroke-dashoffset:-20}}@keyframes guidePulse{50%{transform:scale(1.45);opacity:.72}}
+@media(max-width:960px){.bottle-callout{width:138px;padding:9px 10px}.callout-atomizer{right:0}.callout-seal{left:0}.callout-glass{right:0}.bottle-callout span{display:none}}
+@media(max-width:560px){.bottle-callout{width:auto;max-width:126px}.bottle-callout b{font-size:10px}.callout-atomizer{top:7%}.callout-seal{top:39%}.callout-glass{bottom:14%}}
 
 /* ================= SECTIONS ================= */
 section{padding:100px 0;}
@@ -535,7 +540,7 @@ section{padding:100px 0;}
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="data.js?v=20260719-2"></script>
-<script src="app.js?v=20260719-2"></script>
+<script src="data.js?v=20260719-3"></script>
+<script src="app.js?v=20260719-3"></script>
 </body>
 </html>
