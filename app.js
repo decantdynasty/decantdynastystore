@@ -894,7 +894,10 @@ function bindCardNav(el){
   el.addEventListener("click",(e)=>{
     if(e.target.closest("[data-stop]")) return;
     const go = el.dataset.go;
-    if(go) location.hash = "#"+go;
+    if(go){
+      playSound("click");
+      location.hash = "#"+go;
+    }
   });
 }
 function bindWishButton(el){

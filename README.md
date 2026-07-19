@@ -34,8 +34,8 @@ Example: `"al-haramain|Aqua Dubai":"Louis Vuitton Imagination"`.
 
 ### Edit prices
 
-The shared fallback price is `DEFAULT_PRICE` near the top of `data.js`. To price one product differently, add `prices: PH(1ml, 2ml, 3ml, 5ml)` inside that product's options.
+Every product already has a researched price band in the `PRICE_OVERRIDES` section near the top of `data.js`. Change the tier after a product name to move all four sizes together, such as changing `PRICE_TIERS.select` to `PRICE_TIERS.premium`.
 
-Example: `prices: PH(99, 179, 249, 379)` sets the 1ml, 2ml, 3ml and 5ml prices in that order.
+The exact 1ml, 2ml, 3ml and 5ml amounts for each tier are in `PRICE_TIERS` immediately above that list. You can edit those four amounts once to update every product using the tier. For a one-off custom price, replace that product's tier with `PH(99, 179, 249, 379)`; the values are 1ml, 2ml, 3ml and 5ml in that order.
 
 The current interactive hero bottle is generated in Three.js and does not require a model file. Missing sound files fail silently, and the footer provides a persistent mute control.
