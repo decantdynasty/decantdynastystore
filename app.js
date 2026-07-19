@@ -12,7 +12,7 @@ function localSet(key,value){ try{localStorage.setItem(key,value);}catch(e){} }
 
 /* ---------------- sound manager ---------------- */
 const sounds = {
-  click: new Audio('sounds/click.mp3'),
+  click: new Audio('sounds/click.mp3?v=20260720-1'),
   toggle: new Audio('sounds/toggle.mp3'),
   search: new Audio('sounds/search.mp3'),
   result: new Audio('sounds/result.mp3'),
