@@ -45,7 +45,7 @@ function initHeroBottle(){
   const front=new THREE.PointLight(0xffffff,1.5);front.position.set(0,-1,5);scene.add(front);
   const group=new THREE.Group();
   const disposables=[];
-  group.rotation.set(.035,-.12,-.025);scene.add(group);
+  group.rotation.set(.035,-Math.PI/2,-.025);scene.add(group);
   const featurePoints={seal:new THREE.Vector3(.3,.7,.05),atomizer:new THREE.Vector3(.3,1.9,.04),glass:new THREE.Vector3(.46,-1.25,.02)};
   const guideLines={seal:container.querySelector('[data-guide="seal"]'),atomizer:container.querySelector('[data-guide="atomizer"]'),glass:container.querySelector('[data-guide="glass"]')};
   const guideDots={seal:container.querySelector('[data-dot="seal"]'),atomizer:container.querySelector('[data-dot="atomizer"]'),glass:container.querySelector('[data-dot="glass"]')};
@@ -53,10 +53,20 @@ function initHeroBottle(){
   function updateGuides(){const rect=container.getBoundingClientRect();Object.keys(featurePoints).forEach(key=>{const p=group.localToWorld(featurePoints[key].clone()).project(camera);const x=(p.x*.5+.5)*rect.width,y=(-p.y*.5+.5)*rect.height;const calloutRect=callouts[key]?.getBoundingClientRect();const tx=calloutRect?calloutRect.left-rect.left+(calloutRect.width/2):x,ty=calloutRect?calloutRect.top-rect.top+(calloutRect.height/2):y;guideLines[key]?.setAttribute('x1',x);guideLines[key]?.setAttribute('y1',y);guideLines[key]?.setAttribute('x2',tx);guideLines[key]?.setAttribute('y2',ty);guideDots[key]?.setAttribute('cx',x);guideDots[key]?.setAttribute('cy',y);});}
   const labelCanvas=document.createElement('canvas');labelCanvas.width=2048;labelCanvas.height=640;
   const labelContext=labelCanvas.getContext('2d');
-  const drawLabel=logo=>{labelContext.clearRect(0,0,labelCanvas.width,labelCanvas.height);labelContext.fillStyle='rgba(248,246,240,.78)';labelContext.fillRect(0,0,labelCanvas.width,labelCanvas.height);if(logo)labelContext.drawImage(logo,650,68,748,504);};
+  const drawLabel=logo=>{
+    labelContext.clearRect(0,0,labelCanvas.width,labelCanvas.height);
+    labelContext.fillStyle='#f5f3ed';
+    labelContext.fillRect(0,0,labelCanvas.width,labelCanvas.height);
+    if(logo){
+      labelContext.save();
+      labelContext.filter='contrast(3.2) brightness(.22)';
+      labelContext.drawImage(logo,560,70,928,500);
+      labelContext.restore();
+    }
+  };
   drawLabel();
   const labelTexture=new THREE.CanvasTexture(labelCanvas);labelTexture.encoding=THREE.sRGBEncoding;disposables.push(labelTexture);
-  const labelMaterial=new THREE.MeshPhysicalMaterial({map:labelTexture,roughness:.38,transparent:true,opacity:.93,side:THREE.DoubleSide,depthWrite:false});disposables.push(labelMaterial);
+  const labelMaterial=new THREE.MeshPhysicalMaterial({map:labelTexture,color:0xffffff,roughness:.42,metalness:0,transparent:false,opacity:1,side:THREE.DoubleSide,depthWrite:true});disposables.push(labelMaterial);
   const logoImage=new Image();logoImage.onload=()=>{drawLabel(logoImage);labelTexture.needsUpdate=true;};logoImage.src='images/bottle-logo.png';
   const loader=new THREE.GLTFLoader();
   loader.load('models/decant.gltf',gltf=>{
@@ -68,7 +78,7 @@ function initHeroBottle(){
     model.position.sub(center);group.add(model);
     const radius=Math.max(size.x,size.z)*.515;
     const labelGeometry=new THREE.CylinderGeometry(radius,radius,size.y*.185,96,1,true);disposables.push(labelGeometry);
-    const label=new THREE.Mesh(labelGeometry,labelMaterial);label.position.y=-size.y*.12;label.rotation.y=Math.PI;group.add(label);
+    const label=new THREE.Mesh(labelGeometry,labelMaterial);label.position.y=-size.y*.12;label.rotation.y=-Math.PI/2;label.renderOrder=8;group.add(label);
     featurePoints.seal.set(radius*.52,size.y*.17,0);
     featurePoints.atomizer.set(radius*.46,size.y*.39,0);
     featurePoints.glass.set(radius*.92,-size.y*.24,0);
@@ -140,7 +150,7 @@ function defaultContent(){
       {photo:null, name:"Angeli, Davao", rating:5, text:"Decants arrived carefully packed, labeled clearly, and smelled exactly like the reviews said. My go-to for discovering new houses."},
     ],
     about: {
-      photo: null,
+      photo: "images/our-story.png",
       heading: "A boutique built for the undecided",
       paragraph: "Decant Dynasty started from a simple frustration: full bottles are expensive, blind buys rarely pay off, and the fragrance world is far too interesting to explore one gamble at a time. We hand-decant authentic bottles from {brands} houses so you can live with a scent for days before deciding it deserves a permanent place on your shelf.",
     },
@@ -182,7 +192,8 @@ function productsByBrand(brandId){ return PRODUCTS.map(p=>getProduct(p.id)).filt
 function imgTag(src, alt, cls, fallbackText){
   const safeAlt = esc(alt);
   return `<img src="${esc(src)}" alt="${safeAlt}" class="${cls||''}"
-    onerror="this.onerror=null;this.outerHTML='<div class=&quot;ph&quot;>${esc(fallbackText||alt)}</div>'" loading="lazy" />`;
+    onerror="this.onerror=null;this.hidden=true;this.nextElementSibling.classList.remove('hidden')" loading="lazy" />
+    <div class="ph hidden">${esc(fallbackText||alt)}</div>`;
 }
 
 /* ---------------- persistence bootstrap ---------------- */
@@ -261,8 +272,6 @@ function buildOrderMessage(){
   lines.push(`Name: `);
   lines.push(`Contact Number: `);
   lines.push(`Delivery Address: `);
-  lines.push(``);
-  lines.push(`Please note: we do not accept Cash On Delivery (COD), and shipping fee is shouldered by the buyer.`);
   return {ref, text: lines.join("\n")};
 }
 function openCheckout(){
@@ -284,6 +293,19 @@ function showCheckoutModal(text){
         the chat with our team to complete your order.
       </p>
       <div class="copy-box" id="checkoutText">${esc(text)}</div>
+      <div class="checkout-instructions">
+        <h3>How to order?</h3>
+        <ol>
+          <li><strong>Fill out the form above and send it to us by clicking “Open Messenger”.</strong></li>
+          <li><strong>Ask our admin for the payment details.</strong></li>
+          <li><strong>Kindly wait for our admin to send your invoice.</strong></li>
+          <li><strong>Settle your payment and send your proof of payment.</strong></li>
+          <li><strong>Once confirmed, we will process your order.</strong></li>
+          <li><strong>We ship nationwide via J&amp;T Express. You may also book Lalamove for same-day delivery.</strong></li>
+          <li><strong>Don’t forget to share your experience with us once your order arrives.</strong></li>
+        </ol>
+        <p>Please note: we do not accept Cash On Delivery (COD), and the shipping fee is shouldered by the buyer.</p>
+      </div>
       <div style="display:flex;gap:12px;margin-top:22px;flex-wrap:wrap;">
         <a class="btn btn-primary" href="https://m.me/decantdynasty" target="_blank" rel="noopener">Open Messenger</a>
         <button class="btn btn-ghost" id="copyAgainBtn">Copy Message Again</button>
@@ -332,7 +354,7 @@ function renderHome(){
     <div class="wrap hero-grid">
       <div>
         <div class="eyebrow">${esc(c.hero.eyebrow)}</div>
-        <h1>${esc(c.hero.headlineBefore)} <em>${esc(c.hero.headlineEm)}</em><br/>${esc(c.hero.headlineAfter)}</h1>
+        <h1 class="hero-title-art"><img src="images/find-your-signature-scent.png" alt="Find Your Signature Scent" /></h1>
         <p class="lede">${esc(fillTemplate(c.hero.lede))}</p>
         <div class="hero-actions">
           <a href="#/collection" class="btn btn-cta btn-cta-build">Shop Decants</a>
@@ -440,7 +462,7 @@ function productCardHTML(p){
       ${p.inspiredBy?`<div class="dupe-label">Inspired by ${esc(p.inspiredBy)}</div>`:""}
       ${p.matchReason?`<div style="font-size:12px;color:var(--green);font-weight:650;margin:-4px 0 10px;">Matched for: ${esc(p.matchReason)}</div>`:""}
       <div class="product-meta-row">
-        <div class="product-price">${peso(Math.min(...Object.values(p.prices)))} <small>from</small></div>
+        <div class="product-price"><small>Starting at</small> ${peso(Math.min(...Object.values(p.prices)))}</div>
         <div class="size-dots">${sizes.map(()=>`<span></span>`).join("")}</div>
       </div>
     </div>
@@ -723,7 +745,7 @@ function renderAbout(){
           ${esc(fillTemplate(a.paragraph))}
         </p>
       </div>
-      ${a.photo ? `<div class="reveal" style="max-width:560px;margin:0 auto 60px;border-radius:28px;overflow:hidden;box-shadow:var(--shadow-lift);"><img src="${esc(a.photo)}" alt="How it all started" style="width:100%;display:block;"/></div>` : ""}
+      ${a.photo ? `<figure class="story-photo reveal"><img src="${esc(a.photo)}" alt="The first perfume that inspired Decant Dynasty" onerror="this.parentElement.remove()"/><figcaption>The first bottle that inspired Decant Dynasty.</figcaption></figure>` : ""}
       <div class="value-grid stagger">
         ${whyCard("M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z","Authenticity First","Every decant is poured by hand from verified, authentic bottles.")}
         ${whyCard("M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8L12 2z","Curated, Not Cluttered","We add fragrances deliberately, researched down to the note pyramid.")}
@@ -768,7 +790,7 @@ function renderWishPanel(){
       ${imgTag(p.image, p.name, "", p.name)}
       <div style="flex:1;">
         <div class="ci-name">${esc(p.brand)} — ${esc(p.name)}</div>
-        <div class="ci-meta">${peso(Math.min(...Object.values(p.prices)))} from</div>
+        <div class="ci-meta">Starting at ${peso(Math.min(...Object.values(p.prices)))}</div>
         <div style="display:flex;gap:10px;">
           <button class="btn btn-sm btn-ghost" data-wish-add-cart="${p.id}">Add to Bag</button>
           <button class="remove-x" data-wish-toggle="${p.id}">Remove</button>
