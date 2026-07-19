@@ -152,7 +152,8 @@ function defaultContent(){
     about: {
       photo: "images/our-story.png",
       heading: "From a college collection to Decant Dynasty",
-      paragraph: "Decant Dynasty began while I was a college student with a small fragrance collection and a practical goal: earn back some of what I had spent on the bottles I owned, then use it to explore more scents. Selling decants made that possible while giving other people a more affordable way to experience a fragrance before committing to a full bottle. What started as a simple way to support my hobby gradually became Decant Dynasty — a growing collection built around careful preparation, honest service, and making fragrance discovery easier.",
+      paragraph: "Decant Dynasty began in 2024 while I was a college student with a small fragrance collection and a practical goal: earn back some of what I had spent on the bottles I owned, then use it to explore more scents. Selling decants made that possible while giving other people a more affordable way to experience a fragrance before committing to a full bottle. What started as a simple way to support my hobby gradually became a DTI- and BIR-registered business built around careful preparation, honest service, and making fragrance discovery easier. Today, customers can shop with us directly or through our official Shopee store.",
+      shopeeUrl: "https://shopee.ph/decantdynasty",
     },
     contact: {
       eyebrow: "Get in touch",
@@ -228,7 +229,24 @@ function addToCart(productId, size, qty){
 }
 function removeFromCart(idx){ state.cart.splice(idx,1); persistCart(); updateBadges(); renderCartPanel(); }
 function changeQty(idx, delta){
-  state.cart[idx].qty = Math.max(1, state.cart[idx].qty+delta);
+  const item = state.cart[idx];
+  if(!item) return;
+  const nextQty = item.qty + delta;
+  if(nextQty <= 0){ removeFromCart(idx); return; }
+  item.qty = nextQty;
+  persistCart(); updateBadges(); renderCartPanel();
+}
+function changeCartSize(idx, nextSize){
+  const item = state.cart[idx];
+  const product = item && getProduct(item.productId);
+  if(!item || !product || !Object.prototype.hasOwnProperty.call(product.prices,nextSize) || item.size===nextSize) return;
+  const matchingIdx = state.cart.findIndex((line,lineIdx)=>lineIdx!==idx && line.productId===item.productId && line.size===nextSize);
+  if(matchingIdx>-1){
+    state.cart[matchingIdx].qty += item.qty;
+    state.cart.splice(idx,1);
+  } else {
+    item.size = nextSize;
+  }
   persistCart(); updateBadges(); renderCartPanel();
 }
 function cartTotal(){
@@ -746,13 +764,9 @@ function renderAbout(){
         <p style="color:var(--ink-soft);font-size:16px;line-height:1.8;margin-top:18px;">
           ${esc(fillTemplate(a.paragraph))}
         </p>
+        <a class="story-store-link" href="${esc(a.shopeeUrl)}" target="_blank" rel="noopener">Shop on Shopee · shopee.ph/decantdynasty</a>
       </div>
       ${a.photo ? `<figure class="story-photo reveal"><img src="${esc(a.photo)}" alt="The early fragrance collection that inspired Decant Dynasty" onerror="this.parentElement.remove()"/><figcaption>The early collection that inspired Decant Dynasty.</figcaption></figure>` : ""}
-      <div class="value-grid stagger">
-        ${whyCard("M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z","Authenticity First","Every decant is poured by hand from verified, authentic bottles.")}
-        ${whyCard("M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8L12 2z","Curated, Not Cluttered","We add fragrances deliberately, researched down to the note pyramid.")}
-        ${whyCard("M3 12h4l3 8 4-16 3 8h4","Made for Explorers","Whether you're new to fragrance or chasing your hundredth bottle, there's a decant-sized way in.")}
-      </div>
     </div>
   </div>`;
 }
@@ -815,15 +829,25 @@ function renderCartPanel(){
   }
   body.innerHTML = state.cart.map((c,idx)=>{
     const p = getProduct(c.productId); if(!p) return "";
+    const sizes = Object.keys(p.prices).sort((a,b)=>parseFloat(a)-parseFloat(b));
     return `<div class="cart-item">
-      ${imgTag(p.image, p.name, "", p.name)}
-      <div style="flex:1;">
-        <div class="ci-name">${esc(p.brand)} — ${esc(p.name)}</div>
-        <div class="ci-meta">${c.size} · ${peso(p.prices[c.size]||0)}</div>
+      <a class="cart-product-thumb" href="#/product/${esc(p.id)}" data-cart-product aria-label="View ${esc(p.brand)} ${esc(p.name)}">
+        ${imgTag(p.image, p.name, "", p.name)}
+      </a>
+      <div class="cart-item-content">
+        <a class="ci-name" href="#/product/${esc(p.id)}" data-cart-product>${esc(p.brand)} — ${esc(p.name)}</a>
+        <div class="cart-size-row">
+          <label class="cart-size-label">Size
+            <select data-cart-size="${idx}" aria-label="Size for ${esc(p.name)}">
+              ${sizes.map(size=>`<option value="${esc(size)}" ${size===c.size?"selected":""}>${esc(size)} — ${peso(p.prices[size])}</option>`).join("")}
+            </select>
+          </label>
+          <span class="cart-line-total">${peso((p.prices[c.size]||0)*c.qty)}</span>
+        </div>
         <div class="qty-row">
-          <button data-qty-minus="${idx}">−</button>
-          <span>${c.qty}</span>
-          <button data-qty-plus="${idx}">+</button>
+          <button data-qty-minus="${idx}" aria-label="Decrease ${esc(p.name)} quantity">−</button>
+          <span aria-label="Quantity">${c.qty}</span>
+          <button data-qty-plus="${idx}" aria-label="Increase ${esc(p.name)} quantity">+</button>
           <button class="remove-x" data-cart-remove="${idx}">Remove</button>
         </div>
       </div>
@@ -845,7 +869,9 @@ function renderCartPanel(){
   `;
   body.querySelectorAll("[data-qty-minus]").forEach(b=>b.onclick=()=>changeQty(+b.dataset.qtyMinus,-1));
   body.querySelectorAll("[data-qty-plus]").forEach(b=>b.onclick=()=>changeQty(+b.dataset.qtyPlus,1));
+  body.querySelectorAll("[data-cart-size]").forEach(select=>select.onchange=()=>changeCartSize(+select.dataset.cartSize,select.value));
   body.querySelectorAll("[data-cart-remove]").forEach(b=>b.onclick=()=>removeFromCart(+b.dataset.cartRemove));
+  body.querySelectorAll("[data-cart-product]").forEach(link=>link.onclick=()=>closeAllPanels());
   document.getElementById("applyVoucherBtn").onclick=()=>{state.voucherCode=document.getElementById("voucherInput").value.trim().toUpperCase();renderCartPanel();if(voucherDiscount())toast("DD50 applied — ₱50 off");};
   document.getElementById("voucherInput").onkeydown=e=>{if(e.key==="Enter")document.getElementById("applyVoucherBtn").click();};
   document.getElementById("checkoutBtn").onclick = openCheckout;
