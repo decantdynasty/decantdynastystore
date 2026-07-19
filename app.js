@@ -130,9 +130,8 @@ function defaultContent(){
       paragraph: "Answer a few questions about your lifestyle, climate, personality, and budget — we'll curate a personal fragrance wardrobe of decants suited to how you actually live, not just what's trending.",
     },
     brandsSection: {
-      eyebrow: "{brands} houses, one destination",
       heading: "Explore Brands",
-      paragraph: "From Emirati oud houses to iconic Parisian ateliers — browse by the names you already love.",
+      paragraph: "Explore a growing curation of designer icons and standout Middle Eastern fragrances, chosen to make discovering your next scent feel effortless.",
     },
     whySection: {
       eyebrow: "The case for decants",
@@ -152,8 +151,8 @@ function defaultContent(){
     ],
     about: {
       photo: "images/our-story.png",
-      heading: "A boutique built for the undecided",
-      paragraph: "Decant Dynasty started from a simple frustration: full bottles are expensive, blind buys rarely pay off, and the fragrance world is far too interesting to explore one gamble at a time. We hand-decant authentic bottles from {brands} houses so you can live with a scent for days before deciding it deserves a permanent place on your shelf.",
+      heading: "From a college collection to Decant Dynasty",
+      paragraph: "Decant Dynasty began while I was a college student with a small fragrance collection and a practical goal: earn back some of what I had spent on the bottles I owned, then use it to explore more scents. Selling decants made that possible while giving other people a more affordable way to experience a fragrance before committing to a full bottle. What started as a simple way to support my hobby gradually became Decant Dynasty — a growing collection built around careful preparation, honest service, and making fragrance discovery easier.",
     },
     contact: {
       eyebrow: "Get in touch",
@@ -381,7 +380,6 @@ function renderHome(){
   <section>
     <div class="wrap">
       <div class="section-head reveal">
-        <div class="eyebrow">${esc(fillTemplate(c.brandsSection.eyebrow))}</div>
         <h2>${esc(c.brandsSection.heading)}</h2>
         <p>${esc(c.brandsSection.paragraph)}</p>
       </div>
@@ -749,7 +747,7 @@ function renderAbout(){
           ${esc(fillTemplate(a.paragraph))}
         </p>
       </div>
-      ${a.photo ? `<figure class="story-photo reveal"><img src="${esc(a.photo)}" alt="The first perfume that inspired Decant Dynasty" onerror="this.parentElement.remove()"/><figcaption>The first bottle that inspired Decant Dynasty.</figcaption></figure>` : ""}
+      ${a.photo ? `<figure class="story-photo reveal"><img src="${esc(a.photo)}" alt="The early fragrance collection that inspired Decant Dynasty" onerror="this.parentElement.remove()"/><figcaption>The early collection that inspired Decant Dynasty.</figcaption></figure>` : ""}
       <div class="value-grid stagger">
         ${whyCard("M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z","Authenticity First","Every decant is poured by hand from verified, authentic bottles.")}
         ${whyCard("M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8L12 2z","Curated, Not Cluttered","We add fragrances deliberately, researched down to the note pyramid.")}
