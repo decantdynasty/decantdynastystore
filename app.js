@@ -6,46 +6,9 @@
 (function(){
 "use strict";
 
-/* ---------------- storage layer (with safe fallback) ---------------- */
-const memoryStore = {};
-async function storeGet(key, shared){
-  try{
-    if(window.storage && window.storage.get){
-      const r = await window.storage.get(key, !!shared);
-      return r ? r.value : null;
-    }
-  }catch(e){ /* key not found or unavailable */ }
-  return memoryStore[key] ?? null;
-}
-async function storeSet(key, value, shared){
-  try{
-    if(window.storage && window.storage.set){
-      await window.storage.set(key, value, !!shared);
-      return true;
-    }
-  }catch(e){}
-  memoryStore[key] = value;
-  return false;
-}
-async function storeDelete(key, shared){
-  try{
-    if(window.storage && window.storage.delete){
-      await window.storage.delete(key, !!shared);
-      return true;
-    }
-  }catch(e){}
-  delete memoryStore[key];
-  return false;
-}
-async function storeList(prefix, shared){
-  try{
-    if(window.storage && window.storage.list){
-      const r = await window.storage.list(prefix, !!shared);
-      return r ? r.keys : [];
-    }
-  }catch(e){}
-  return Object.keys(memoryStore).filter(k=>k.startsWith(prefix||""));
-}
+/* ---------------- device-local preferences ---------------- */
+function localGet(key){ try{return localStorage.getItem(key);}catch(e){return null;} }
+function localSet(key,value){ try{localStorage.setItem(key,value);}catch(e){} }
 
 /* ---------------- sound manager ---------------- */
 const sounds = {
@@ -53,125 +16,49 @@ const sounds = {
   toggle: new Audio('sounds/toggle.mp3'),
   search: new Audio('sounds/search.mp3'),
   result: new Audio('sounds/result.mp3'),
-  muted: false
+  muted: localGet('prefs:sound-muted') === 'true'
 };
 function playSound(name){
   if(sounds.muted || !sounds[name]) return;
   sounds[name].currentTime = 0;
   sounds[name].play().catch(()=>{});
 }
+function setSoundMuted(muted){ sounds.muted=!!muted; localSet('prefs:sound-muted',String(sounds.muted)); }
 
 /* ---------------- 3D Bottle ---------------- */
-let bottleScene, bottleCamera, bottleRenderer, bottleMesh;
+let bottleCleanup = null;
 function initHeroBottle(){
-  const container = document.getElementById('heroBottleContainer');
-  if(!container) return;
-  
-  const width = container.clientWidth;
-  const height = container.clientHeight;
-  
-  bottleScene = new THREE.Scene();
-  bottleCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-  bottleCamera.position.z = 5;
-  
-  bottleRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  bottleRenderer.setSize(width, height);
-  bottleRenderer.setPixelRatio(window.devicePixelRatio);
-  container.appendChild(bottleRenderer.domElement);
-  
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-  bottleScene.add(ambientLight);
-  
-  const pointLight = new THREE.PointLight(0xffffff, 1);
-  pointLight.position.set(5, 5, 5);
-  bottleScene.add(pointLight);
-
-  const bottleGroup = new THREE.Group();
-
-  // Bottle body
-  const bodyGeo = new THREE.CylinderGeometry(0.8, 0.8, 2.5, 32);
-  const bodyMat = new THREE.MeshPhysicalMaterial({ 
-    color: 0xffffff, 
-    metalness: 0.1, 
-    roughness: 0.1, 
-    transmission: 0.9, 
-    thickness: 0.5, 
-    transparent: true 
-  });
-  const body = new THREE.Mesh(bodyGeo, bodyMat);
-  bottleGroup.add(body);
-
-  // Bottle neck
-  const neckGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.5, 32);
-  const neck = new THREE.Mesh(neckGeo, bodyMat);
-  neck.position.y = 1.5;
-  bottleGroup.add(neck);
-
-  // Bottle cap
-  const capGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.6, 32);
-  const capMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.8, roughness: 0.2 });
-  const cap = new THREE.Mesh(capGeo, capMat);
-  cap.position.y = 1.9;
-  bottleGroup.add(cap);
-
-  bottleMesh = bottleGroup;
-  bottleScene.add(bottleMesh);
-
-  let isDragging = false;
-  let previousMouseX = 0;
-  let previousMouseY = 0;
-  let targetRotationX = 0;
-  let targetRotationY = 0;
-
-  container.addEventListener('mousedown', (e) => { isDragging = true; });
-  container.addEventListener('touchstart', (e) => { isDragging = true; previousMouseX = e.touches[0].clientX; previousMouseY = e.touches[0].clientY; });
-  
-  window.addEventListener('mousemove', (e) => {
-    if (isDragging) {
-      const deltaX = e.clientX - previousMouseX;
-      const deltaY = e.clientY - previousMouseY;
-      targetRotationY += deltaX * 0.01;
-      targetRotationX += deltaY * 0.01;
-    }
-    previousMouseX = e.clientX;
-    previousMouseY = e.clientY;
-  });
-
-  window.addEventListener('touchmove', (e) => {
-    if (isDragging) {
-      const deltaX = e.touches[0].clientX - previousMouseX;
-      const deltaY = e.touches[0].clientY - previousMouseY;
-      targetRotationY += deltaX * 0.01;
-      targetRotationX += deltaY * 0.01;
-    }
-    previousMouseX = e.touches[0].clientX;
-    previousMouseY = e.touches[0].clientY;
-  }, { passive: false });
-
-  window.addEventListener('mouseup', () => { isDragging = false; });
-  window.addEventListener('touchend', () => { isDragging = false; });
-
-  function animate() {
-    requestAnimationFrame(animate);
-    
-    if (!isDragging) {
-      bottleMesh.rotation.y += 0.005; // Auto rotate
-    } else {
-      bottleMesh.rotation.y += (targetRotationY - bottleMesh.rotation.y) * 0.1;
-      bottleMesh.rotation.x += (targetRotationX - bottleMesh.rotation.x) * 0.1;
-    }
-    
-    bottleRenderer.render(bottleScene, bottleCamera);
-  }
-  animate();
-
-  window.addEventListener('resize', () => {
-    const w = container.clientWidth;
-    const h = container.clientHeight;
-    bottleCamera.aspect = w / h;
-    bottleCamera.updateProjectionMatrix();
-    bottleRenderer.setSize(w, h);
-  });
+  const container=document.getElementById('heroBottleContainer');
+  if(!container)return;
+  if(bottleCleanup)bottleCleanup();
+  if(!window.THREE){container.innerHTML='<div class="ph">Interactive decant bottle</div>';return;}
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(38,container.clientWidth/Math.max(container.clientHeight,1),.1,100);
+  camera.position.set(0,.15,6);
+  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));renderer.setSize(container.clientWidth,container.clientHeight);
+  renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+  container.replaceChildren(renderer.domElement);
+  scene.add(new THREE.HemisphereLight(0xfff6df,0x151522,1.35));
+  const key=new THREE.DirectionalLight(0xffe3a0,2.3);key.position.set(4,5,5);scene.add(key);
+  const rim=new THREE.PointLight(0x8ebeff,1.8);rim.position.set(-4,1,-1);scene.add(rim);
+  const group=new THREE.Group();
+  const bodyGeo=new THREE.CylinderGeometry(.78,.86,2.65,48);
+  const glass=new THREE.MeshPhysicalMaterial({color:0xf3d99b,metalness:.05,roughness:.12,transmission:.86,thickness:.65,transparent:true,opacity:.9});
+  group.add(new THREE.Mesh(bodyGeo,glass));
+  const neckGeo=new THREE.CylinderGeometry(.3,.34,.48,40);const neck=new THREE.Mesh(neckGeo,glass);neck.position.y=1.52;group.add(neck);
+  const capGeo=new THREE.CylinderGeometry(.38,.38,.62,40);const metal=new THREE.MeshStandardMaterial({color:0x151515,metalness:.88,roughness:.18});const cap=new THREE.Mesh(capGeo,metal);cap.position.y=1.98;group.add(cap);
+  group.rotation.z=-.04;scene.add(group);
+  let dragging=false,lastX=0,lastY=0,velocityX=0,velocityY=.004,raf=0;
+  const down=e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;container.setPointerCapture?.(e.pointerId);};
+  const move=e=>{if(!dragging)return;velocityY=(e.clientX-lastX)*.008;velocityX=(e.clientY-lastY)*.006;lastX=e.clientX;lastY=e.clientY;};
+  const up=()=>{dragging=false;};
+  container.addEventListener('pointerdown',down);container.addEventListener('pointermove',move);container.addEventListener('pointerup',up);container.addEventListener('pointercancel',up);
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function animate(){raf=requestAnimationFrame(animate);if(!dragging){velocityX*=.94;velocityY*=.965;if(Math.abs(velocityY)<.001&&!reduced)velocityY=.0015;}group.rotation.y+=velocityY;group.rotation.x=Math.max(-.45,Math.min(.45,group.rotation.x+velocityX));renderer.render(scene,camera);}animate();
+  const resize=()=>{const w=container.clientWidth,h=container.clientHeight;camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();renderer.setSize(w,h);};
+  window.addEventListener('resize',resize,{passive:true});
+  bottleCleanup=()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);renderer.dispose();[bodyGeo,neckGeo,capGeo,glass,metal].forEach(x=>x.dispose());};
 }
 
 /* ---------------- state ---------------- */
@@ -179,9 +66,8 @@ const state = {
   theme: "dark",
   cart: [],        // {productId, size, qty}
   wishlist: [],     // productId[]
-  overrides: {},    // productId -> {name,image,image2,prices,description,concentration,gender,longevity,projection,topNotes,heartNotes,baseNotes,verified}
-  brandOverrides: {}, // brandId -> {logo,name}
-  content: null,    // editable site copy — see DEFAULT_CONTENT
+  recentSearches: [],
+  content: null,
   route: {page:"home"},
 };
 
@@ -256,19 +142,13 @@ function esc(s){ return String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"
 function slug(s){ return String(s).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,""); }
 
 function getBrand(id){
-  const base = BRANDS.find(b=>b.id===id);
-  if(!base) return null;
-  const ov = state.brandOverrides[id] || {};
-  return {...base, ...ov};
+  return BRANDS.find(b=>b.id===id) || null;
 }
 function allBrands(){ return BRANDS.map(b=>getBrand(b.id)); }
 function brandProductCount(id){ return PRODUCTS.filter(p=>p.brandId===id).length; }
 
 function getProduct(id){
-  const base = PRODUCTS.find(p=>p.id===id);
-  if(!base) return null;
-  const ov = state.overrides[id] || {};
-  return {...base, ...ov, prices:{...base.prices, ...(ov.prices||{})}};
+  return PRODUCTS.find(p=>p.id===id) || null;
 }
 function allProducts(){ return PRODUCTS.map(p=>getProduct(p.id)); }
 function productsByBrand(brandId){ return allProducts().filter(p=>p.brandId===brandId); }
@@ -280,24 +160,26 @@ function imgTag(src, alt, cls, fallbackText){
 }
 
 /* ---------------- persistence bootstrap ---------------- */
-async function loadPersisted(){
-  const theme = await storeGet("prefs:theme", false);
+function loadPersisted(){
+  const theme = localGet("prefs:theme");
   if(theme) state.theme = theme;
   document.documentElement.setAttribute("data-theme", state.theme);
 
-  const cart = await storeGet("cart:v1", false);
+  const cart = localGet("cart:v1");
   if(cart) { try{ state.cart = JSON.parse(cart); }catch(e){} }
 
-  const wish = await storeGet("wishlist:v1", false);
+  const wish = localGet("wishlist:v1");
   if(wish) { try{ state.wishlist = JSON.parse(wish); }catch(e){} }
 
   state.content = defaultContent();
+  const recent=localGet("search:recent");
+  if(recent){try{state.recentSearches=JSON.parse(recent).slice(0,5);}catch(e){}}
   updateBadges();
 }
 
-function persistCart(){ storeSet("cart:v1", JSON.stringify(state.cart), false); }
-function persistWishlist(){ storeSet("wishlist:v1", JSON.stringify(state.wishlist), false); }
-function persistTheme(){ storeSet("prefs:theme", state.theme, false); }
+function persistCart(){ localSet("cart:v1",JSON.stringify(state.cart)); }
+function persistWishlist(){ localSet("wishlist:v1",JSON.stringify(state.wishlist)); }
+function persistTheme(){ localSet("prefs:theme",state.theme); }
 
 /* ---------------- cart / wishlist logic ---------------- */
 function addToCart(productId, size, qty){
@@ -350,14 +232,6 @@ function buildOrderMessage(){
   lines.push(`Contact Number: `);
   lines.push(`Delivery Address: `);
   lines.push(``);
-  lines.push(`HOW TO ORDER?`);
-  lines.push(`1. Ask our admin for the payment details.`);
-  lines.push(`2. Kindly wait for our admin to send your invoice.`);
-  lines.push(`3. Settle your payment and send your proof of payment.`);
-  lines.push(`4. Once confirmed we will process your order.`);
-  lines.push(`We ship nationwide via J&T Express. You may also book Lalamove for same-day delivery.`);
-  lines.push(`Don't forget to share your experience with us once your order arrives!`);
-  lines.push(``);
   lines.push(`Please note: we do not accept Cash On Delivery (COD), and shipping fee is shouldered by the buyer.`);
   return {ref, text: lines.join("\n")};
 }
@@ -377,7 +251,7 @@ function showCheckoutModal(text){
       <h2 style="font-family:var(--font-display);font-weight:400;margin:0 0 14px;font-size:28px;">Send your order on Messenger</h2>
       <p style="color:var(--ink-soft);font-size:14.5px;line-height:1.7;margin-bottom:18px;">
         We've copied your order summary to your clipboard. Tap <b>Open Messenger</b>, then paste it into
-        the chat with us so our admin can send you payment details and an invoice.
+        the chat with our team to complete your order.
       </p>
       <div class="copy-box" id="checkoutText">${esc(text)}</div>
       <div style="display:flex;gap:12px;margin-top:22px;flex-wrap:wrap;">
@@ -524,6 +398,7 @@ function productCardHTML(p){
     <div class="product-body">
       <div class="product-brand">${esc(p.brand)}</div>
       <div class="product-name">${esc(p.name)}</div>
+      ${p.matchReason?`<div style="font-size:12px;color:var(--green);font-weight:650;margin:-4px 0 10px;">Matched for: ${esc(p.matchReason)}</div>`:""}
       <div class="product-meta-row">
         <div class="product-price">${peso(Math.min(...Object.values(p.prices)))} <small>from</small></div>
         <div class="size-dots">${sizes.map(()=>`<span></span>`).join("")}</div>
@@ -629,12 +504,12 @@ function renderProductDetail(productId){
   const p = getProduct(productId);
   if(!p) return `<div class="center-empty">Fragrance not found. <a href="#/collection">Back to collection</a></div>`;
   const firstSize = Object.keys(p.prices)[0];
-  const hasImage2 = !!(state.overrides[p.id] && state.overrides[p.id].image2);
+  const hasImage2 = !!p.image2;
   return `
   <div class="wrap pd-grid" id="pdWrap" data-pid="${p.id}" data-size="${firstSize}">
     <div>
       <div class="pd-media">${imgTag(p.image, `${p.brand} ${p.name}`, "", `${p.brand} — ${p.name}`)}</div>
-      ${hasImage2 ? `<div class="pd-media pd-media-2">${imgTag(p.image2, `${p.brand} ${p.name} decant bottle`, "", "Decant bottle")}</div>` : ""}
+      ${hasImage2 ? `<div class="pd-media pd-media-2"><img src="${esc(p.image2)}" alt="${esc(`${p.brand} ${p.name} decant bottle`)}" loading="lazy" onerror="this.parentElement.remove()" /></div>` : ""}
     </div>
     <div>
       <div class="breadcrumb"><a href="#/">Home</a> / <a href="#/brand/${p.brandId}">${esc(p.brand)}</a> / ${esc(p.name)}</div>
@@ -654,7 +529,7 @@ function renderProductDetail(productId){
         <button class="btn btn-primary" id="pdAddToCart">Add to Bag</button>
         <button class="btn btn-ghost" id="pdWishBtn" data-wish-toggle="${p.id}">${state.wishlist.includes(p.id) ? "♥ In Wishlist" : "♡ Add to Wishlist"}</button>
       </div>
-      ${!p.verified ? `<div class="unverified-note">Note pyramid pending final Fragrantica cross-check — verified via our sourcing team before shipping. Ask our admin on Messenger for confirmation.</div>` : ""}
+      ${!p.verified ? `<div class="unverified-note">Note pyramid pending final cross-check — verified by our sourcing team before shipping. Message us for confirmation.</div>` : ""}
     </div>
   </div>
   <section>
@@ -706,16 +581,46 @@ const QUIZ = [
   {key:"lifestyle", q:"What does most of your week look like?", opts:["Office & meetings","Creative & casual","Active & outdoorsy","Nights out & social"]},
   {key:"climate", q:"What climate do you wear scent in most?", opts:["Hot & humid","Warm, occasional rain","Cool evenings","It varies a lot"]},
   {key:"personality", q:"Which word feels most like you?", opts:["Confident","Romantic","Understated","Adventurous"]},
+  {key:"character", q:"What should your scent communicate first?", opts:["Fresh & effortless","Warm & magnetic","Elegant & polished","Bold & unexpected"]},
+  {key:"gender", q:"Which fragrance profile should we prioritize?", opts:["Masculine","Feminine","Unisex","Surprise me"]},
   {key:"budget", q:"What's a comfortable decant budget to start?", opts:["Under ₱300","₱300–₱700","₱700–₱1,500","No limit — I want the full experience"]},
 ];
 let quizAnswers = {};
 let quizStep = 0;
 function pickForAnswers(){
-  const genderGuess = quizAnswers.personality==="Romantic" ? "Women" : (quizAnswers.personality==="Adventurous"?"Unisex":"Men");
-  let pool = allProducts().filter(p=>p.gender===genderGuess || p.gender==="Unisex");
-  if(pool.length<6) pool = allProducts();
-  const recommended = pool.filter(p=>p.recommended);
-  const chosen = (recommended.length>=3 ? recommended : pool).slice(0,4);
+  const groups={
+    fresh:["bergamot","grapefruit","marine","aquatic","citrus","mint","lavender","apple","pear","musk","cedar"],
+    warm:["vanilla","amber","tonka","cinnamon","tobacco","coffee","caramel","cognac","oud","sandalwood"],
+    floral:["rose","jasmine","peony","orange blossom","lily","iris","violet"],
+    bold:["oud","leather","saffron","incense","patchouli","pepper","cognac","tobacco"]
+  };
+  const wanted={"Fresh & effortless":"fresh","Warm & magnetic":"warm","Elegant & polished":"floral","Bold & unexpected":"bold"}[quizAnswers.character];
+  const wantedGender={Masculine:"Men",Feminine:"Women",Unisex:"Unisex"}[quizAnswers.gender];
+  const budgetCap={"Under ₱300":300,"₱300–₱700":700,"₱700–₱1,500":1500,"No limit — I want the full experience":Infinity}[quizAnswers.budget]||Infinity;
+  const scored=allProducts().map(p=>{
+    const text=[p.description,...p.topNotes,...p.heartNotes,...p.baseNotes,p.longevity,p.projection].join(' ').toLowerCase();
+    let score=0;const reasons=[];
+    if(wanted){const hits=groups[wanted].filter(n=>text.includes(n)).length;score+=hits*3.2;if(hits)reasons.push(`${wanted} scent profile`);}
+    if(wantedGender){if(p.gender===wantedGender){score+=7;reasons.push(`${wantedGender.toLowerCase()} profile`);}else if(p.gender==='Unisex')score+=3;else score-=3;}
+    if(quizAnswers.gender==='Surprise me'&&p.gender==='Unisex')score+=2;
+    if(quizAnswers.climate==='Hot & humid'){score+=groups.fresh.filter(n=>text.includes(n)).length*2.4;if(/strong|long/.test(text))score-=1;}
+    if(quizAnswers.climate==='Cool evenings'){score+=groups.warm.filter(n=>text.includes(n)).length*2.4;if(/long|strong/.test(text))score+=2;}
+    if(quizAnswers.climate==='Warm, occasional rain')score+=(groups.fresh.concat(groups.warm)).filter(n=>text.includes(n)).length*1.1;
+    if(quizAnswers.lifestyle==='Office & meetings'){if(/moderate|soft/.test(text))score+=4;if(/strong/.test(text))score-=1;}
+    if(quizAnswers.lifestyle==='Active & outdoorsy')score+=groups.fresh.filter(n=>text.includes(n)).length*1.8;
+    if(quizAnswers.lifestyle==='Nights out & social'){if(/strong|long/.test(text))score+=5;score+=groups.warm.filter(n=>text.includes(n)).length*1.4;}
+    if(quizAnswers.lifestyle==='Creative & casual'&&p.gender==='Unisex')score+=4;
+    if(quizAnswers.personality==='Confident'&&/strong|leather|oud|pepper/.test(text))score+=5;
+    if(quizAnswers.personality==='Romantic')score+=groups.floral.concat(groups.warm).filter(n=>text.includes(n)).length*1.5;
+    if(quizAnswers.personality==='Understated'&&/moderate|musk|cedar|lavender/.test(text))score+=4;
+    if(quizAnswers.personality==='Adventurous'&&/oud|saffron|cognac|leather|unusual|distinctive/.test(text))score+=5;
+    const entry=Math.min(...Object.values(p.prices));if(entry<=budgetCap)score+=5;else score-=Math.min(8,(entry-budgetCap)/75);
+    if(p.recommended)score+=1.25;
+    const reason=reasons.slice(0,2).join(' · ')||`${quizAnswers.personality.toLowerCase()} energy · ${quizAnswers.lifestyle.toLowerCase()}`;
+    return {...p,matchReason:reason,matchScore:score};
+  }).sort((a,b)=>b.matchScore-a.matchScore);
+  const chosen=[],brands=new Set();
+  for(const p of scored){if(!brands.has(p.brandId)||chosen.length>=3){chosen.push(p);brands.add(p.brandId);}if(chosen.length===4)break;}
   return chosen;
 }
 function renderBuild(){
@@ -736,6 +641,7 @@ function renderQuizStep(){
   if(!card) return;
   if(quizStep >= QUIZ.length){
     const picks = pickForAnswers();
+    playSound('result');
     card.innerHTML = `
       <span class="tag">Your Curated Wardrobe</span>
       <h3 class="quiz-q">A collection matched to how you live</h3>
@@ -902,7 +808,8 @@ async function route(){
 
   app.innerHTML = html;
   postRenderBind(r);
-  initReveal(app);
+  initReveal(document);
+  if(r.page==="home") initHeroBottle();
 }
 
 function bindCardNav(el){
@@ -973,14 +880,15 @@ function postRenderBind(r){
    GLOBAL UI: navbar scroll, drawer, panels, theme, search
    ================================================================ */
 function closeAllPanels(){
-  ["searchBackdrop","searchPanel","wishBackdrop","wishPanel","cartBackdrop","cartPanel"].forEach(id=>{
-    document.getElementById(id).classList.remove("open");
+  ["wishBackdrop","wishPanel","cartBackdrop","cartPanel"].forEach(id=>{
+    document.getElementById(id)?.classList.remove("open");
   });
+  document.getElementById('searchPopover')?.classList.remove('open');
   closeModal();
 }
 function initGlobalUI(){
-  const navbar = document.getElementById("navbar");
-  window.addEventListener("scroll", ()=>{ navbar.classList.toggle("scrolled", window.scrollY>10); }, {passive:true});
+  const navStack = document.getElementById("navStack");
+  window.addEventListener("scroll", ()=>{ navStack.classList.toggle("scrolled", window.scrollY>10); }, {passive:true});
 
   document.getElementById("menuBtn").onclick = ()=>{ document.getElementById("drawer").classList.add("open"); document.getElementById("drawerBackdrop").classList.add("open"); };
   document.getElementById("drawerBackdrop").onclick = closeDrawer;
@@ -988,9 +896,12 @@ function initGlobalUI(){
   function closeDrawer(){ document.getElementById("drawer").classList.remove("open"); document.getElementById("drawerBackdrop").classList.remove("open"); }
 
   document.getElementById("themeBtn").onclick = ()=>{
+    document.documentElement.classList.add('theme-changing');
     state.theme = state.theme==="dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", state.theme);
-    persistTheme();
+    persistTheme();playSound('toggle');
+    document.getElementById('themeIcon').innerHTML=state.theme==='dark'?'<path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/>':'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+    setTimeout(()=>document.documentElement.classList.remove('theme-changing'),800);
   };
 
   // wishlist panel
@@ -1003,30 +914,23 @@ function initGlobalUI(){
   document.getElementById("cartBackdrop").onclick = ()=>{ document.getElementById("cartBackdrop").classList.remove("open"); document.getElementById("cartPanel").classList.remove("open"); };
   document.querySelector("[data-close-cart]").onclick = ()=>{ document.getElementById("cartBackdrop").classList.remove("open"); document.getElementById("cartPanel").classList.remove("open"); };
 
-  // search panel
-  document.getElementById("searchBtn").onclick = ()=>{
-    document.getElementById("searchBackdrop").classList.add("open");
-    document.getElementById("searchPanel").classList.add("open");
-    document.getElementById("searchInput").value="";
-    document.getElementById("searchResults").innerHTML = "";
-    setTimeout(()=>document.getElementById("searchInput").focus(),300);
+  // inline fragrance search with recent searches
+  const input=document.getElementById('searchInput'),popover=document.getElementById('searchPopover'),clear=document.getElementById('searchClear');
+  const remember=q=>{state.recentSearches=[q,...state.recentSearches.filter(x=>x.toLowerCase()!==q.toLowerCase())].slice(0,5);localSet('search:recent',JSON.stringify(state.recentSearches));};
+  const openSearch=()=>{popover.classList.add('open');input.setAttribute('aria-expanded','true');};
+  const renderSearch=()=>{
+    const raw=input.value.trim(),q=raw.toLowerCase();clear.classList.toggle('visible',!!raw);openSearch();
+    if(!q){popover.innerHTML=state.recentSearches.length?`<div class="search-caption">Recent searches</div><div class="recent-chips">${state.recentSearches.map(x=>`<button class="recent-chip" data-recent="${esc(x)}">${esc(x)}</button>`).join('')}</div>`:`<div class="search-caption">Search by fragrance or house</div>`;popover.querySelectorAll('[data-recent]').forEach(b=>b.onclick=()=>{input.value=b.dataset.recent;renderSearch();});return;}
+    const matches=allProducts().filter(p=>p.name.toLowerCase().includes(q)||p.brand.toLowerCase().includes(q)).slice(0,12);
+    popover.innerHTML=matches.length?matches.map(p=>`<div class="search-result" role="option" tabindex="0" data-go-search="${p.id}" data-query="${esc(raw)}">${imgTag(p.image,p.name,'',p.name)}<div><div class="sr-name">${esc(p.name)}</div><div class="sr-brand">${esc(p.brand)}</div></div></div>`).join(''):`<div style="color:var(--ink-soft);font-size:13.5px;padding:20px;">No matches yet — try a house or fragrance name.</div>`;
+    popover.querySelectorAll('[data-go-search]').forEach(el=>{const go=()=>{remember(el.dataset.query);location.hash='#/product/'+el.dataset.goSearch;popover.classList.remove('open');playSound('search');};el.onclick=go;el.onkeydown=e=>{if(e.key==='Enter')go();};});
   };
-  document.getElementById("searchBackdrop").onclick = ()=>{ document.getElementById("searchBackdrop").classList.remove("open"); document.getElementById("searchPanel").classList.remove("open"); };
-  document.querySelector("[data-close-search]").onclick = ()=>{ document.getElementById("searchBackdrop").classList.remove("open"); document.getElementById("searchPanel").classList.remove("open"); };
-  document.getElementById("searchInput").addEventListener("input",(e)=>{
-    const q = e.target.value.trim().toLowerCase();
-    const results = document.getElementById("searchResults");
-    if(q.length<2){ results.innerHTML=""; return; }
-    const matches = allProducts().filter(p=>p.name.toLowerCase().includes(q)||p.brand.toLowerCase().includes(q)).slice(0,20);
-    results.innerHTML = matches.length ? matches.map(p=>`
-      <div class="search-result" data-go-search="${p.id}">
-        ${imgTag(p.image,p.name,"",p.name)}
-        <div><div class="sr-name">${esc(p.name)}</div><div class="sr-brand">${esc(p.brand)}</div></div>
-      </div>`).join("") : `<div style="color:var(--ink-soft);font-size:13.5px;padding:20px 0;">No matches yet — try a brand or fragrance name.</div>`;
-    results.querySelectorAll("[data-go-search]").forEach(el=>{
-      el.onclick = ()=>{ location.hash = "#/product/"+el.dataset.goSearch; document.getElementById("searchBackdrop").classList.remove("open"); document.getElementById("searchPanel").classList.remove("open"); };
-    });
-  });
+  document.getElementById('searchBtn').onclick=()=>{input.focus();renderSearch();};input.addEventListener('focus',renderSearch);input.addEventListener('input',renderSearch);
+  clear.onclick=()=>{input.value='';input.focus();renderSearch();};document.addEventListener('click',e=>{if(!e.target.closest('#searchBox')&&!e.target.closest('#searchBtn')){popover.classList.remove('open');input.setAttribute('aria-expanded','false');}});
+  document.addEventListener('click',e=>{const control=e.target.closest('button,.btn,a');if(control&&!['themeBtn','searchBtn','soundToggle'].includes(control.id))playSound('click');});
+  const soundToggle=document.getElementById('soundToggle');
+  const syncSoundLabel=()=>{soundToggle.textContent=sounds.muted?'Sound off':'Sound on';soundToggle.setAttribute('aria-pressed',String(sounds.muted));};
+  soundToggle.onclick=()=>{setSoundMuted(!sounds.muted);syncSoundLabel();if(!sounds.muted)playSound('toggle');};syncSoundLabel();
 
   // quick view modal
   document.getElementById("qvBackdrop").onclick = closeModal;
@@ -1048,8 +952,8 @@ function initGlobalUI(){
 }
 
 /* ---------------- boot ---------------- */
-(async function init(){
-  await loadPersisted();
+(function init(){
+  loadPersisted();
   initGlobalUI();
   route();
 })();

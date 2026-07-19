@@ -1,0 +1,1 @@
+Upload product photos under a folder named for the product's brand ID, for example `lattafa/khamrah.jpg`. The `P(...)` helper in `public/data.js` automatically derives `<product-slug>.jpg` and optional `<product-slug>-decant.jpg` paths.

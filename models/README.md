@@ -1,0 +1,1 @@
+Place future optimized 3D fragrance assets here. Prefer compressed `.glb` models with baked or lightweight materials. The current hero uses a generated Three.js bottle and does not require a model file.
