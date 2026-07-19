@@ -4,8 +4,8 @@ This is a responsive, framework-free fragrance storefront. Open `index.html` dir
 
 ## Asset locations
 
-- Product photos: `images/products/<brand-id>/<product-slug>.jpg`
-- Optional decant photos: `images/products/<brand-id>/<product-slug>-decant.jpg`
+- Product photos: `images/products/<brand-id>/<product-slug>.png`
+- Optional decant photos: `images/products/<brand-id>/<product-slug>-decant.png`
 - Brand logos: `images/brands/<brand-id>.png`
 - Future 3D models: `models/` (optimized `.glb` preferred)
 - UI sounds: `sounds/` (`click.mp3`, `toggle.mp3`, `search.mp3`, `result.mp3`)

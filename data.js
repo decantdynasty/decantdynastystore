@@ -47,8 +47,8 @@ function P(brandId, brandName, name, opts) {
   return {
     id: nid(brandId),
     brandId, brand: brandName, name,
-    image: `images/products/${brandId}/${name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')}.jpg`,
-    image2: `images/products/${brandId}/${name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')}-decant.jpg`,
+    image: `images/products/${brandId}/${name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')}.png`,
+    image2: `images/products/${brandId}/${name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')}-decant.png`,
     prices: opts.prices || DEFAULT_PRICE,
     concentration: opts.concentration || "Eau de Parfum",
     gender: opts.gender || "Unisex",
