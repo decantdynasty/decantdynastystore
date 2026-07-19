@@ -60,22 +60,26 @@ function initHeroBottle(){
   addMesh(new THREE.TorusGeometry(.37,.055,12,48),glass,1.68).rotation.x=Math.PI/2;
   addMesh(new THREE.CylinderGeometry(.405,.405,.28,64),sealMaterial,1.67);
   for(let i=0;i<3;i++){const band=addMesh(new THREE.TorusGeometry(.415,.025,10,48),sealMaterial,1.56+i*.11);band.rotation.x=Math.PI/2;}
-  addMesh(new THREE.CylinderGeometry(.095,.095,3.15,24),clearPlastic,-.18);
+  const dipTubeCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(0,1.55,0),new THREE.Vector3(0,.4,0),new THREE.Vector3(-.03,-1.3,0),new THREE.Vector3(-.22,-2.18,0)]);
+  addMesh(new THREE.TubeGeometry(dipTubeCurve,48,.026,10,false),clearPlastic,0);
   addMesh(new THREE.CylinderGeometry(.42,.42,.38,48),whitePlastic,1.92);
   addMesh(new THREE.CylinderGeometry(.48,.48,1.12,64,1,true),clearPlastic,2.34);
   addMesh(new THREE.CylinderGeometry(.47,.47,.09,64),clearPlastic,2.88);
   addMesh(new THREE.CylinderGeometry(.21,.21,.62,40),whitePlastic,2.42);
+  const springPoints=[];for(let i=0;i<=72;i++){const t=i/72;springPoints.push(new THREE.Vector3(Math.cos(t*Math.PI*9)*.13,1.78+t*.58,Math.sin(t*Math.PI*9)*.13));}
+  const springMaterial=new THREE.MeshStandardMaterial({color:0x696b6c,metalness:.88,roughness:.24});disposables.push(springMaterial);
+  addMesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(springPoints),96,.018,7,false),springMaterial,0);
   addMesh(new THREE.CylinderGeometry(.115,.115,.34,32),whitePlastic,2.82);
   const nozzle=addMesh(new THREE.CylinderGeometry(.075,.075,.28,24),whitePlastic,2.69);nozzle.rotation.z=Math.PI/2;nozzle.position.x=.18;
   const nozzleTip=addMesh(new THREE.SphereGeometry(.055,20,12),new THREE.MeshStandardMaterial({color:0x282828,roughness:.5}),2.69);nozzleTip.position.x=.32;disposables.push(nozzleTip.material);
 
-  const labelCanvas=document.createElement('canvas');labelCanvas.width=1024;labelCanvas.height=640;
+  const labelCanvas=document.createElement('canvas');labelCanvas.width=2048;labelCanvas.height=768;
   const labelContext=labelCanvas.getContext('2d');
-  const drawLabel=logo=>{labelContext.clearRect(0,0,1024,640);labelContext.fillStyle='rgba(247,243,233,.88)';labelContext.fillRect(0,0,1024,640);if(logo){labelContext.drawImage(logo,387,55,250,250);}labelContext.fillStyle='#171714';labelContext.textAlign='center';labelContext.font='700 54px -apple-system, BlinkMacSystemFont, sans-serif';labelContext.fillText('DECANT DYNASTY',512,390);labelContext.font='500 25px -apple-system, BlinkMacSystemFont, sans-serif';labelContext.letterSpacing='7px';labelContext.fillText('AUTHENTIC FRAGRANCE DECANT',512,450);};
+  const drawLabel=logo=>{labelContext.clearRect(0,0,2048,768);labelContext.fillStyle='rgba(248,246,240,.82)';labelContext.fillRect(0,0,2048,768);if(logo){labelContext.drawImage(logo,610,124,828,520);}};
   drawLabel();const labelTexture=new THREE.CanvasTexture(labelCanvas);labelTexture.encoding=THREE.sRGBEncoding;
-  const labelMaterial=new THREE.MeshPhysicalMaterial({map:labelTexture,roughness:.55,transparent:true,opacity:.96,side:THREE.DoubleSide});disposables.push(labelTexture,labelMaterial);
-  const label=addMesh(new THREE.PlaneGeometry(1.02,1.28),labelMaterial,-.48);label.position.z=.535;
-  const logoImage=new Image();logoImage.onload=()=>{drawLabel(logoImage);labelTexture.needsUpdate=true;};logoImage.src='images/logo.png';
+  const labelMaterial=new THREE.MeshPhysicalMaterial({map:labelTexture,roughness:.5,transparent:true,opacity:.94,side:THREE.DoubleSide});disposables.push(labelTexture,labelMaterial);
+  const label=addMesh(new THREE.CylinderGeometry(.542,.542,1.35,64,1,true),labelMaterial,-.48);label.rotation.y=Math.PI;
+  const logoImage=new Image();logoImage.onload=()=>{drawLabel(logoImage);labelTexture.needsUpdate=true;};logoImage.src='images/bottle-logo.png';
   group.rotation.set(.035,-.12,-.025);scene.add(group);
 
   const featurePoints={seal:new THREE.Vector3(.34,1.66,.05),atomizer:new THREE.Vector3(.32,2.52,.04),glass:new THREE.Vector3(.48,-1.32,.02)};
@@ -101,6 +105,7 @@ const state = {
   cart: [],        // {productId, size, qty}
   wishlist: [],     // productId[]
   recentSearches: [],
+  voucherCode: "",
   content: null,
   route: {page:"home"},
 };
@@ -234,6 +239,8 @@ function cartTotal(){
     return sum + (p.prices[c.size]||0)*c.qty;
   },0);
 }
+function voucherDiscount(){ return state.voucherCode==="DD50"&&cartTotal()>=599?50:0; }
+function checkoutTotal(){ return Math.max(0,cartTotal()-voucherDiscount()); }
 function toggleWishlist(productId){
   const i = state.wishlist.indexOf(productId);
   if(i>-1) state.wishlist.splice(i,1); else state.wishlist.push(productId);
@@ -259,7 +266,9 @@ function buildOrderMessage(){
     lines.push(`• ${p.brand} ${p.name} — ${c.size} x${c.qty} — ${peso((p.prices[c.size]||0)*c.qty)}`);
   });
   lines.push(``);
-  lines.push(`Total: ${peso(cartTotal())}`);
+  const discount=voucherDiscount();
+  if(discount){lines.push(`Subtotal: ${peso(cartTotal())}`);lines.push(`Voucher DD50: -${peso(discount)}`);}
+  lines.push(`Total: ${peso(checkoutTotal())}`);
   lines.push(`Order Reference: ${ref}`);
   lines.push(``);
   lines.push(`Name: `);
@@ -807,14 +816,25 @@ function renderCartPanel(){
       </div>
     </div>`;
   }).join("");
+  const subtotal=cartTotal(),discount=voucherDiscount();
+  const voucherMessage=state.voucherCode?(discount?`<div class="voucher-feedback success">DD50 applied — you saved ${peso(discount)}.</div>`:state.voucherCode==="DD50"?`<div class="voucher-feedback">Spend ${peso(Math.max(0,599-subtotal))} more to unlock DD50.</div>`:`<div class="voucher-feedback error">That voucher code isn't valid.</div>`):"";
   foot.innerHTML = `
-    <div class="subtotal-row"><span>Subtotal</span><span>${peso(cartTotal())}</span></div>
+    <div class="voucher-entry">
+      <label for="voucherInput">Voucher code</label>
+      <div><input id="voucherInput" value="${esc(state.voucherCode)}" placeholder="Enter code" maxlength="12" autocomplete="off"/><button class="btn btn-ghost btn-sm" id="applyVoucherBtn">Apply</button></div>
+      ${voucherMessage}
+    </div>
+    <div class="subtotal-row"><span>Subtotal</span><span>${peso(subtotal)}</span></div>
+    ${discount?`<div class="subtotal-row discount-row"><span>DD50 discount</span><span>−${peso(discount)}</span></div>`:""}
+    <div class="subtotal-row total-row"><span>Total</span><span>${peso(subtotal-discount)}</span></div>
     <button class="btn btn-primary" style="width:100%;" id="checkoutBtn">Checkout via Messenger</button>
     <p style="font-size:11.5px;color:var(--ink-soft);margin-top:10px;text-align:center;">Shipping fee shouldered by buyer · No COD</p>
   `;
   body.querySelectorAll("[data-qty-minus]").forEach(b=>b.onclick=()=>changeQty(+b.dataset.qtyMinus,-1));
   body.querySelectorAll("[data-qty-plus]").forEach(b=>b.onclick=()=>changeQty(+b.dataset.qtyPlus,1));
   body.querySelectorAll("[data-cart-remove]").forEach(b=>b.onclick=()=>removeFromCart(+b.dataset.cartRemove));
+  document.getElementById("applyVoucherBtn").onclick=()=>{state.voucherCode=document.getElementById("voucherInput").value.trim().toUpperCase();renderCartPanel();if(voucherDiscount())toast("DD50 applied — ₱50 off");};
+  document.getElementById("voucherInput").onkeydown=e=>{if(e.key==="Enter")document.getElementById("applyVoucherBtn").click();};
   document.getElementById("checkoutBtn").onclick = openCheckout;
 }
 
@@ -929,7 +949,25 @@ function closeAllPanels(){
   document.getElementById('searchPopover')?.classList.remove('open');
   closeModal();
 }
+function initLoadingScreen(){
+  const loader=document.getElementById("loadingScreen");if(!loader)return;
+  const started=performance.now();let hidden=false;
+  const hide=()=>{if(hidden)return;hidden=true;const delay=Math.max(0,1050-(performance.now()-started));setTimeout(()=>{loader.classList.add("is-hidden");setTimeout(()=>loader.remove(),750);},delay);};
+  if(document.readyState==="complete")hide();else window.addEventListener("load",hide,{once:true});
+  setTimeout(hide,2600);
+}
+function initVoucherPromo(){
+  const backdrop=document.getElementById("promoBackdrop"),modal=document.getElementById("promoModal");if(!backdrop||!modal)return;
+  let seen=false;try{seen=sessionStorage.getItem("promo:dd50-seen")==="true";}catch(e){}
+  const close=()=>{backdrop.classList.remove("open");modal.classList.remove("open");try{sessionStorage.setItem("promo:dd50-seen","true");}catch(e){}};
+  document.querySelectorAll("[data-close-promo]").forEach(button=>button.onclick=close);backdrop.onclick=close;
+  document.getElementById("copyPromoCode").onclick=()=>{navigator.clipboard?.writeText("DD50");toast("DD50 copied");};
+  document.getElementById("shopPromo").onclick=()=>{close();location.hash="#/collection";};
+  if(!seen)setTimeout(()=>{backdrop.classList.add("open");modal.classList.add("open");},1750);
+}
 function initGlobalUI(){
+  initLoadingScreen();
+  initVoucherPromo();
   const navStack = document.getElementById("navStack");
   window.addEventListener("scroll", ()=>{ navStack.classList.toggle("scrolled", window.scrollY>10); }, {passive:true});
 
