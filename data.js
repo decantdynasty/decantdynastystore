@@ -19,6 +19,8 @@ const BRANDS = [
   { id: "al-wataniah", name: "Al Wataniah", logo: "images/brands/al-wataniah.png" },
   { id: "arabiyat-prestige", name: "Arabiyat Prestige", logo: "images/brands/arabiyat-prestige.png" },
   { id: "armaf", name: "Armaf", logo: "images/brands/armaf.png" },
+  { id: "asdaaf", name: "Asdaaf", logo: "images/brands/asdaaf.png" },
+  { id: "azzaro", name: "Azzaro", logo: "images/brands/azzaro.png" },
   { id: "bujairami", name: "Bujairami", logo: "images/brands/bujairami.png" },
   { id: "calvin-klein", name: "Calvin Klein", logo: "images/brands/calvin-klein.png" },
   { id: "fragrance-world", name: "Fragrance World", logo: "images/brands/fragrance-world.png" },
@@ -316,9 +318,12 @@ add(P("fragrance-world","Fragrance World","John Gustav Homme Amaze",{gender:"Men
 add(P("fragrance-world","Fragrance World","Harmony Code Absolute",{gender:"Unisex",
   topNotes:["Bergamot","Pink Pepper"],heartNotes:["Iris","Violet"],baseNotes:["Musk","Sandalwood","Vanilla"],
   description:"A balanced, harmonious floral-woody composition."}));
-add(P("fragrance-world","Fragrance World","Proud of You",{gender:"Women",
-  topNotes:["Pear","Bergamot"],heartNotes:["Jasmine","Rose"],baseNotes:["Vanilla","Musk"],
-  description:"A sentimental, soft floral gift-worthy fragrance."}));
+add(P("fragrance-world","Fragrance World","Montera Instant Love",{gender:"Unisex",concentration:"Eau de Parfum",
+  topNotes:["Saffron","Ginger","Fruits","Citruses"],heartNotes:["Amber","Rose","Jasmine"],baseNotes:["Vanilla","Sandalwood","White Musk","Oakmoss"],
+  description:"A warm spicy amber-floral that pairs sparkling saffron, ginger and citrus with rose, jasmine and a creamy vanilla-musk dry-down."}));
+add(P("fragrance-world","Fragrance World","Proud of You Absolute",{gender:"Men",concentration:"Eau de Parfum",
+  topNotes:["Rum","Bergamot","Elemi"],heartNotes:["Lavender","Davana"],baseNotes:["Madagascar Vanilla","Chestnut","Cedar","Patchouli"],
+  description:"A rich boozy gourmand for men, blending rum and bergamot with aromatic lavender, roasted chestnut and deep Madagascar vanilla."}));
 add(P("fragrance-world","Fragrance World","Varakh Silver",{gender:"Unisex",concentration:"Eau de Parfum",
   topNotes:["Saffron","Rose"],heartNotes:["Oud","Amber"],baseNotes:["Musk","Sandalwood"],
   description:"A silver-leaf inspired oud-rose oriental with a refined, luminous character."}));
@@ -516,6 +521,9 @@ add(P("paris-corner","Paris Corner","Emir Fire Your Desire",{gender:"Men",concen
 add(P("paris-corner","Paris Corner","Khair Pistachio",{gender:"Unisex",
   topNotes:["Pistachio Accord","Bergamot"],heartNotes:["Praline","Rose"],baseNotes:["Vanilla","Musk","Sandalwood"],
   description:"A distinctive nutty-gourmand built around a rare pistachio accord."}));
+add(P("paris-corner","Paris Corner","Rifaaqat",{gender:"Unisex",concentration:"Eau de Parfum",
+  topNotes:["Black Pepper","Elemi","Pink Pepper"],heartNotes:["Olibanum","Saffron"],baseNotes:["Vanilla","Cedarwood"],
+  description:"A resinous spicy vanilla built around pepper, elemi and saffron, drying into smoky olibanum, creamy vanilla and cedarwood."}));
 add(P("paris-corner","Paris Corner","Taskeen Caramel Cascade",{gender:"Women",
   topNotes:["Caramel","Bergamot"],heartNotes:["Praline","Jasmine"],baseNotes:["Vanilla","Musk"],
   description:"A cascading, caramel-drenched gourmand for sweet-scent lovers."}));
@@ -544,6 +552,9 @@ add(P("bujairami","Bujairami","Hectic",{gender:"Unisex",concentration:"Eau de Pa
   description:"An intense, whirlwind oriental true to its name — layered oud and saffron in constant motion."}));
 
 /* ---------------------------- ARABIYAT PRESTIGE ---------------------------- */
+add(P("arabiyat-prestige","Arabiyat Prestige","Aristo",{gender:"Men",concentration:"Eau de Parfum",
+  topNotes:["Ginger Flower","Mandarin Orange","Orange","Lemon"],heartNotes:["Jasmine","Magnolia","Patchouli"],baseNotes:["Vanilla","Musk","Sandalwood"],
+  description:"A vivid citrus-ginger fragrance with airy florals and patchouli, settling into a smooth vanilla, musk and sandalwood base."}));
 add(P("arabiyat-prestige","Arabiyat Prestige","Marwa",{gender:"Women",concentration:"Eau de Parfum",
   topNotes:["Bergamot","Pear"],heartNotes:["Rose","Jasmine"],baseNotes:["Musk","Vanilla","Sandalwood"],
   description:"A graceful, rose-centered floral from the Arabiyat Prestige house."}));
@@ -555,6 +566,18 @@ add(P("giorgio-armani","Giorgio Armani","Stronger With You Intensely",{gender:"M
   description:"A more intense, resinous reading of Stronger With You — pink pepper and cardamom deepened by chestnut and vanilla."}));
 
 /* ---------------------------- NEW HOUSES & RELEASES ---------------------------- */
+add(P("asdaaf","Asdaaf","Ameerat Al Arab",{gender:"Women",concentration:"Eau de Parfum",
+  topNotes:["Citruses","Bergamot"],heartNotes:["White Musk","Aloe Vera"],baseNotes:["Jasmine","Musk","Woody Notes","Oud"],
+  description:"A bright feminine floral that moves from sparkling citrus and bergamot through cool aloe vera and white musk into jasmine, soft woods and oud."}));
+add(P("asdaaf","Asdaaf","Ameerat Al Arab Prive Rose",{gender:"Women",concentration:"Eau de Parfum",
+  topNotes:["Strawberry","Grapes","Orange"],heartNotes:["Rose","White Musk","Jasmine","Ylang-Ylang","Gardenia","Lily"],baseNotes:["Tonka Bean","Amber","Sandalwood"],
+  description:"A lush fruity rose with strawberry, grape and orange above a full floral heart, finishing with powdery musk, amber, tonka bean and sandalwood."}));
+add(P("azzaro","Azzaro","The Most Wanted Intense EDP",{gender:"Men",concentration:"Eau de Parfum Intense",
+  topNotes:["Cardamom"],heartNotes:["Toffee"],baseNotes:["Amberwood"],
+  description:"A bold oriental-spicy gourmand for men, combining aromatic cardamom with addictive toffee and a powerful amberwood finish."}));
+add(P("azzaro","Azzaro","The Most Wanted Intense Parfum",{gender:"Men",concentration:"Parfum",
+  topNotes:["Ginger"],heartNotes:["Woody Notes"],baseNotes:["Bourbon Vanilla"],
+  description:"A dark woody-spicy parfum for men, balancing lively ginger with warm woods and a smooth, subtly boozy Bourbon vanilla trail."}));
 add(P("ahmed-al-maghribi","Ahmed Al Maghribi","Kaaf",{gender:"Unisex",
   topNotes:["Lavender","Watermelon","Sicilian Orange","Red Fruits"],
   heartNotes:["Lily-of-the-Valley","Jasmine","Lotus","Sea Accord"],

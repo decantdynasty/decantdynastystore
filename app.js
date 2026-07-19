@@ -372,7 +372,7 @@ function renderHome(){
         </svg>
         <div class="bottle-callout callout-seal" data-callout="seal"><b>PARAFILM Sealed</b><span>Locked in for a clean, leak-resistant journey.</span></div>
         <div class="bottle-callout callout-atomizer" data-callout="atomizer"><b>QUALITY Atomizer</b><span>A smooth, controlled mist with every press.</span></div>
-        <div class="bottle-callout callout-sticker" data-callout="sticker"><b>Sticker Label</b><span>Finished with the Decant Dynasty signature.</span></div>
+        <div class="bottle-callout callout-sticker" data-callout="sticker"><b>STICKER Label</b><span>Finished with the Decant Dynasty signature.</span></div>
         <div class="bottle-callout callout-glass" data-callout="glass"><b>HARD Glass Bottle</b><span>Clear, durable glass protects every decant.</span></div>
       </div>
     </div>
