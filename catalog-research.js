@@ -18,7 +18,8 @@ const INSPIRED_BY={
 "maison-alhambra|Baroque Rouge Extrait":"Maison Francis Kurkdjian Baccarat Rouge 540 Extrait","maison-alhambra|Candid Pour Homme":"Jean Paul Gaultier Scandal Pour Homme","maison-alhambra|Delilah Pour Femme":"Parfums de Marly Delina","maison-alhambra|Delilah Blanc":"Parfums de Marly Valaya","maison-alhambra|Delilah Viola":"Parfums de Marly Delina Exclusif","maison-alhambra|Glacier Bold":"Jean Paul Gaultier Le Beau Le Parfum","maison-alhambra|Jean Lowe Immortal":"Louis Vuitton L'Immensité","maison-alhambra|Jorge Di Profondo":"Giorgio Armani Acqua di Giò Profondo","maison-alhambra|Jorge Di Profumo":"Giorgio Armani Acqua di Giò Profumo","maison-alhambra|Versencia Oro":"Versace Eros Eau de Parfum","maison-alhambra|Versencia Rouge":"Versace Eros Flame","maison-alhambra|Yeah!":"Yves Saint Laurent Y Eau de Parfum",
 "rasasi|Hawas for Him":"Paco Rabanne Invictus Aqua","rasasi|Hawas Kobra":"Louis Vuitton Imagination","rasasi|Hawas Black":"Nishane Hacivat","rasasi|Hawas Malibu":"Jean Paul Gaultier Le Beau",
 "rayhaan|Ocean Rush":"Giorgio Armani Acqua di Giò Profondo","rayhaan|Pacific":"Paco Rabanne Invictus Aqua 2016","rayhaan|Imperia":"Creed Aventus","rayhaan|Obsidian":"Dior Homme Parfum","rayhaan|Aquatica":"Creed Virgin Island Water","rayhaan|Elixir":"Jean Paul Gaultier Le Male Elixir",
-"riiffs|Momento":"Montale Arabians Tonka","maison-asrar|Legacy":"Ex Nihilo Blue Talisman","maison-asrar|Regent":"Bvlgari Tygar","paris-corner|Emir Fire Your Desire":"By Kilian Angels' Share","paris-corner|Khair Pistachio":"Kayali Yum Pistachio Gelato 33","paris-corner|Taskeen Caramel Cascade":"Giardini di Toscana Bianco Latte","paris-corner|Vibrant Vetiver Delight":"Byredo Bal d'Afrique","bujairami|Hectic":"Louis Vuitton Imagination","arabiyat-prestige|Marwa":"Louis Vuitton Imagination"
+"riiffs|Momento":"Montale Arabians Tonka","maison-asrar|Legacy":"Ex Nihilo Blue Talisman","maison-asrar|Regent":"Bvlgari Tygar","paris-corner|Emir Fire Your Desire":"By Kilian Angels' Share","paris-corner|Khair Pistachio":"Kayali Yum Pistachio Gelato 33","paris-corner|Taskeen Caramel Cascade":"Giardini di Toscana Bianco Latte","paris-corner|Vibrant Vetiver Delight":"Byredo Bal d'Afrique","bujairami|Hectic":"Louis Vuitton Imagination","arabiyat-prestige|Marwa":"Louis Vuitton Imagination",
+"ahmed-al-maghribi|Kaaf":"Parfums de Marly Percival","al-haramain|Amber Oud Gold Edition":"Xerjoff Erba Pura","al-haramain|Aqua Dubai":"Louis Vuitton Imagination","al-wataniah|Kayaan Classic":"Dior Homme Intense","rayhaan|Pacific Aura":"Louis Vuitton Pacific Chill"
 };
 
 const CORRECTIONS={};
@@ -27,11 +28,26 @@ const notes=(top,heart,base,description,extra={})=>({topNotes:top,heartNotes:hea
 
 // Concentration, audience and performance are deliberately applied to every SKU.
 const CONCENTRATION={
-"afnan|Supremacy Collector's Edition":"Extrait de Parfum","armaf|Club de Nuit Intense Man EDT":"Eau de Toilette","armaf|Club de Nuit Intense Man Limited Edition":"Parfum","armaf|Hunter":"Eau de Toilette","jpg|Le Male Elixir Absolu":"Parfum Intense","jpg|Le Male Le Parfum":"Eau de Parfum Intense","jpg|Ultramale":"Eau de Toilette Intense","versace|Dylan Blue":"Eau de Toilette","khadlaj|Island":"Extrait de Parfum","khadlaj|Island Dreams":"Extrait de Parfum","khadlaj|Panache Angel Dust":"Extrait de Parfum","french-avenue|Aether Extrait":"Extrait de Parfum","french-avenue|Atlantis Extrait":"Extrait de Parfum","maison-alhambra|Baroque Rouge Extrait":"Extrait de Parfum","fragrance-world|Barakkat Rouge Extrait":"Extrait de Parfum","riiffs|Freeze":"Extrait de Parfum","nautica|Voyage":"Eau de Toilette"
+"afnan|Supremacy Collector's Edition":"Extrait de Parfum","armaf|Club de Nuit Intense Man EDT":"Eau de Toilette","armaf|Club de Nuit Intense Man Limited Edition":"Parfum","armaf|Hunter":"Eau de Toilette","jpg|Le Male Elixir Absolu":"Parfum Intense","jpg|Le Male Le Parfum":"Eau de Parfum Intense","jpg|Ultramale":"Eau de Toilette Intense","versace|Dylan Blue":"Eau de Toilette","khadlaj|Island":"Extrait de Parfum","khadlaj|Island Dreams":"Extrait de Parfum","khadlaj|Panache Angel Dust":"Extrait de Parfum","french-avenue|Aether Extrait":"Extrait de Parfum","french-avenue|Atlantis Extrait":"Extrait de Parfum","maison-alhambra|Baroque Rouge Extrait":"Extrait de Parfum","fragrance-world|Barakkat Rouge Extrait":"Extrait de Parfum","riiffs|Freeze":"Extrait de Parfum","nautica|Voyage":"Eau de Toilette","al-haramain|Aqua Dubai":"Extrait de Parfum"
 };
 const VERY_LONG=new Set(["9PM Night Out","9PM","Supremacy Collector's Edition","Supremacy Not Only Intense","Club de Nuit Intense Man Limited Edition","Le Male Elixir Absolu","Le Male Le Parfum","Eros EDP","Asad","Asad Elixir","Ameer Al Oudh Intense","Bade'e Al Oud Honor & Glory","Khamrah","Khamrah Qahwa","Barakkat Rouge Extrait","Barakkat Satin Oud","Cocktail Intense","Amber Empire","Enigma Deux","Liquid Brun","Spectre Wraith","Baroque Rouge Extrait","Hawas Black","Momento","Spicebomb Extreme","Stronger With You Intensely"]);
 const LONG=new Set(["Turathi Blue","Club de Nuit Sillage","Club de Nuit Intense Man EDT","Club de Nuit Woman","Odyssey Mega Limited Edition","Ultramale","Dylan Blue","Yara Elixir","Asad Bourbon","Art of Universe","Angham","Eclaire","Fakhar","Khamrah Waha","Liam Grey","Najdia Intense","Nasheet","Rave Now","Island","Island Dreams","Intoxicate Mystique","Shiyaaka Snow","Titan","Aqua Pura","Barakkat Ambre Eve","Barakkat Rouge 540 EDP","Barakkat Gentle Gold","Classy Chic Girl","John Gustav Homme Le Parfum","Harmony Code Absolute","Proud of You","La Uno Million Elixir","No. 4 After Love","Aether Extrait","Atlantis Extrait","Enigma Une","Vulcan FEU","Candid Pour Homme","Glacier Bold","Jean Lowe Immortal","Versencia Oro","Versencia Rouge","Hawas for Him","Hawas Ice","Hawas Kobra","Hawas Malibu","Obsidian","Elixir","Nocturno Elixir","Regent","Emir Fire Your Desire","Khair Pistachio","Taskeen Caramel Cascade","Y EDP","Hectic","Marwa"]);
 const LIGHT=new Set(["9AM for Women","Odyssey Limoni Fresh Edition","Yara Tous","Panache Angel Dust","Ria","Pinnace","Ravine Ginger","Fresh Wave","Imperia Intense","Kiss","Taskeen Marina","Vibrant Vetiver Delight","Voyage"]);
+const PERFORMANCE={
+  "ahmed-al-maghribi|Kaaf":{longevity:"Long (8-12 hours)",projection:"Strong"},
+  "al-haramain|Amber Oud Gold Edition":{longevity:"Very long (10-12+ hours)",projection:"Strong to very strong"},
+  "al-haramain|Aqua Dubai":{longevity:"Very long (9-12+ hours)",projection:"Strong"},
+  "al-wataniah|Kayaan Classic":{longevity:"Moderate (5-7 hours)",projection:"Moderate"},
+  "calvin-klein|Obsession for Women":{longevity:"Long (8-10 hours)",projection:"Strong"},
+  "rasasi|Hawas Majestic":{longevity:"Moderate to long (6-8 hours)",projection:"Moderate to strong"},
+  "rayhaan|Pacific Aura":{longevity:"Light to moderate (4-6 hours)",projection:"Moderate"},
+  "tubbees|Bubble Gum":{longevity:"Light (2-4 hours)",projection:"Soft"},
+  "tubbees|Chocolate Fudge":{longevity:"Moderate (4-7 hours)",projection:"Moderate"},
+  "tubbees|Cookies & Cream":{longevity:"Light to moderate (3-6 hours)",projection:"Soft to moderate"},
+  "tubbees|Cotton Candy":{longevity:"Light (2-4 hours)",projection:"Soft"},
+  "tubbees|Strawberry Cheesecake":{longevity:"Light to moderate (3-5 hours)",projection:"Soft"},
+  "tubbees|Unicorn Vanilla":{longevity:"Light to moderate (3-5 hours)",projection:"Soft to moderate"}
+};
 
 // Afnan, Armaf and designer releases.
 fix("afnan","9AM Dive",notes(["Lemon","Mint","Black Currant","Pink Pepper"],["Apple","Incense","Cedar"],["Ginger","Sandalwood","Patchouli","Jasmine"],"A bright aromatic aquatic that moves from minty citrus and black currant into crisp apple, incense and clean woods."));
@@ -126,7 +142,8 @@ PRODUCTS.forEach(product=>{
   product.concentration=CONCENTRATION[key]||"Eau de Parfum";
   product.inspiredBy=INSPIRED_BY[key]||null;
   if(CORRECTIONS[key])Object.assign(product,CORRECTIONS[key]);
-  if(VERY_LONG.has(product.name)){product.longevity="Very long (9–12+ hours)";product.projection="Strong to very strong";}
+  if(PERFORMANCE[key])Object.assign(product,PERFORMANCE[key]);
+  else if(VERY_LONG.has(product.name)){product.longevity="Very long (9–12+ hours)";product.projection="Strong to very strong";}
   else if(LONG.has(product.name)){product.longevity="Long (7–10 hours)";product.projection="Moderate to strong";}
   else if(LIGHT.has(product.name)){product.longevity="Light to moderate (4–6 hours)";product.projection="Soft to moderate";}
   else{product.longevity="Moderate (5–8 hours)";product.projection="Moderate";}

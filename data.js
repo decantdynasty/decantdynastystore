@@ -13,27 +13,32 @@
 // ============================================================
 
 const BRANDS = [
-  { id: "lattafa", name: "Lattafa", logo: "images/brands/lattafa.png" },
-  { id: "armaf", name: "Armaf", logo: "images/brands/armaf.png" },
   { id: "afnan", name: "Afnan", logo: "images/brands/afnan.png" },
-  { id: "versace", name: "Versace", logo: "images/brands/versace.png" },
-  { id: "jpg", name: "Jean Paul Gaultier", logo: "images/brands/jpg.png" },
-  { id: "khadlaj", name: "Khadlaj", logo: "images/brands/khadlaj.png" },
+  { id: "ahmed-al-maghribi", name: "Ahmed Al Maghribi", logo: "images/brands/ahmed-al-maghribi.png" },
+  { id: "al-haramain", name: "Al Haramain", logo: "images/brands/al-haramain.png" },
+  { id: "al-wataniah", name: "Al Wataniah", logo: "images/brands/al-wataniah.png" },
+  { id: "arabiyat-prestige", name: "Arabiyat Prestige", logo: "images/brands/arabiyat-prestige.png" },
+  { id: "armaf", name: "Armaf", logo: "images/brands/armaf.png" },
+  { id: "bujairami", name: "Bujairami", logo: "images/brands/bujairami.png" },
+  { id: "calvin-klein", name: "Calvin Klein", logo: "images/brands/calvin-klein.png" },
   { id: "fragrance-world", name: "Fragrance World", logo: "images/brands/fragrance-world.png" },
   { id: "french-avenue", name: "French Avenue", logo: "images/brands/french-avenue.png" },
-  { id: "maison-alhambra", name: "Maison Alhambra", logo: "images/brands/maison-alhambra.png" },
   { id: "giorgio-armani", name: "Giorgio Armani", logo: "images/brands/giorgio-armani.png" },
-  { id: "riiffs", name: "Riiffs", logo: "images/brands/riiffs.png" },
+  { id: "jpg", name: "Jean Paul Gaultier", logo: "images/brands/jpg.png" },
+  { id: "khadlaj", name: "Khadlaj", logo: "images/brands/khadlaj.png" },
+  { id: "lattafa", name: "Lattafa", logo: "images/brands/lattafa.png" },
+  { id: "maison-alhambra", name: "Maison Alhambra", logo: "images/brands/maison-alhambra.png" },
+  { id: "maison-asrar", name: "Maison Asrar", logo: "images/brands/maison-asrar.png" },
+  { id: "montblanc", name: "Montblanc", logo: "images/brands/montblanc.png" },
+  { id: "nautica", name: "Nautica", logo: "images/brands/nautica.png" },
+  { id: "paris-corner", name: "Paris Corner", logo: "images/brands/paris-corner.png" },
   { id: "rasasi", name: "Rasasi", logo: "images/brands/rasasi.png" },
   { id: "rayhaan", name: "Rayhaan", logo: "images/brands/rayhaan.png" },
-  { id: "paris-corner", name: "Paris Corner", logo: "images/brands/paris-corner.png" },
-  { id: "nautica", name: "Nautica", logo: "images/brands/nautica.png" },
-  { id: "montblanc", name: "Montblanc", logo: "images/brands/montblanc.png" },
-  { id: "maison-asrar", name: "Maison Asrar", logo: "images/brands/maison-asrar.png" },
+  { id: "riiffs", name: "Riiffs", logo: "images/brands/riiffs.png" },
+  { id: "tubbees", name: "Tubbees", logo: "images/brands/tubbees.png" },
+  { id: "versace", name: "Versace", logo: "images/brands/versace.png" },
   { id: "viktor-rolf", name: "Viktor & Rolf", logo: "images/brands/viktor-rolf.png" },
   { id: "yves-saint-laurent", name: "Yves Saint Laurent", logo: "images/brands/yves-saint-laurent.png" },
-  { id: "bujairami", name: "Bujairami", logo: "images/brands/bujairami.png" },
-  { id: "arabiyat-prestige", name: "Arabiyat Prestige", logo: "images/brands/arabiyat-prestige.png" },
 ];
 
 // price placeholders — can edit every value in real time
@@ -548,5 +553,48 @@ add(P("giorgio-armani","Giorgio Armani","Stronger With You Intensely",{gender:"M
   topNotes:["Pink Pepper","Cardamom"],heartNotes:["Sage","Chestnut"],baseNotes:["Vanilla","Amber","Tonka Bean"],
   longevity:"Long (8-10 hours)", projection:"Strong",
   description:"A more intense, resinous reading of Stronger With You — pink pepper and cardamom deepened by chestnut and vanilla."}));
+
+/* ---------------------------- NEW HOUSES & RELEASES ---------------------------- */
+add(P("ahmed-al-maghribi","Ahmed Al Maghribi","Kaaf",{gender:"Unisex",
+  topNotes:["Lavender","Watermelon","Sicilian Orange","Red Fruits"],
+  heartNotes:["Lily-of-the-Valley","Jasmine","Lotus","Sea Accord"],
+  baseNotes:["White Musk","Ambroxan","Sandalwood"],
+  description:"A powerful clean-fruity fresh scent, opening with watermelon, lavender and red fruits before an airy floral heart and musky sandalwood trail."}));
+add(P("al-haramain","Al Haramain","Amber Oud Gold Edition",{gender:"Unisex",
+  topNotes:["Bergamot","Green Notes"],heartNotes:["Melon","Pineapple","Amber","Gourmand Accord"],baseNotes:["Vanilla","Musk","Woody Notes"],
+  description:"A radiant fruity amber with green bergamot, ripe melon and pineapple over a dense vanilla-musk base."}));
+add(P("al-haramain","Al Haramain","Aqua Dubai",{gender:"Unisex",
+  topNotes:["Bergamot","Green Notes","Mandarin Orange"],heartNotes:["Melon","Amber","Black Currant","Pineapple"],baseNotes:["Musk","Petitgrain","Galbanum","Vanilla"],
+  description:"Al Haramain's vivid citrus-fruity extrait pairs mandarin and green bergamot with tropical fruit and a polished musky-vanilla base."}));
+add(P("al-wataniah","Al Wataniah","Kayaan Classic",{gender:"Unisex",
+  topNotes:["Orange","Bergamot"],heartNotes:["Tuscan Iris","Spices","Jasmine","Rose"],baseNotes:["Vanilla","Sandalwood","Musk","Patchouli"],
+  description:"A smooth powdery iris fragrance with bright citrus, soft florals and a warm vanilla-sandalwood dry-down."}));
+add(P("calvin-klein","Calvin Klein","Obsession for Women",{gender:"Women",
+  topNotes:["Vanilla","Basil","Bergamot","Mandarin Orange","Green Notes","Peach","Lemon"],heartNotes:["Spices","Sandalwood","Coriander","Oakmoss","Cedar","Orange Blossom","Jasmine","Rose"],baseNotes:["Amber","Incense","Vanilla","Civet","Musk","Vetiver"],
+  description:"Calvin Klein's iconic warm-spicy amber layers bright citrus and aromatic herbs over incense, civet, musk and a rich vanilla glow."}));
+add(P("tubbees","Tubbees","Bubble Gum",{gender:"Unisex",
+  topNotes:["Fruits","Clove"],heartNotes:["Bubble Gum","Orange Oil"],baseNotes:["Vanilla","Patchouli","Cashmeran"],
+  description:"A playful fruit-and-clove opening melts into nostalgic bubble gum, orange oil and a warm vanilla-cashmeran base."}));
+add(P("tubbees","Tubbees","Chocolate Fudge",{gender:"Unisex",
+  topNotes:["Dark Chocolate","Hazelnut","Dulce de Leche"],heartNotes:["Chocolate Fudge","Baileys Irish Cream","Caramel","Bitter Almond"],baseNotes:["Praline","Vanilla Absolute","Amberwood","Sandalwood"],
+  description:"A photorealistic chocolate gourmand with hazelnut and dulce de leche, a boozy caramel heart and a praline-vanilla finish."}));
+add(P("tubbees","Tubbees","Cookies & Cream",{gender:"Unisex",
+  topNotes:["Butter","Sugar"],heartNotes:["Milk","Milk Chocolate"],baseNotes:["Vanilla","White Musk"],
+  description:"A cozy lactonic gourmand that smells of buttered sugar, milk chocolate, vanilla cream and soft white musk."}));
+add(P("tubbees","Tubbees","Cotton Candy",{gender:"Unisex",
+  topNotes:["Coconut Milk"],heartNotes:["Cotton Candy","Caramel"],baseNotes:["Musk","Vanilla"],
+  description:"A carnival-inspired gourmand of creamy coconut milk, caramelized cotton candy, vanilla and clean musk."}));
+add(P("tubbees","Tubbees","Strawberry Cheesecake",{gender:"Women",
+  topNotes:["Cheesecake","Strawberry","Vanilla"],heartNotes:["Whipped Cream","Vanilla","Sandalwood"],baseNotes:["Vanilla","Styrax"],
+  description:"A creamy strawberry gourmand with a realistic cheesecake accord, whipped cream and a warm vanilla-styrax dry-down."}));
+add(P("tubbees","Tubbees","Unicorn Vanilla",{gender:"Unisex",
+  topNotes:["Black Currant","Citruses","Acai Berry"],heartNotes:["White Flowers","Matcha Tea","Rose"],baseNotes:["Vanilla","Cotton Candy","Sandalwood"],
+  description:"A colorful fruit-and-matcha gourmand that settles into white flowers, fluffy cotton candy, vanilla and sandalwood."}));
+add(P("rasasi","Rasasi","Hawas Majestic",{gender:"Unisex",
+  topNotes:["Sharp Citrus","Crushed Green Leaves"],heartNotes:["Dry Woods","Mineral Accord"],baseNotes:["Vetiver","Clean Musk","Oakmoss"],
+  description:"A newly released green-citrus Hawas flanker with crushed leaves, mineral woods, earthy vetiver and clean musk."}));
+add(P("rayhaan","Rayhaan","Pacific Aura",{gender:"Men",
+  topNotes:["Citron","Mint","Orange","Lemon","Black Currant","Coriander"],heartNotes:["Apricot","Basil","Carrot Seeds","May Rose"],baseNotes:["Fig","Dates","Ambrette"],
+  description:"A cooling citrus-green summer fragrance with mint, black currant and aromatic herbs over fig, dates and soft ambrette."}));
 
 if (typeof module !== "undefined") module.exports = { BRANDS, PRODUCTS };

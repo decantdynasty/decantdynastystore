@@ -46,10 +46,10 @@ function initHeroBottle(){
   const group=new THREE.Group();
   const disposables=[];
   group.rotation.set(.035,-Math.PI/2,-.025);scene.add(group);
-  const featurePoints={seal:new THREE.Vector3(.3,.7,.05),atomizer:new THREE.Vector3(.3,1.9,.04),glass:new THREE.Vector3(.46,-1.25,.02)};
-  const guideLines={seal:container.querySelector('[data-guide="seal"]'),atomizer:container.querySelector('[data-guide="atomizer"]'),glass:container.querySelector('[data-guide="glass"]')};
-  const guideDots={seal:container.querySelector('[data-dot="seal"]'),atomizer:container.querySelector('[data-dot="atomizer"]'),glass:container.querySelector('[data-dot="glass"]')};
-  const callouts={seal:container.querySelector('[data-callout="seal"]'),atomizer:container.querySelector('[data-callout="atomizer"]'),glass:container.querySelector('[data-callout="glass"]')};
+  const featurePoints={seal:new THREE.Vector3(.3,.7,.05),atomizer:new THREE.Vector3(.3,1.9,.04),sticker:new THREE.Vector3(.46,-.6,.02),glass:new THREE.Vector3(.46,-1.25,.02)};
+  const guideLines={seal:container.querySelector('[data-guide="seal"]'),atomizer:container.querySelector('[data-guide="atomizer"]'),sticker:container.querySelector('[data-guide="sticker"]'),glass:container.querySelector('[data-guide="glass"]')};
+  const guideDots={seal:container.querySelector('[data-dot="seal"]'),atomizer:container.querySelector('[data-dot="atomizer"]'),sticker:container.querySelector('[data-dot="sticker"]'),glass:container.querySelector('[data-dot="glass"]')};
+  const callouts={seal:container.querySelector('[data-callout="seal"]'),atomizer:container.querySelector('[data-callout="atomizer"]'),sticker:container.querySelector('[data-callout="sticker"]'),glass:container.querySelector('[data-callout="glass"]')};
   function updateGuides(){const rect=container.getBoundingClientRect();Object.keys(featurePoints).forEach(key=>{const p=group.localToWorld(featurePoints[key].clone()).project(camera);const x=(p.x*.5+.5)*rect.width,y=(-p.y*.5+.5)*rect.height;const calloutRect=callouts[key]?.getBoundingClientRect();const tx=calloutRect?calloutRect.left-rect.left+(calloutRect.width/2):x,ty=calloutRect?calloutRect.top-rect.top+(calloutRect.height/2):y;guideLines[key]?.setAttribute('x1',x);guideLines[key]?.setAttribute('y1',y);guideLines[key]?.setAttribute('x2',tx);guideLines[key]?.setAttribute('y2',ty);guideDots[key]?.setAttribute('cx',x);guideDots[key]?.setAttribute('cy',y);});}
   const labelCanvas=document.createElement('canvas');labelCanvas.width=2048;labelCanvas.height=640;
   const labelContext=labelCanvas.getContext('2d');
@@ -81,6 +81,7 @@ function initHeroBottle(){
     const label=new THREE.Mesh(labelGeometry,labelMaterial);label.position.y=-size.y*.12;label.rotation.y=-Math.PI/2;label.renderOrder=8;group.add(label);
     featurePoints.seal.set(radius*.52,size.y*.17,0);
     featurePoints.atomizer.set(radius*.46,size.y*.39,0);
+    featurePoints.sticker.set(radius*.94,-size.y*.12,0);
     featurePoints.glass.set(radius*.92,-size.y*.24,0);
     container.classList.add('model-ready');
   },undefined,()=>{container.classList.add('model-error');showToast('The 3D bottle could not be loaded.');});
@@ -129,7 +130,7 @@ function defaultContent(){
       paragraph: "Answer a few questions about your lifestyle, climate, personality, and budget — we'll curate a personal fragrance wardrobe of decants suited to how you actually live, not just what's trending.",
     },
     brandsSection: {
-      eyebrow: "21 houses, one destination",
+      eyebrow: "{brands} houses, one destination",
       heading: "Explore Brands",
       paragraph: "From Emirati oud houses to iconic Parisian ateliers — browse by the names you already love.",
     },
@@ -272,6 +273,7 @@ function buildOrderMessage(){
   lines.push(`Name: `);
   lines.push(`Contact Number: `);
   lines.push(`Delivery Address: `);
+  lines.push(`Mode of Delivery: `);
   return {ref, text: lines.join("\n")};
 }
 function openCheckout(){
@@ -365,11 +367,13 @@ function renderHome(){
         <svg class="bottle-guides" aria-hidden="true">
           <line data-guide="seal"/><circle data-dot="seal" r="4"/>
           <line data-guide="atomizer"/><circle data-dot="atomizer" r="4"/>
+          <line data-guide="sticker"/><circle data-dot="sticker" r="4"/>
           <line data-guide="glass"/><circle data-dot="glass" r="4"/>
         </svg>
-        <div class="bottle-callout callout-seal" data-callout="seal"><b>Parafilm sealed</b><span>Locked in for a clean, leak-resistant journey.</span></div>
-        <div class="bottle-callout callout-atomizer" data-callout="atomizer"><b>Quality atomizer</b><span>A smooth, controlled mist with every press.</span></div>
-        <div class="bottle-callout callout-glass" data-callout="glass"><b>Hard glass bottle</b><span>Clear, durable glass protects every decant.</span></div>
+        <div class="bottle-callout callout-seal" data-callout="seal"><b>PARAFILM Sealed</b><span>Locked in for a clean, leak-resistant journey.</span></div>
+        <div class="bottle-callout callout-atomizer" data-callout="atomizer"><b>QUALITY Atomizer</b><span>A smooth, controlled mist with every press.</span></div>
+        <div class="bottle-callout callout-sticker" data-callout="sticker"><b>Sticker Label</b><span>Finished with the Decant Dynasty signature.</span></div>
+        <div class="bottle-callout callout-glass" data-callout="glass"><b>HARD Glass Bottle</b><span>Clear, durable glass protects every decant.</span></div>
       </div>
     </div>
   </section>
@@ -377,7 +381,7 @@ function renderHome(){
   <section>
     <div class="wrap">
       <div class="section-head reveal">
-        <div class="eyebrow">${esc(c.brandsSection.eyebrow)}</div>
+        <div class="eyebrow">${esc(fillTemplate(c.brandsSection.eyebrow))}</div>
         <h2>${esc(c.brandsSection.heading)}</h2>
         <p>${esc(c.brandsSection.paragraph)}</p>
       </div>
