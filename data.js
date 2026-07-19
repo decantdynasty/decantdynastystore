@@ -36,7 +36,7 @@ const BRANDS = [
   { id: "arabiyat-prestige", name: "Arabiyat Prestige", logo: "images/brands/arabiyat-prestige.png" },
 ];
 
-// price placeholders in PHP — admin can edit every value in real time
+// price placeholders — can edit every value in real time
 const PH = (a,b,c,d) => ({ "1ml": a, "2ml": b, "3ml": c, "5ml": d });
 const DEFAULT_PRICE = PH(99, 179, 249, 379);
 

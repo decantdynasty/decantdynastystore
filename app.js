@@ -47,19 +47,143 @@ async function storeList(prefix, shared){
   return Object.keys(memoryStore).filter(k=>k.startsWith(prefix||""));
 }
 
+/* ---------------- sound manager ---------------- */
+const sounds = {
+  click: new Audio('sounds/click.mp3'),
+  toggle: new Audio('sounds/toggle.mp3'),
+  search: new Audio('sounds/search.mp3'),
+  result: new Audio('sounds/result.mp3'),
+  muted: false
+};
+function playSound(name){
+  if(sounds.muted || !sounds[name]) return;
+  sounds[name].currentTime = 0;
+  sounds[name].play().catch(()=>{});
+}
+
+/* ---------------- 3D Bottle ---------------- */
+let bottleScene, bottleCamera, bottleRenderer, bottleMesh;
+function initHeroBottle(){
+  const container = document.getElementById('heroBottleContainer');
+  if(!container) return;
+  
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+  
+  bottleScene = new THREE.Scene();
+  bottleCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+  bottleCamera.position.z = 5;
+  
+  bottleRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  bottleRenderer.setSize(width, height);
+  bottleRenderer.setPixelRatio(window.devicePixelRatio);
+  container.appendChild(bottleRenderer.domElement);
+  
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  bottleScene.add(ambientLight);
+  
+  const pointLight = new THREE.PointLight(0xffffff, 1);
+  pointLight.position.set(5, 5, 5);
+  bottleScene.add(pointLight);
+
+  const bottleGroup = new THREE.Group();
+
+  // Bottle body
+  const bodyGeo = new THREE.CylinderGeometry(0.8, 0.8, 2.5, 32);
+  const bodyMat = new THREE.MeshPhysicalMaterial({ 
+    color: 0xffffff, 
+    metalness: 0.1, 
+    roughness: 0.1, 
+    transmission: 0.9, 
+    thickness: 0.5, 
+    transparent: true 
+  });
+  const body = new THREE.Mesh(bodyGeo, bodyMat);
+  bottleGroup.add(body);
+
+  // Bottle neck
+  const neckGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.5, 32);
+  const neck = new THREE.Mesh(neckGeo, bodyMat);
+  neck.position.y = 1.5;
+  bottleGroup.add(neck);
+
+  // Bottle cap
+  const capGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.6, 32);
+  const capMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.8, roughness: 0.2 });
+  const cap = new THREE.Mesh(capGeo, capMat);
+  cap.position.y = 1.9;
+  bottleGroup.add(cap);
+
+  bottleMesh = bottleGroup;
+  bottleScene.add(bottleMesh);
+
+  let isDragging = false;
+  let previousMouseX = 0;
+  let previousMouseY = 0;
+  let targetRotationX = 0;
+  let targetRotationY = 0;
+
+  container.addEventListener('mousedown', (e) => { isDragging = true; });
+  container.addEventListener('touchstart', (e) => { isDragging = true; previousMouseX = e.touches[0].clientX; previousMouseY = e.touches[0].clientY; });
+  
+  window.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+      const deltaX = e.clientX - previousMouseX;
+      const deltaY = e.clientY - previousMouseY;
+      targetRotationY += deltaX * 0.01;
+      targetRotationX += deltaY * 0.01;
+    }
+    previousMouseX = e.clientX;
+    previousMouseY = e.clientY;
+  });
+
+  window.addEventListener('touchmove', (e) => {
+    if (isDragging) {
+      const deltaX = e.touches[0].clientX - previousMouseX;
+      const deltaY = e.touches[0].clientY - previousMouseY;
+      targetRotationY += deltaX * 0.01;
+      targetRotationX += deltaY * 0.01;
+    }
+    previousMouseX = e.touches[0].clientX;
+    previousMouseY = e.touches[0].clientY;
+  }, { passive: false });
+
+  window.addEventListener('mouseup', () => { isDragging = false; });
+  window.addEventListener('touchend', () => { isDragging = false; });
+
+  function animate() {
+    requestAnimationFrame(animate);
+    
+    if (!isDragging) {
+      bottleMesh.rotation.y += 0.005; // Auto rotate
+    } else {
+      bottleMesh.rotation.y += (targetRotationY - bottleMesh.rotation.y) * 0.1;
+      bottleMesh.rotation.x += (targetRotationX - bottleMesh.rotation.x) * 0.1;
+    }
+    
+    bottleRenderer.render(bottleScene, bottleCamera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    bottleCamera.aspect = w / h;
+    bottleCamera.updateProjectionMatrix();
+    bottleRenderer.setSize(w, h);
+  });
+}
+
 /* ---------------- state ---------------- */
 const state = {
-  theme: "light",
+  theme: "dark",
   cart: [],        // {productId, size, qty}
   wishlist: [],     // productId[]
   overrides: {},    // productId -> {name,image,image2,prices,description,concentration,gender,longevity,projection,topNotes,heartNotes,baseNotes,verified}
   brandOverrides: {}, // brandId -> {logo,name}
   content: null,    // editable site copy — see DEFAULT_CONTENT
-  adminUnlocked: false,
   route: {page:"home"},
 };
-
-const ADMIN_PASS = "dynasty2026"; // demo-only client gate — swap for real auth in production
 
 const WHY_ICONS = [
   "M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
@@ -168,31 +292,7 @@ async function loadPersisted(){
   if(wish) { try{ state.wishlist = JSON.parse(wish); }catch(e){} }
 
   state.content = defaultContent();
-  const contentRaw = await storeGet("override:content", true);
-  if(contentRaw){
-    try{
-      const saved = JSON.parse(contentRaw);
-      Object.keys(saved).forEach(k=>{ state.content[k] = saved[k]; });
-    }catch(e){}
-  }
-
-  // shared admin overrides — visible to every visitor
-  const prodKeys = await storeList("override:product:", true);
-  for(const k of prodKeys){
-    const v = await storeGet(k, true);
-    if(v){ try{ state.overrides[k.replace("override:product:","")] = JSON.parse(v); }catch(e){} }
-  }
-  const brandKeys = await storeList("override:brand:", true);
-  for(const k of brandKeys){
-    const v = await storeGet(k, true);
-    if(v){ try{ state.brandOverrides[k.replace("override:brand:","")] = JSON.parse(v); }catch(e){} }
-  }
   updateBadges();
-}
-
-async function saveContentSection(sectionKey, value){
-  state.content[sectionKey] = value;
-  await storeSet("override:content", JSON.stringify(state.content), true);
 }
 
 function persistCart(){ storeSet("cart:v1", JSON.stringify(state.cart), false); }
@@ -320,7 +420,6 @@ function heroArtSVG(){
 }
 
 function renderHome(){
-  const rec = allProducts().filter(p=>p.recommended).slice(0,4);
   const arrivals = allProducts().slice(-8).reverse().slice(0,4);
   const brands = allBrands().slice(0,8);
   const c = state.content;
@@ -332,39 +431,11 @@ function renderHome(){
         <h1>${esc(c.hero.headlineBefore)} <em>${esc(c.hero.headlineEm)}</em><br/>${esc(c.hero.headlineAfter)}</h1>
         <p class="lede">${esc(fillTemplate(c.hero.lede))}</p>
         <div class="hero-actions">
-          <a href="#/build" class="btn btn-primary">Build My Collection</a>
-          <a href="#/collection" class="btn btn-ghost">Browse Collection</a>
+          <a href="#/collection" class="btn btn-cta btn-cta-build">Shop Decants</a>
+          <a href="#/build" class="btn btn-cta btn-cta-browse">Build My Collection</a>
         </div>
       </div>
-      <div class="hero-art">
-        <div class="plinth">${heroArtSVG()}</div>
-        <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
-      </div>
-    </div>
-    <div class="scroll-cue"><span>Scroll</span><span class="line"></span></div>
-  </section>
-
-  <section>
-    <div class="wrap">
-      <div class="collection-band reveal">
-        <div class="collection-inner">
-          <div>
-            <div class="eyebrow" style="color:var(--gold-soft);">${esc(c.buildBand.eyebrow)}</div>
-            <h2>${esc(c.buildBand.heading)}</h2>
-            <p>${esc(c.buildBand.paragraph)}</p>
-            <ul class="collection-steps">
-              <li><span class="num">1</span> Tell us your lifestyle &amp; the climate you wear scent in</li>
-              <li><span class="num">2</span> Share the personality you want your scent to express</li>
-              <li><span class="num">3</span> Set your budget — we'll match decants, not guesswork</li>
-            </ul>
-            <a href="#/build" class="btn btn-gold">Start My Consultation</a>
-          </div>
-          <div class="collection-card">
-            <div class="eyebrow" style="color:var(--gold-soft);">Why a consultation?</div>
-            <p style="font-size:14px;line-height:1.8;opacity:.9;">Full bottles are a gamble. A short, guided conversation about how and where you'll wear a scent means every decant we recommend actually earns a place in your rotation.</p>
-          </div>
-        </div>
-      </div>
+      <div class="hero-art" id="heroBottleContainer"></div>
     </div>
   </section>
 
@@ -378,7 +449,7 @@ function renderHome(){
       <div class="brand-grid stagger">
         ${brands.map(brandCardHTML).join("")}
       </div>
-      <div style="text-align:center;margin-top:36px;">
+      <div style="text-align:center;margin-top:48px;">
         <a href="#/brands" class="btn btn-ghost">View All Brands</a>
       </div>
     </div>
@@ -397,34 +468,12 @@ function renderHome(){
   <section>
     <div class="wrap">
       <div class="section-head reveal">
-        <div class="eyebrow">Fan favorites</div>
-        <h2>Best Sellers</h2>
-      </div>
-      <div class="product-grid stagger">${rec.map(productCardHTML).join("")}</div>
-    </div>
-  </section>
-
-  <section>
-    <div class="wrap">
-      <div class="section-head reveal">
         <div class="eyebrow">${esc(c.whySection.eyebrow)}</div>
         <h2>${esc(c.whySection.heading)}</h2>
         <p>${esc(c.whySection.paragraph)}</p>
       </div>
       <div class="why-grid stagger">
         ${c.whySection.cards.map((card,i)=>whyCard(WHY_ICONS[i%WHY_ICONS.length], card.title, card.desc)).join("")}
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="wrap">
-      <div class="section-head reveal">
-        <div class="eyebrow">From the community</div>
-        <h2>Testimonials</h2>
-      </div>
-      <div class="testi-row stagger">
-        ${c.testimonials.map(testiCard).join("")}
       </div>
     </div>
   </section>
@@ -821,443 +870,6 @@ function renderCartPanel(){
 }
 
 /* ================================================================
-   ADMIN
-   ================================================================ */
-async function resizeImage(file, maxDim){
-  return new Promise((resolve,reject)=>{
-    const reader = new FileReader();
-    reader.onload = ()=>{
-      const img = new Image();
-      img.onload = ()=>{
-        let {width,height} = img;
-        if(width>height && width>maxDim){ height*=maxDim/width; width=maxDim; }
-        else if(height>maxDim){ width*=maxDim/height; height=maxDim; }
-        const canvas = document.createElement("canvas");
-        canvas.width=width; canvas.height=height;
-        canvas.getContext("2d").drawImage(img,0,0,width,height);
-        resolve(canvas.toDataURL("image/jpeg",0.82));
-      };
-      img.onerror = reject;
-      img.src = reader.result;
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-function renderAdminLogin(){
-  return `
-  <div class="admin-login">
-    <div class="admin-login-card">
-      <div class="eyebrow" style="margin-bottom:14px;">Admin Access</div>
-      <h2 style="font-family:var(--font-display);font-weight:400;margin:0 0 18px;">Decant Dynasty Admin</h2>
-      <div class="form-row"><label>Passphrase</label><input type="password" id="adminPassInput" placeholder="Enter admin passphrase"/></div>
-      <button class="btn btn-primary" style="width:100%;" id="adminLoginBtn">Unlock Admin</button>
-      <p style="font-size:11.5px;color:var(--ink-soft);margin-top:16px;">Demo-only client-side gate. Replace with real authentication before going live.</p>
-      <p style="margin-top:14px;"><a href="#/" style="font-size:12.5px;color:var(--ink-soft);">← Back to site</a></p>
-    </div>
-  </div>`;
-}
-
-let adminTab = "products";
-function renderAdminShell(){
-  return `
-  <div class="admin-shell">
-    <div class="admin-body">
-      <div class="admin-side">
-        <button data-admin-tab="products" class="${adminTab==='products'?'active':''}">Products</button>
-        <button data-admin-tab="brands" class="${adminTab==='brands'?'active':''}">Brand Logos</button>
-        <button data-admin-tab="content" class="${adminTab==='content'?'active':''}">Site Content</button>
-        <button data-admin-tab="orders" class="${adminTab==='orders'?'active':''}">How Orders Work</button>
-        <div style="height:1px;background:var(--line);margin:14px 0;"></div>
-        <button id="adminLogoutBtn">Log Out</button>
-        <a href="#/" style="display:block;padding:11px 14px;font-size:14px;color:var(--ink-soft);">← View Site</a>
-      </div>
-      <div class="admin-main" id="adminMain"></div>
-    </div>
-  </div>`;
-}
-function adminProductRow(p){
-  const sizeInputs = Object.entries(p.prices).map(([size,price])=>`
-    <div style="display:flex;flex-direction:column;gap:2px;">
-      <label style="font-size:9.5px;color:var(--ink-soft);text-transform:uppercase;">${size}</label>
-      <input class="mini-input" data-field="price" data-id="${p.id}" data-size="${size}" value="${price}" style="width:64px;"/>
-    </div>`).join("");
-  return `
-  <div class="admin-table-row" data-admin-row="${p.id}">
-    <div class="dropzone" data-drop="${p.id}" style="padding:2px;width:56px;height:56px;border-radius:10px;display:flex;align-items:center;justify-content:center;">
-      ${imgTag(p.image, p.name, "", "img")}
-    </div>
-    <div>
-      <input class="mini-input" data-field="name" data-id="${p.id}" value="${esc(p.name)}"/>
-      <div style="font-size:11.5px;color:var(--ink-soft);margin-top:4px;">${esc(p.brand)}</div>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">${sizeInputs}</div>
-    <div style="font-size:12px;color:var(--ink-soft);">${p.verified? "Verified":"Pending"}</div>
-    <div>
-      <button class="btn btn-sm btn-ghost" data-admin-edit="${p.id}">Edit</button>
-    </div>
-  </div>`;
-}
-function renderContentTab(main){
-  const c = state.content;
-  main.innerHTML = `
-    <div class="admin-card">
-      <h3 style="margin-top:0;">Hero</h3>
-      <div class="form-row"><label>Eyebrow</label><input class="mini-input" id="ctHeroEyebrow" value="${esc(c.hero.eyebrow)}"/></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
-        <div class="form-row"><label>Headline — before</label><input class="mini-input" id="ctHeroBefore" value="${esc(c.hero.headlineBefore)}"/></div>
-        <div class="form-row"><label>Headline — emphasis</label><input class="mini-input" id="ctHeroEm" value="${esc(c.hero.headlineEm)}"/></div>
-        <div class="form-row"><label>Headline — after</label><input class="mini-input" id="ctHeroAfter" value="${esc(c.hero.headlineAfter)}"/></div>
-      </div>
-      <div class="form-row"><label>Subheading (use {count} and {brands} for live totals)</label><textarea class="mini-input" id="ctHeroLede" rows="2">${esc(c.hero.lede)}</textarea></div>
-      <button class="btn btn-sm btn-primary" data-save-content="hero">Save Hero</button>
-    </div>
-
-    <div class="admin-card">
-      <h3 style="margin-top:0;">Build My Collection (home strip)</h3>
-      <div class="form-row"><label>Eyebrow</label><input class="mini-input" id="ctBandEyebrow" value="${esc(c.buildBand.eyebrow)}"/></div>
-      <div class="form-row"><label>Heading</label><input class="mini-input" id="ctBandHeading" value="${esc(c.buildBand.heading)}"/></div>
-      <div class="form-row"><label>Paragraph</label><textarea class="mini-input" id="ctBandParagraph" rows="3">${esc(c.buildBand.paragraph)}</textarea></div>
-      <button class="btn btn-sm btn-primary" data-save-content="buildBand">Save</button>
-    </div>
-
-    <div class="admin-card">
-      <h3 style="margin-top:0;">Explore Brands</h3>
-      <div class="form-row"><label>Eyebrow</label><input class="mini-input" id="ctBrandsEyebrow" value="${esc(c.brandsSection.eyebrow)}"/></div>
-      <div class="form-row"><label>Heading</label><input class="mini-input" id="ctBrandsHeading" value="${esc(c.brandsSection.heading)}"/></div>
-      <div class="form-row"><label>Paragraph</label><textarea class="mini-input" id="ctBrandsParagraph" rows="2">${esc(c.brandsSection.paragraph)}</textarea></div>
-      <button class="btn btn-sm btn-primary" data-save-content="brandsSection">Save</button>
-    </div>
-
-    <div class="admin-card">
-      <h3 style="margin-top:0;">Why Sample First</h3>
-      <div class="form-row"><label>Eyebrow</label><input class="mini-input" id="ctWhyEyebrow" value="${esc(c.whySection.eyebrow)}"/></div>
-      <div class="form-row"><label>Heading</label><input class="mini-input" id="ctWhyHeading" value="${esc(c.whySection.heading)}"/></div>
-      <div class="form-row"><label>Paragraph</label><textarea class="mini-input" id="ctWhyParagraph" rows="2">${esc(c.whySection.paragraph)}</textarea></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-        ${c.whySection.cards.map((card,i)=>`
-          <div style="border:1px solid var(--line);border-radius:12px;padding:12px;">
-            <div class="form-row" style="margin-bottom:8px;"><label>Card ${i+1} title</label><input class="mini-input" data-why-title="${i}" value="${esc(card.title)}"/></div>
-            <div class="form-row" style="margin:0;"><label>Card ${i+1} description</label><textarea class="mini-input" data-why-desc="${i}" rows="2">${esc(card.desc)}</textarea></div>
-          </div>
-        `).join("")}
-      </div>
-      <button class="btn btn-sm btn-primary" style="margin-top:14px;" data-save-content="whySection">Save</button>
-    </div>
-
-    <div class="admin-card">
-      <h3 style="margin-top:0;">Testimonials</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
-        ${c.testimonials.map((t,i)=>`
-          <div style="border:1px solid var(--line);border-radius:12px;padding:14px;">
-            <div class="dropzone" data-drop="content:testimonial:${i}" style="padding:10px;margin-bottom:10px;">
-              ${t.photo ? `<img src="${esc(t.photo)}" style="max-height:70px;border-radius:50%;margin:0 auto;"/>` : ""}
-              <div style="font-size:11px;margin-top:6px;">Drop buyer photo</div>
-            </div>
-            <div class="form-row" style="margin-bottom:8px;"><label>Name</label><input class="mini-input" data-testi-name="${i}" value="${esc(t.name)}"/></div>
-            <div class="form-row" style="margin-bottom:8px;"><label>Rating (1-5)</label>
-              <select class="mini-input" data-testi-rating="${i}">${[1,2,3,4,5].map(n=>`<option value="${n}" ${t.rating===n?"selected":""}>${n}</option>`).join("")}</select>
-            </div>
-            <div class="form-row" style="margin:0;"><label>Quote</label><textarea class="mini-input" data-testi-text="${i}" rows="3">${esc(t.text)}</textarea></div>
-          </div>
-        `).join("")}
-      </div>
-      <button class="btn btn-sm btn-primary" style="margin-top:14px;" data-save-content="testimonials">Save Testimonials</button>
-    </div>
-
-    <div class="admin-card">
-      <h3 style="margin-top:0;">Our Story</h3>
-      <div class="form-row"><label>Heading</label><input class="mini-input" id="ctAboutHeading" value="${esc(c.about.heading)}"/></div>
-      <div class="form-row"><label>Paragraph (use {brands} for live total)</label><textarea class="mini-input" id="ctAboutParagraph" rows="4">${esc(c.about.paragraph)}</textarea></div>
-      <div class="dropzone" data-drop="content:about:photo" style="max-width:320px;">
-        ${c.about.photo ? `<img src="${esc(c.about.photo)}" style="max-height:120px;border-radius:10px;margin:0 auto;"/>` : ""}
-        <div style="margin-top:8px;">Drag &amp; drop your first-fragrance photo, or click to upload</div>
-      </div>
-      <button class="btn btn-sm btn-primary" style="margin-top:14px;" data-save-content="about">Save Our Story</button>
-    </div>
-
-    <div class="admin-card">
-      <h3 style="margin-top:0;">Contact Us</h3>
-      <div class="form-row"><label>Eyebrow</label><input class="mini-input" id="ctContactEyebrow" value="${esc(c.contact.eyebrow)}"/></div>
-      <div class="form-row"><label>Heading</label><input class="mini-input" id="ctContactHeading" value="${esc(c.contact.heading)}"/></div>
-      <div class="form-row"><label>Paragraph</label><textarea class="mini-input" id="ctContactParagraph" rows="2">${esc(c.contact.paragraph)}</textarea></div>
-      <button class="btn btn-sm btn-primary" data-save-content="contact">Save</button>
-    </div>
-  `;
-  main.querySelectorAll("[data-drop]").forEach(setupDropzone);
-
-  main.querySelector('[data-save-content="hero"]').onclick = async ()=>{
-    await saveContentSection("hero", {
-      eyebrow: document.getElementById("ctHeroEyebrow").value,
-      headlineBefore: document.getElementById("ctHeroBefore").value,
-      headlineEm: document.getElementById("ctHeroEm").value,
-      headlineAfter: document.getElementById("ctHeroAfter").value,
-      lede: document.getElementById("ctHeroLede").value,
-    });
-    toast("Hero updated");
-  };
-  main.querySelector('[data-save-content="buildBand"]').onclick = async ()=>{
-    await saveContentSection("buildBand", {
-      eyebrow: document.getElementById("ctBandEyebrow").value,
-      heading: document.getElementById("ctBandHeading").value,
-      paragraph: document.getElementById("ctBandParagraph").value,
-    });
-    toast("Saved");
-  };
-  main.querySelector('[data-save-content="brandsSection"]').onclick = async ()=>{
-    await saveContentSection("brandsSection", {
-      eyebrow: document.getElementById("ctBrandsEyebrow").value,
-      heading: document.getElementById("ctBrandsHeading").value,
-      paragraph: document.getElementById("ctBrandsParagraph").value,
-    });
-    toast("Saved");
-  };
-  main.querySelector('[data-save-content="whySection"]').onclick = async ()=>{
-    const cards = c.whySection.cards.map((card,i)=>({
-      title: main.querySelector(`[data-why-title="${i}"]`).value,
-      desc: main.querySelector(`[data-why-desc="${i}"]`).value,
-    }));
-    await saveContentSection("whySection", {
-      eyebrow: document.getElementById("ctWhyEyebrow").value,
-      heading: document.getElementById("ctWhyHeading").value,
-      paragraph: document.getElementById("ctWhyParagraph").value,
-      cards,
-    });
-    toast("Saved");
-  };
-  main.querySelector('[data-save-content="testimonials"]').onclick = async ()=>{
-    const list = c.testimonials.map((t,i)=>({
-      photo: t.photo,
-      name: main.querySelector(`[data-testi-name="${i}"]`).value,
-      rating: Number(main.querySelector(`[data-testi-rating="${i}"]`).value)||5,
-      text: main.querySelector(`[data-testi-text="${i}"]`).value,
-    }));
-    await saveContentSection("testimonials", list);
-    toast("Testimonials updated");
-  };
-  main.querySelector('[data-save-content="about"]').onclick = async ()=>{
-    await saveContentSection("about", {
-      photo: c.about.photo,
-      heading: document.getElementById("ctAboutHeading").value,
-      paragraph: document.getElementById("ctAboutParagraph").value,
-    });
-    toast("Our Story updated");
-  };
-  main.querySelector('[data-save-content="contact"]').onclick = async ()=>{
-    await saveContentSection("contact", {
-      eyebrow: document.getElementById("ctContactEyebrow").value,
-      heading: document.getElementById("ctContactHeading").value,
-      paragraph: document.getElementById("ctContactParagraph").value,
-    });
-    toast("Saved");
-  };
-}
-function renderAdminMain(){
-  const main = document.getElementById("adminMain");
-  if(!main) return;
-  if(adminTab==="products"){
-    main.innerHTML = `
-      <div class="admin-card">
-        <h3 style="margin-top:0;">Products <span style="font-weight:400;color:var(--ink-soft);font-size:13px;">(${PRODUCTS.length} total)</span></h3>
-        <input class="mini-input" style="max-width:280px;margin-bottom:16px;" id="adminSearch" placeholder="Search products…"/>
-        <div id="adminProductList">${allProducts().map(adminProductRow).join("")}</div>
-      </div>
-      <div class="admin-card" id="adminEditPanel"></div>
-    `;
-    bindAdminProductInputs();
-    document.getElementById("adminSearch").oninput = (e)=>{
-      const q = e.target.value.toLowerCase();
-      document.getElementById("adminProductList").innerHTML = allProducts()
-        .filter(p=>p.name.toLowerCase().includes(q)||p.brand.toLowerCase().includes(q))
-        .map(adminProductRow).join("");
-      bindAdminProductInputs();
-    };
-  } else if(adminTab==="brands"){
-    main.innerHTML = `
-      <div class="admin-card">
-        <h3 style="margin-top:0;">Brand Logos</h3>
-        <p style="color:var(--ink-soft);font-size:13px;margin-bottom:20px;">Drag and drop a logo image onto any brand to update it site-wide, instantly.</p>
-        <div class="brand-grid" style="grid-template-columns:repeat(4,1fr);">
-          ${allBrands().map(b=>`
-            <div class="admin-card" style="padding:16px;text-align:center;">
-              <div class="brand-logo-wrap" style="margin-bottom:10px;">${b.logo?imgTag(b.logo,b.name,"",b.name[0]):`<span class="fallback">${esc(b.name[0])}</span>`}</div>
-              <div style="font-size:13px;font-weight:600;">${esc(b.name)}</div>
-              <div class="dropzone" data-drop="brand:${b.id}" style="margin-top:10px;padding:14px;font-size:11.5px;">Drop logo image</div>
-            </div>
-          `).join("")}
-        </div>
-      </div>`;
-    main.querySelectorAll("[data-drop]").forEach(setupDropzone);
-  } else if(adminTab==="content"){
-    renderContentTab(main);
-  } else if(adminTab==="orders"){
-    main.innerHTML = `
-      <div class="admin-card">
-        <h3 style="margin-top:0;">How Checkout Works</h3>
-        <p style="color:var(--ink-soft);font-size:14px;line-height:1.8;">
-          When a buyer taps <b>Checkout via Messenger</b>, we generate an order summary — items, sizes, quantities,
-          total, and a unique reference code — and copy it to their clipboard. They're then sent to
-          <b>m.me/decantdynasty</b> to paste it in, along with their name and delivery address. From there, you
-          reply with payment details, confirm proof of payment, and process the order for J&amp;T Express or Lalamove.
-        </p>
-        <p style="color:var(--ink-soft);font-size:12.5px;">Note: Messenger links can't auto-fill a message for the buyer — that's a Meta platform limitation, not a site bug — so the copy-to-clipboard + paste flow is the most reliable way to get the order details into your inbox.</p>
-      </div>`;
-  }
-}
-function bindAdminProductInputs(){
-  document.querySelectorAll('[data-field="name"]').forEach(inp=>{
-    inp.onchange = async ()=>{
-      const id = inp.dataset.id;
-      await saveOverride(id, {name: inp.value});
-      toast("Saved");
-    };
-  });
-  document.querySelectorAll('[data-field="price"]').forEach(inp=>{
-    inp.onchange = async ()=>{
-      const id = inp.dataset.id; const size = inp.dataset.size;
-      const p = getProduct(id);
-      const prices = {...p.prices, [size]: Number(inp.value)||0};
-      await saveOverride(id, {prices});
-      toast("Price updated");
-    };
-  });
-  document.querySelectorAll('[data-admin-edit]').forEach(btn=>{
-    btn.onclick = ()=>openAdminEditPanel(btn.dataset.adminEdit);
-  });
-  document.querySelectorAll('[data-drop][data-drop]').forEach(setupDropzone);
-}
-function openAdminEditPanel(productId){
-  const p = getProduct(productId);
-  const panel = document.getElementById("adminEditPanel");
-  panel.innerHTML = `
-    <h3 style="margin-top:0;">Editing: ${esc(p.brand)} ${esc(p.name)}</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
-      <div>
-        <label style="font-size:11.5px;color:var(--ink-soft);display:block;margin-bottom:6px;">Main photo</label>
-        <div class="dropzone" id="editDrop" data-drop="${p.id}">
-          ${imgTag(p.image, p.name, "", "Drag & drop, or click to upload")}
-          <div style="margin-top:8px;">Drag &amp; drop a product photo, or click to upload</div>
-        </div>
-      </div>
-      <div>
-        <label style="font-size:11.5px;color:var(--ink-soft);display:block;margin-bottom:6px;">Decant bottle photo (shown next to main photo)</label>
-        <div class="dropzone" id="editDrop2" data-drop="decant:${p.id}">
-          ${p.image2 && state.overrides[p.id] && state.overrides[p.id].image2 ? imgTag(p.image2, p.name+" decant", "", "Decant bottle") : ""}
-          <div style="margin-top:8px;">Drag &amp; drop a decant bottle photo, or click to upload</div>
-        </div>
-      </div>
-    </div>
-    <div class="form-row"><label>Description</label><textarea id="editDesc" rows="3">${esc(p.description)}</textarea></div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
-      ${Object.entries(p.prices).map(([size,price])=>`
-        <div><label style="font-size:11.5px;color:var(--ink-soft);">${size}</label><input class="mini-input" data-edit-price="${size}" value="${price}"/></div>
-      `).join("")}
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:16px;">
-      <div class="form-row" style="margin:0;"><label>Concentration</label><input class="mini-input" id="editConcentration" value="${esc(p.concentration)}"/></div>
-      <div class="form-row" style="margin:0;"><label>Gender</label>
-        <select class="mini-input" id="editGender">
-          ${["Men","Women","Unisex"].map(g=>`<option value="${g}" ${p.gender===g?"selected":""}>${g}</option>`).join("")}
-        </select>
-      </div>
-      <div class="form-row" style="margin:0;"><label>Longevity</label><input class="mini-input" id="editLongevity" value="${esc(p.longevity)}"/></div>
-      <div class="form-row" style="margin:0;"><label>Projection</label><input class="mini-input" id="editProjection" value="${esc(p.projection)}"/></div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px;">
-      <div class="form-row" style="margin:0;"><label>Top Notes (comma-separated)</label><input class="mini-input" id="editTop" value="${esc((p.topNotes||[]).join(", "))}"/></div>
-      <div class="form-row" style="margin:0;"><label>Heart Notes</label><input class="mini-input" id="editHeart" value="${esc((p.heartNotes||[]).join(", "))}"/></div>
-      <div class="form-row" style="margin:0;"><label>Base Notes</label><input class="mini-input" id="editBase" value="${esc((p.baseNotes||[]).join(", "))}"/></div>
-    </div>
-    <label style="font-size:12.5px;color:var(--ink-soft);display:flex;align-items:center;gap:8px;margin-bottom:16px;">
-      <input type="checkbox" id="editVerified" ${p.verified?'checked':''}/> Notes verified against Fragrantica
-    </label>
-    <button class="btn btn-primary" id="saveEditBtn">Save Changes</button>
-  `;
-  setupDropzone(document.getElementById("editDrop"));
-  setupDropzone(document.getElementById("editDrop2"));
-  document.getElementById("saveEditBtn").onclick = async ()=>{
-    const prices = {...p.prices};
-    panel.querySelectorAll('[data-edit-price]').forEach(inp=>{ prices[inp.dataset.editPrice] = Number(inp.value)||0; });
-    const splitNotes = (v)=>v.split(",").map(s=>s.trim()).filter(Boolean);
-    await saveOverride(p.id, {
-      description: document.getElementById("editDesc").value,
-      concentration: document.getElementById("editConcentration").value,
-      gender: document.getElementById("editGender").value,
-      longevity: document.getElementById("editLongevity").value,
-      projection: document.getElementById("editProjection").value,
-      topNotes: splitNotes(document.getElementById("editTop").value),
-      heartNotes: splitNotes(document.getElementById("editHeart").value),
-      baseNotes: splitNotes(document.getElementById("editBase").value),
-      prices,
-      verified: document.getElementById("editVerified").checked
-    });
-    toast("Product updated for all visitors");
-    adminTab="products"; renderAdminMain();
-  };
-}
-async function saveOverride(productId, patch){
-  const current = state.overrides[productId] || {};
-  const merged = {...current, ...patch, prices: {...(current.prices||{}), ...(patch.prices||{})}};
-  state.overrides[productId] = merged;
-  await storeSet("override:product:"+productId, JSON.stringify(merged), true);
-}
-async function saveBrandOverride(brandId, patch){
-  const current = state.brandOverrides[brandId] || {};
-  const merged = {...current, ...patch};
-  state.brandOverrides[brandId] = merged;
-  await storeSet("override:brand:"+brandId, JSON.stringify(merged), true);
-}
-function setupDropzone(el){
-  if(!el || el._wired) return;
-  el._wired = true;
-  const key = el.dataset.drop;
-  el.addEventListener("dragover", e=>{ e.preventDefault(); el.classList.add("drag"); });
-  el.addEventListener("dragleave", ()=> el.classList.remove("drag"));
-  el.addEventListener("drop", async e=>{
-    e.preventDefault(); el.classList.remove("drag");
-    const file = e.dataTransfer.files[0];
-    if(file) await handleDroppedImage(key, file);
-  });
-  el.addEventListener("click", ()=>{
-    let input = el.querySelector('input[type=file]');
-    if(!input){
-      input = document.createElement("input");
-      input.type="file"; input.accept="image/*"; input.style.display="none";
-      el.appendChild(input);
-      input.onchange = async ()=>{ if(input.files[0]) await handleDroppedImage(key, input.files[0]); };
-    }
-    input.click();
-  });
-}
-async function handleDroppedImage(key, file){
-  toast("Uploading image…");
-  try{
-    const dataUrl = await resizeImage(file, 900);
-    if(key.startsWith("brand:")){
-      const brandId = key.replace("brand:","");
-      await saveBrandOverride(brandId, {logo: dataUrl});
-    } else if(key.startsWith("decant:")){
-      const productId = key.replace("decant:","");
-      await saveOverride(productId, {image2: dataUrl});
-    } else if(key === "content:about:photo"){
-      await saveContentSection("about", {...state.content.about, photo: dataUrl});
-    } else if(key.startsWith("content:testimonial:")){
-      const idx = Number(key.split(":")[2]);
-      const list = state.content.testimonials.slice();
-      list[idx] = {...list[idx], photo: dataUrl};
-      await saveContentSection("testimonials", list);
-    } else {
-      await saveOverride(key, {image: dataUrl});
-    }
-    toast("Image updated for all visitors");
-    renderAdminMain();
-  }catch(e){
-    toast("Upload failed — try a smaller image");
-  }
-}
-
-/* ================================================================
    ROUTER
    ================================================================ */
 function parseHash(){
@@ -1266,7 +878,7 @@ function parseHash(){
   if(parts.length===0) return {page:"home"};
   if(parts[0]==="brand" && parts[1]) return {page:"brand", id:parts[1]};
   if(parts[0]==="product" && parts[1]) return {page:"product", id:parts[1]};
-  if(["collection","brands","build","about","contact","admin"].includes(parts[0])) return {page:parts[0]};
+  if(["collection","brands","build","about","contact"].includes(parts[0])) return {page:parts[0]};
   return {page:"home"};
 }
 async function route(){
@@ -1276,25 +888,6 @@ async function route(){
   const app = document.getElementById("app");
   window.scrollTo({top:0,behavior:"instant" in window ? "instant":"auto"});
   document.querySelectorAll(".nav-links a").forEach(a=>a.classList.toggle("active", a.dataset.nav === "/"+ (r.page==="home"?"":r.page)));
-
-  if(r.page==="admin"){
-    if(!state.adminUnlocked){
-      app.innerHTML = renderAdminLogin();
-      document.getElementById("adminLoginBtn").onclick = ()=>{
-        const val = document.getElementById("adminPassInput").value;
-        if(val===ADMIN_PASS){ state.adminUnlocked=true; route(); }
-        else toast("Incorrect passphrase");
-      };
-    } else {
-      app.innerHTML = renderAdminShell();
-      document.querySelectorAll("[data-admin-tab]").forEach(btn=>{
-        btn.onclick = ()=>{ adminTab = btn.dataset.adminTab; app.innerHTML = renderAdminShell(); renderAdminMain(); bindGlobalAdminNav(); };
-      });
-      document.getElementById("adminLogoutBtn").onclick = ()=>{ state.adminUnlocked=false; location.hash="#/"; };
-      renderAdminMain();
-    }
-    return;
-  }
 
   let html = "";
   if(r.page==="home") html = renderHome();
@@ -1310,11 +903,6 @@ async function route(){
   app.innerHTML = html;
   postRenderBind(r);
   initReveal(app);
-}
-function bindGlobalAdminNav(){
-  document.querySelectorAll("[data-admin-tab]").forEach(btn=>{
-    btn.onclick = ()=>{ adminTab = btn.dataset.adminTab; document.getElementById("app").innerHTML = renderAdminShell(); renderAdminMain(); bindGlobalAdminNav(); document.getElementById("adminLogoutBtn").onclick = ()=>{ state.adminUnlocked=false; location.hash="#/"; }; };
-  });
 }
 
 function bindCardNav(el){
