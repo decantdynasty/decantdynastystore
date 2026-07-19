@@ -714,7 +714,7 @@ add(P("yves-saint-laurent","Yves Saint Laurent","Y EDP",{gender:"Men",concentrat
   description:"A modern, self-made-man signature scent — crisp apple and ginger resolving into a smooth amberwood-tonka base."}));
 
 /* ---------------------------- BUJAIRAMI ---------------------------- */
-add(P("bujairami","Bujairami","Hectic",{gender:"Unisex",concentration:"Eau de Parfum",
+add(P("bujairami","Bujairami","Hectic",{gender:"Unisex",concentration:"Extrait de Parfum",
   topNotes:["Saffron","Bergamot"],heartNotes:["Oud","Rose"],baseNotes:["Amber","Musk","Sandalwood"],
   description:"An intense, whirlwind oriental true to its name — layered oud and saffron in constant motion."}));
 
