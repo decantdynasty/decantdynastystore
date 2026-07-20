@@ -118,6 +118,7 @@ const state = {
   theme: "dark",
   cart: [],        // {productId, size, qty}
   wishlist: [],     // productId[]
+  compare: [],      // productId[] (maximum 3)
   recentSearches: [],
   voucherCode: "",
   content: null,
@@ -209,7 +210,7 @@ function productsByBrand(brandId){ return PRODUCTS.map(p=>getProduct(p.id)).filt
 function imgTag(src, alt, cls, fallbackText){
   const safeAlt = esc(alt);
   return `<img src="${esc(src)}" alt="${safeAlt}" class="${cls||''}"
-    onerror="this.onerror=null;this.hidden=true;this.nextElementSibling.classList.remove('hidden')" loading="lazy" />
+    onerror="this.onerror=null;this.hidden=true;this.nextElementSibling.classList.remove('hidden')" loading="lazy" decoding="async" />
     <div class="ph hidden">${esc(fallbackText||alt)}</div>`;
 }
 
@@ -225,6 +226,9 @@ function loadPersisted(){
   const wish = localGet("wishlist:v1");
   if(wish) { try{ state.wishlist = JSON.parse(wish); }catch(e){} }
 
+  const compare = localGet("compare:v1");
+  if(compare) { try{ state.compare = JSON.parse(compare).filter(id=>getProduct(id)).slice(0,3); }catch(e){} }
+
   state.content = defaultContent();
   const recent=localGet("search:recent");
   if(recent){try{state.recentSearches=JSON.parse(recent).slice(0,5);}catch(e){}}
@@ -233,6 +237,7 @@ function loadPersisted(){
 
 function persistCart(){ localSet("cart:v1",JSON.stringify(state.cart)); }
 function persistWishlist(){ localSet("wishlist:v1",JSON.stringify(state.wishlist)); }
+function persistCompare(){ localSet("compare:v1",JSON.stringify(state.compare)); }
 function persistTheme(){ localSet("prefs:theme",state.theme); }
 
 /* ---------------- cart / wishlist logic ---------------- */
@@ -282,6 +287,24 @@ function toggleWishlist(productId){
   if(i>-1) state.wishlist.splice(i,1); else state.wishlist.push(productId);
   persistWishlist(); updateBadges(); renderWishPanel();
   document.querySelectorAll(`[data-wish-toggle="${productId}"]`).forEach(el=>el.classList.toggle("active", state.wishlist.includes(productId)));
+}
+function toggleCompare(productId){
+  const product=getProduct(productId);if(!product)return;
+  const index=state.compare.indexOf(productId);
+  if(index>-1)state.compare.splice(index,1);
+  else{
+    if(state.compare.length>=3){toast("Compare up to three fragrances at a time");return;}
+    state.compare.push(productId);
+  }
+  persistCompare();renderCompareTray();syncCompareControls();
+  toast(index>-1?`${product.name} removed from comparison`:`${product.name} ready to compare`);
+}
+function syncCompareControls(root=document){
+  root.querySelectorAll("[data-compare-toggle]").forEach(button=>{
+    const active=state.compare.includes(button.dataset.compareToggle);
+    button.classList.toggle("active",active);button.setAttribute("aria-pressed",String(active));
+    if(button.classList.contains("compare-detail-toggle"))button.textContent=active?"Remove from Compare":"Add to Compare";
+  });
 }
 function updateBadges(){
   const cartCount = state.cart.reduce((s,c)=>s+c.qty,0);
@@ -445,6 +468,8 @@ function heroArtSVG(){
 function renderHome(){
   const arrivals = PRODUCTS.slice(-8).reverse().slice(0,4).map(p=>getProduct(p.id));
   const brands = allBrands().slice(0,8);
+  const homeCatalog=allProducts();
+  const initialCatalogCount=Math.min(36,homeCatalog.length);
   const c = state.content;
   return `
   <section class="hero">
@@ -518,10 +543,32 @@ function renderHome(){
         <h2>The Full Collection</h2>
         <p>Explore every authentic decant currently available from Decant Dynasty.</p>
       </div>
-      <div class="product-grid stagger">${allProducts().map(productCardHTML).join("")}</div>
+      <div class="product-grid stagger" id="homeFullGrid" data-rendered="${initialCatalogCount}">${homeCatalog.slice(0,initialCatalogCount).map(productCardHTML).join("")}</div>
+      ${initialCatalogCount<homeCatalog.length?`<div class="catalog-loading" id="homeCatalogLoading" aria-live="polite"><i></i><span>Preparing the complete collection</span></div>`:""}
     </div>
   </section>
   `;
+}
+function appendHomeCatalog(immediate=false,bindAdded=true){
+  const grid=document.getElementById("homeFullGrid");if(!grid)return;
+  const products=allProducts();let rendered=Number(grid.dataset.rendered)||0;
+  const appendBatch=()=>{
+    if(!document.body.contains(grid)||rendered>=products.length)return;
+    const end=immediate?products.length:Math.min(products.length,rendered+24);
+    const template=document.createElement("template");template.innerHTML=products.slice(rendered,end).map(productCardHTML).join("");
+    const added=[...template.content.children];
+    added.forEach(card=>{card.style.setProperty("--stagger-index",0);if(!motionMedia.matches)card.classList.add("catalog-enter");});
+    grid.append(template.content);rendered=end;grid.dataset.rendered=String(rendered);
+    if(bindAdded)added.forEach(card=>{bindCardNav(card);card.querySelectorAll("[data-wish-toggle]").forEach(bindWishButton);card.querySelectorAll("[data-quickview]").forEach(bindQuickviewButton);card.querySelectorAll("[data-compare-toggle]").forEach(bindCompareButton);});
+    requestAnimationFrame(()=>added.forEach(card=>card.classList.remove("catalog-enter")));
+    if(rendered>=products.length){document.getElementById("homeCatalogLoading")?.remove();return;}
+    if(!immediate)scheduleHomeCatalogBatch();
+  };
+  appendBatch();
+}
+function scheduleHomeCatalogBatch(){
+  const run=()=>appendHomeCatalog(false,true);
+  if("requestIdleCallback" in window)requestIdleCallback(run,{timeout:450});else setTimeout(run,90);
 }
 function whyCard(path, title, body){
   return `<div class="why-card"><div class="why-icon"><svg viewBox="0 0 24 24"><path d="${path}"/></svg></div><h3>${esc(title)}</h3><p>${esc(body)}</p></div>`;
@@ -557,6 +604,7 @@ function stockStampHTML(p){
 }
 function productCardHTML(p){
   const isWish = state.wishlist.includes(p.id);
+  const isCompared = state.compare.includes(p.id);
   const sizes = Object.keys(p.prices);
   return `<div class="product-card" data-go="/product/${p.id}">
     ${p.recommended ? `<div class="badge-rec">Best Seller</div>` : ""}
@@ -565,6 +613,9 @@ function productCardHTML(p){
       ${stockStampHTML(p)}
       <button class="wish-toggle ${isWish?'active':''}" data-wish-toggle="${p.id}" data-stop aria-label="Wishlist">
         <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.2 2.4 5 6 5c2 0 3.4 1 4.5 2.4l1.5 1.9 1.5-1.9C14.6 6 16 5 18 5c3.6 0 5.5 3.2 4 6.7C19.5 16.3 12 21 12 21z"/></svg>
+      </button>
+      <button class="compare-toggle ${isCompared?'active':''}" data-compare-toggle="${p.id}" data-stop aria-label="${isCompared?'Remove from':'Add to'} comparison" aria-pressed="${isCompared}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="7" height="14" rx="2"/><rect x="14" y="5" width="7" height="14" rx="2"/><path d="M10 9h4M10 15h4"/></svg>
       </button>
       <button class="quick-view-btn" data-quickview="${p.id}" data-stop>Quick View</button>
     </div>
@@ -720,6 +771,7 @@ function renderProductDetail(productId){
       <div class="pd-actions">
         <button class="btn btn-primary" id="pdAddToCart" ${p.outOfStock?'disabled aria-disabled="true"':''}>${p.outOfStock?'Out of Stock':'Add to Bag'}</button>
         <button class="btn btn-ghost" id="pdWishBtn" data-wish-toggle="${p.id}">${state.wishlist.includes(p.id) ? "♥ In Wishlist" : "♡ Add to Wishlist"}</button>
+        <button class="btn btn-ghost compare-detail-toggle ${state.compare.includes(p.id)?'active':''}" data-compare-toggle="${p.id}" aria-pressed="${state.compare.includes(p.id)}">${state.compare.includes(p.id)?'Remove from Compare':'Add to Compare'}</button>
       </div>
     </div>
   </div>
@@ -754,6 +806,7 @@ function openQuickView(productId){
         <div class="size-select" id="qvSizeWrap">${sizeSelectHTML(p, firstSize)}</div>
         <div class="pd-actions">
           <button class="btn btn-primary" id="qvAddToCart" ${p.outOfStock?'disabled aria-disabled="true"':''}>${p.outOfStock?'Out of Stock':'Add to Bag'}</button>
+          <button class="btn btn-ghost compare-detail-toggle ${state.compare.includes(p.id)?'active':''}" data-compare-toggle="${p.id}" aria-pressed="${state.compare.includes(p.id)}">${state.compare.includes(p.id)?'Remove from Compare':'Add to Compare'}</button>
           <a class="btn btn-ghost" href="#/product/${p.id}">Full Details</a>
         </div>
       </div>
@@ -764,6 +817,55 @@ function openQuickView(productId){
 function closeModal(){
   document.getElementById("qvBackdrop").classList.remove("open");
   document.getElementById("qvModal").classList.remove("open");
+}
+
+/* ================================================================
+   COMPARE
+   ================================================================ */
+function renderCompareTray(){
+  const tray=document.getElementById("compareTray");if(!tray)return;
+  const items=state.compare.map(getProduct).filter(Boolean);
+  document.body.classList.toggle("has-compare-tray",items.length>0);
+  tray.classList.toggle("open",items.length>0);
+  tray.setAttribute("aria-hidden",String(items.length===0));
+  tray.innerHTML=items.length?`<div class="compare-tray-inner">
+    <div class="compare-tray-title"><span>Fragrance comparison</span><strong>${items.length}<i>/3</i></strong></div>
+    <div class="compare-tray-items">${items.map((p,index)=>`<div class="compare-tray-item" style="--compare-index:${index}"><img src="${esc(p.image)}" alt="" loading="lazy" decoding="async"/><span><b>${esc(p.name)}</b><small>${esc(p.brand)}</small></span><button data-compare-remove="${p.id}" aria-label="Remove ${esc(p.name)}">&times;</button></div>`).join("")}</div>
+    <div class="compare-tray-actions"><button class="compare-clear" data-compare-clear>Clear</button><button class="btn btn-gold btn-sm" data-open-compare ${items.length<2?'disabled aria-disabled="true"':''}>${items.length<2?'Choose one more':'Compare now'}</button></div>
+  </div>`:"";
+}
+function comparisonRow(label,items,value){
+  return `<div class="comparison-row"><div class="comparison-label">${esc(label)}</div>${items.map(p=>`<div class="comparison-value">${value(p)}</div>`).join("")}</div>`;
+}
+function renderComparisonModal(){
+  const items=state.compare.map(getProduct).filter(Boolean);
+  if(items.length<2){closeCompare();toast("Choose at least two fragrances to compare");return;}
+  const body=document.getElementById("compareModalBody");
+  const notes=(list)=>list?.length?list.map(esc).join(" · "):"—";
+  body.innerHTML=`<div class="comparison-scroll"><div class="comparison-table" style="--compare-columns:${items.length}">
+    <div class="comparison-row comparison-products"><div class="comparison-label"><span>Side by side</span></div>${items.map(p=>`<div class="comparison-product"><button data-compare-remove="${p.id}" aria-label="Remove ${esc(p.name)}">&times;</button><div class="comparison-image">${imgTag(p.image,`${p.brand} ${p.name}`,"",p.name)}</div><small>${esc(p.brand)}</small><h3>${esc(p.name)}</h3>${p.inspiredBy?`<p>Inspired by ${esc(p.inspiredBy)}</p>`:`<p>Original fragrance profile</p>`}</div>`).join("")}</div>
+    ${comparisonRow("Starting price",items,p=>`<strong class="comparison-price">${peso(Math.min(...Object.values(p.prices)))}</strong>`)}
+    ${comparisonRow("Available sizes",items,p=>Object.entries(p.prices).map(([size,price])=>`<span class="comparison-size">${esc(size)} <b>${peso(price)}</b></span>`).join(""))}
+    ${comparisonRow("Concentration",items,p=>esc(p.concentration||"—"))}
+    ${comparisonRow("Gender",items,p=>esc(p.gender||"—"))}
+    ${comparisonRow("Longevity",items,p=>esc(p.longevity||"—"))}
+    ${comparisonRow("Projection",items,p=>esc(p.projection||"—"))}
+    ${comparisonRow("Top notes",items,p=>notes(p.topNotes))}
+    ${comparisonRow("Heart notes",items,p=>notes(p.heartNotes))}
+    ${comparisonRow("Base notes",items,p=>notes(p.baseNotes))}
+  </div></div>`;
+}
+function openCompare(){
+  if(state.compare.length<2){toast("Choose at least two fragrances to compare");return;}
+  renderComparisonModal();document.body.classList.add("compare-open");document.getElementById("compareBackdrop").classList.add("open");document.getElementById("compareModal").classList.add("open");
+  setTimeout(()=>document.querySelector("#compareModal [data-close-compare]")?.focus(),0);
+}
+function closeCompare(){
+  document.body.classList.remove("compare-open");document.getElementById("compareBackdrop")?.classList.remove("open");document.getElementById("compareModal")?.classList.remove("open");
+}
+function removeComparedProduct(productId){
+  state.compare=state.compare.filter(id=>id!==productId);persistCompare();renderCompareTray();syncCompareControls();
+  if(document.getElementById("compareModal")?.classList.contains("open")){if(state.compare.length<2)closeCompare();else renderComparisonModal();}
 }
 
 /* ================================================================
@@ -844,6 +946,7 @@ function renderQuizStep(){
     card.querySelectorAll("[data-go]").forEach(bindCardNav);
     card.querySelectorAll("[data-wish-toggle]").forEach(bindWishButton);
     card.querySelectorAll("[data-quickview]").forEach(bindQuickviewButton);
+    card.querySelectorAll("[data-compare-toggle]").forEach(bindCompareButton);
     document.getElementById("quizRestart").onclick = ()=>{ quizStep=0; quizAnswers={}; renderQuizStep(); };
     initReveal(card);
     return;
@@ -1007,7 +1110,13 @@ function navigateTo(targetHash){
   if(hash===location.hash){window.scrollTo({top:0,behavior:"auto"});saveCurrentScroll();return;}
   saveCurrentScroll();
   history.pushState({ddManaged:true,scrollY:0},"",hash);
-  route({restoreY:0});
+  transitionRoute({restoreY:0});
+}
+function transitionRoute(options){
+  if(motionMedia.matches||typeof document.startViewTransition!=="function")return route(options);
+  const transition=document.startViewTransition(()=>route(options));
+  transition.finished.catch(()=>{});
+  return transition;
 }
 function parseHash(){
   const h = location.hash.replace(/^#\/?/, "");
@@ -1022,6 +1131,7 @@ async function route({restoreY=0}={}){
   const serial=++routeSerial;
   closeAllPanels();
   closeModal();
+  closeCompare();
   const r = parseHash();
   if(r.page!=="home"&&bottleCleanup){bottleCleanup();bottleCleanup=null;}
   state.route = r;
@@ -1040,9 +1150,10 @@ async function route({restoreY=0}={}){
   else html = renderHome();
 
   app.innerHTML = html;
+  if(r.page==="home"&&Number(restoreY)>0)appendHomeCatalog(true,false);
   postRenderBind(r);
   initReveal(document,true);
-  if(r.page==="home") initHeroBottle();
+  if(r.page==="home"){initHeroBottle();if(Number(restoreY)<=0)scheduleHomeCatalogBatch();}
   const settleScroll=()=>{
     if(serial!==routeSerial)return;
     const max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
@@ -1074,11 +1185,15 @@ function bindWishButton(el){
 function bindQuickviewButton(el){
   el.onclick = (e)=>{ e.stopPropagation(); openQuickView(el.dataset.quickview); };
 }
+function bindCompareButton(el){
+  el.onclick=(e)=>{e.stopPropagation();toggleCompare(el.dataset.compareToggle);};
+}
 
 function postRenderBind(r){
   document.querySelectorAll("[data-go]").forEach(bindCardNav);
   document.querySelectorAll("[data-wish-toggle]").forEach(bindWishButton);
   document.querySelectorAll("[data-quickview]").forEach(bindQuickviewButton);
+  document.querySelectorAll("[data-compare-toggle]").forEach(bindCompareButton);
   initBrandInteractions(document);
 
   if(r.page==="product"){
@@ -1101,6 +1216,7 @@ function postRenderBind(r){
         grid.querySelectorAll("[data-go]").forEach(bindCardNav);
         grid.querySelectorAll("[data-wish-toggle]").forEach(bindWishButton);
         grid.querySelectorAll("[data-quickview]").forEach(bindQuickviewButton);
+        grid.querySelectorAll("[data-compare-toggle]").forEach(bindCompareButton);
         initReveal(grid);
       };
     });
@@ -1122,6 +1238,7 @@ function postRenderBind(r){
       grid.querySelectorAll("[data-go]").forEach(bindCardNav);
       grid.querySelectorAll("[data-wish-toggle]").forEach(bindWishButton);
       grid.querySelectorAll("[data-quickview]").forEach(bindQuickviewButton);
+      grid.querySelectorAll("[data-compare-toggle]").forEach(bindCompareButton);
       initReveal(grid);
     }
     document.querySelectorAll("[data-cf-gender]").forEach(chip=>{
@@ -1270,6 +1387,7 @@ function initGlobalUI(){
   document.getElementById("qvBackdrop").onclick = closeModal;
   document.getElementById("qvModal").addEventListener("click",(e)=>{
     if(e.target.closest("[data-close-modal]")) closeModal();
+    if(e.target.closest("[data-compare-toggle]")){toggleCompare(e.target.closest("[data-compare-toggle]").dataset.compareToggle);return;}
     if(e.target.closest("[data-size-opt]")){
       const wrap = e.target.closest("[data-pid]");
       wrap.querySelectorAll("[data-size-opt]").forEach(b=>b.classList.remove("active"));
@@ -1282,9 +1400,22 @@ function initGlobalUI(){
     }
   });
 
+  const compareTray=document.getElementById("compareTray"),compareModal=document.getElementById("compareModal"),compareBackdrop=document.getElementById("compareBackdrop");
+  compareTray.onclick=e=>{
+    const remove=e.target.closest("[data-compare-remove]");if(remove){removeComparedProduct(remove.dataset.compareRemove);return;}
+    if(e.target.closest("[data-compare-clear]")){state.compare=[];persistCompare();renderCompareTray();syncCompareControls();return;}
+    if(e.target.closest("[data-open-compare]"))openCompare();
+  };
+  compareModal.onclick=e=>{
+    if(e.target.closest("[data-close-compare]")){closeCompare();return;}
+    const remove=e.target.closest("[data-compare-remove]");if(remove)removeComparedProduct(remove.dataset.compareRemove);
+  };
+  compareBackdrop.onclick=closeCompare;
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeCompare();closeModal();}});
+
   window.addEventListener("popstate",e=>{
     clearTimeout(scrollSaveTimer);scrollSaveTimer=0;
-    route({restoreY:Number(e.state?.scrollY)||0});
+    transitionRoute({restoreY:Number(e.state?.scrollY)||0});
   });
 }
 
@@ -1294,6 +1425,7 @@ function initGlobalUI(){
   if("scrollRestoration" in history)history.scrollRestoration="manual";
   try{history.replaceState({...history.state,ddManaged:true,scrollY:Number(history.state?.scrollY)||0},"",location.href);}catch(e){}
   initGlobalUI();
+  renderCompareTray();
   route({restoreY:Number(history.state?.scrollY)||0});
 })();
 
