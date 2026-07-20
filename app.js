@@ -86,15 +86,31 @@ function initHeroBottle(){
     container.classList.add('model-ready');
   },undefined,()=>{container.classList.add('model-error');showToast('The 3D bottle could not be loaded.');});
   let dragging=false,lastX=0,lastY=0,velocityX=0,velocityY=.004,raf=0;
+  let userRotationX=group.rotation.x,userRotationY=group.rotation.y;
+  let scrollTarget=0,scrollCurrent=0,heroStart=0,heroRange=Math.max(window.innerHeight,1);
   const down=e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;container.setPointerCapture?.(e.pointerId);};
   const move=e=>{if(!dragging)return;velocityY=(e.clientX-lastX)*.008;velocityX=(e.clientY-lastY)*.006;lastX=e.clientX;lastY=e.clientY;};
   const up=()=>{dragging=false;};
   container.addEventListener('pointerdown',down);container.addEventListener('pointermove',move);container.addEventListener('pointerup',up);container.addEventListener('pointercancel',up);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function animate(){raf=requestAnimationFrame(animate);if(!dragging){velocityX*=.94;velocityY*=.965;if(Math.abs(velocityY)<.001&&!reduced)velocityY=.0015;}group.rotation.y+=velocityY;group.rotation.x=Math.max(-.35,Math.min(.35,group.rotation.x+velocityX));updateGuides();renderer.render(scene,camera);}animate();
-  const resize=()=>{const w=container.clientWidth,h=container.clientHeight;camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();renderer.setSize(w,h);};
+  const syncScrollTarget=()=>{scrollTarget=(reduced||window.innerWidth<720)?0:Math.max(0,Math.min(1,(window.scrollY-heroStart)/(heroRange*.82)));};
+  const measureScroll=()=>{const hero=container.closest('.hero');heroStart=hero?.offsetTop||0;heroRange=Math.max(hero?.offsetHeight||window.innerHeight,window.innerHeight*.8);syncScrollTarget();};
+  function animate(){
+    raf=requestAnimationFrame(animate);
+    if(!dragging){velocityX*=.94;velocityY*=.965;if(Math.abs(velocityY)<.001&&!reduced)velocityY=.0015;}
+    userRotationY+=velocityY;
+    userRotationX=Math.max(-.35,Math.min(.35,userRotationX+velocityX));
+    scrollCurrent+=(scrollTarget-scrollCurrent)*(reduced?1:.055);
+    group.rotation.y=userRotationY+(scrollCurrent*.24);
+    group.rotation.x=userRotationX-(scrollCurrent*.045);
+    group.position.y=scrollCurrent*-.18;
+    group.scale.setScalar(1-(scrollCurrent*.035));
+    updateGuides();renderer.render(scene,camera);
+  }animate();
+  const resize=()=>{const w=container.clientWidth,h=container.clientHeight;camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();renderer.setSize(w,h);measureScroll();};
   window.addEventListener('resize',resize,{passive:true});
-  bottleCleanup=()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);container.removeEventListener('pointerdown',down);container.removeEventListener('pointermove',move);container.removeEventListener('pointerup',up);container.removeEventListener('pointercancel',up);renderer.dispose();disposables.forEach(x=>x.dispose?.());};
+  window.addEventListener('scroll',syncScrollTarget,{passive:true});measureScroll();
+  bottleCleanup=()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);window.removeEventListener('scroll',syncScrollTarget);container.removeEventListener('pointerdown',down);container.removeEventListener('pointermove',move);container.removeEventListener('pointerup',up);container.removeEventListener('pointercancel',up);renderer.dispose();disposables.forEach(x=>x.dispose?.());};
 }
 
 /* ---------------- state ---------------- */
@@ -344,12 +360,68 @@ function showCheckoutModal(text){
 
 /* ---------------- scroll reveal ---------------- */
 let revealObserver;
-function initReveal(root){
-  revealObserver && revealObserver.disconnect();
-  revealObserver = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); revealObserver.unobserve(e.target); } });
-  }, {threshold:.14});
-  (root||document).querySelectorAll(".reveal, .stagger").forEach(el=>revealObserver.observe(el));
+const motionMedia=matchMedia('(prefers-reduced-motion: reduce)');
+function prepareMotionText(root){
+  (root||document).querySelectorAll('.section-head h2,.page-header h1,.about-hero h1').forEach(heading=>{
+    if(heading.dataset.motionSplit||heading.querySelector('img'))return;
+    const words=heading.textContent.trim().split(/\s+/);
+    heading.innerHTML=words.map((word,index)=>`<span class="motion-word" style="--word-index:${index}"><span>${esc(word)}</span></span>`).join(' ');
+    heading.dataset.motionSplit='true';
+  });
+}
+function motionTargets(root){
+  const selector='.reveal,.stagger,.page-header,.pd-grid';
+  const scope=root||document;
+  return [...(scope.matches?.(selector)?[scope]:[]),...scope.querySelectorAll(selector)];
+}
+function initReveal(root,reset=false){
+  const scope=root||document;
+  prepareMotionText(scope);
+  const targets=motionTargets(scope);
+  targets.forEach(el=>{
+    if(el.classList.contains('brand-grid'))el.dataset.motion='brands';
+    else if(el.classList.contains('product-grid'))el.dataset.motion='products';
+    else if(el.classList.contains('why-grid'))el.dataset.motion='features';
+    else if(el.classList.contains('story-photo'))el.dataset.motion='image';
+    [...el.children].forEach((child,index)=>child.style.setProperty('--stagger-index',index));
+  });
+  if(motionMedia.matches||!('IntersectionObserver' in window)){
+    document.documentElement.classList.remove('motion-enabled');
+    targets.forEach(el=>el.classList.add('in'));
+    return;
+  }
+  document.documentElement.classList.add('motion-enabled');
+  if(reset&&revealObserver){revealObserver.disconnect();revealObserver=null;}
+  if(!revealObserver)revealObserver=new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(!entry.isIntersecting)return;
+      entry.target.classList.add('in');
+      revealObserver.unobserve(entry.target);
+      setTimeout(()=>entry.target.classList.add('motion-settled'),1250);
+    });
+  },{threshold:.12,rootMargin:'0px 0px -7% 0px'});
+  targets.forEach(el=>revealObserver.observe(el));
+}
+function initBrandInteractions(root){
+  if(motionMedia.matches||!matchMedia('(pointer:fine)').matches)return;
+  (root||document).querySelectorAll('.brand-card:not([data-depth-ready])').forEach(card=>{
+    card.dataset.depthReady='true';
+    card.addEventListener('pointermove',event=>{
+      card.classList.add('is-pointer-active');
+      const rect=card.getBoundingClientRect();
+      const x=(event.clientX-rect.left)/rect.width;
+      const y=(event.clientY-rect.top)/rect.height;
+      card.style.setProperty('--glow-x',`${x*100}%`);
+      card.style.setProperty('--glow-y',`${y*100}%`);
+      card.style.setProperty('--tilt-x',`${(0.5-y)*5}deg`);
+      card.style.setProperty('--tilt-y',`${(x-0.5)*6}deg`);
+    });
+    card.addEventListener('pointerleave',()=>{
+      card.classList.remove('is-pointer-active');
+      card.style.setProperty('--glow-x','50%');card.style.setProperty('--glow-y','50%');
+      card.style.setProperty('--tilt-x','0deg');card.style.setProperty('--tilt-y','0deg');
+    });
+  });
 }
 
 /* ================================================================
@@ -377,8 +449,8 @@ function renderHome(){
   return `
   <section class="hero">
     <div class="wrap hero-grid">
-      <div>
-        <div class="eyebrow">${esc(c.hero.eyebrow)}</div>
+      <div class="hero-copy">
+        <div class="eyebrow hero-kicker">${esc(c.hero.eyebrow)}</div>
         <h1 class="hero-title-art"><img src="images/find-your-signature-scent.png" alt="Find Your Signature Scent" /></h1>
         <p class="lede">${esc(fillTemplate(c.hero.lede))}</p>
         <div class="hero-actions">
@@ -401,7 +473,7 @@ function renderHome(){
     </div>
   </section>
 
-  <section>
+  <section class="motion-section motion-section-brands">
     <div class="wrap">
       <div class="section-head reveal">
         <h2>${esc(c.brandsSection.heading)}</h2>
@@ -416,7 +488,7 @@ function renderHome(){
     </div>
   </section>
 
-  <section>
+  <section class="motion-section motion-section-products">
     <div class="wrap">
       <div class="section-head reveal">
         <div class="eyebrow">Just poured</div>
@@ -426,7 +498,7 @@ function renderHome(){
     </div>
   </section>
 
-  <section>
+  <section class="motion-section motion-section-features">
     <div class="wrap">
       <div class="section-head reveal">
         <div class="eyebrow">${esc(c.whySection.eyebrow)}</div>
@@ -458,14 +530,13 @@ function testiCard(t){
 /* ================================================================
    RENDER: BRAND CARD / PRODUCT CARD (reused everywhere)
    ================================================================ */
-function brandCardHTML(b, hideName=false){
+function brandCardHTML(b){
   const count = brandProductCount(b.id);
-  return `<div class="brand-card ${hideName?'brand-card-logo-only':''}" data-go="/brand/${b.id}" aria-label="Explore ${esc(b.name)} fragrances">
+  return `<div class="brand-card brand-card-logo-only" data-go="/brand/${b.id}" role="link" tabindex="0" aria-label="Explore ${esc(b.name)} fragrances">
     <div class="brand-arrow"><svg viewBox="0 0 24 24" stroke="var(--ink)" fill="none" stroke-width="1.6"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="9 5 19 5 19 15"/></svg></div>
     <div class="brand-logo-wrap">
       ${b.logo ? imgTag(b.logo, b.name, "", b.name[0]) : `<span class="fallback">${esc(b.name[0])}</span>`}
     </div>
-    ${hideName?"":`<div class="brand-name">${esc(b.name)}</div>`}
     <div class="brand-count">${count} fragrance${count===1?"":"s"}</div>
     <div class="brand-desc">Tap to explore the full ${esc(b.name)} decant range.</div>
   </div>`;
@@ -511,7 +582,7 @@ function renderBrandsIndex(){
   </div>
   <section style="padding-top:0;">
     <div class="wrap">
-      <div class="brand-grid stagger in">${allBrands().map(b=>brandCardHTML(b,true)).join("")}</div>
+      <div class="brand-grid stagger">${allBrands().map(brandCardHTML).join("")}</div>
     </div>
   </section>`;
 }
@@ -544,7 +615,7 @@ function renderBrandDetail(brandId){
           <button class="chip" data-filter-gender="Unisex">Unisex</button>
         </div>
       </div>
-      <div class="product-grid stagger in" id="brandProductGrid">${products.map(productCardHTML).join("")}</div>
+      <div class="product-grid stagger" id="brandProductGrid">${products.map(productCardHTML).join("")}</div>
     </div>
   </section>`;
 }
@@ -575,7 +646,7 @@ function renderCollection(){
           ${brandOptions.map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join("")}
         </select>
       </div>
-      <div class="product-grid stagger in" id="collectionGrid">${products.map(productCardHTML).join("")}</div>
+      <div class="product-grid stagger" id="collectionGrid">${products.map(productCardHTML).join("")}</div>
     </div>
   </section>`;
 }
@@ -905,6 +976,7 @@ function parseHash(){
 async function route(){
   closeAllPanels();
   const r = parseHash();
+  if(r.page!=="home"&&bottleCleanup){bottleCleanup();bottleCleanup=null;}
   state.route = r;
   const app = document.getElementById("app");
   window.scrollTo({top:0,behavior:"instant" in window ? "instant":"auto"});
@@ -923,7 +995,7 @@ async function route(){
 
   app.innerHTML = html;
   postRenderBind(r);
-  initReveal(document);
+  initReveal(document,true);
   if(r.page==="home") initHeroBottle();
 }
 
@@ -935,6 +1007,10 @@ function bindCardNav(el){
       playSound("click");
       location.hash = "#"+go;
     }
+  });
+  el.addEventListener("keydown",e=>{
+    if(e.target!==el||!['Enter',' '].includes(e.key))return;
+    e.preventDefault();playSound("click");location.hash="#"+el.dataset.go;
   });
 }
 function bindWishButton(el){
@@ -950,6 +1026,7 @@ function postRenderBind(r){
   document.querySelectorAll("[data-go]").forEach(bindCardNav);
   document.querySelectorAll("[data-wish-toggle]").forEach(bindWishButton);
   document.querySelectorAll("[data-quickview]").forEach(bindQuickviewButton);
+  initBrandInteractions(document);
 
   if(r.page==="product"){
     const wrap = document.getElementById("pdWrap");
@@ -966,10 +1043,12 @@ function postRenderBind(r){
         chip.classList.add("active");
         const g = chip.dataset.filterGender;
         const items = productsByBrand(r.id).filter(p=> g==="all" || p.gender===g);
+        grid.classList.remove('in','motion-settled');
         grid.innerHTML = items.map(productCardHTML).join("");
         grid.querySelectorAll("[data-go]").forEach(bindCardNav);
         grid.querySelectorAll("[data-wish-toggle]").forEach(bindWishButton);
         grid.querySelectorAll("[data-quickview]").forEach(bindQuickviewButton);
+        initReveal(grid);
       };
     });
   }
@@ -978,10 +1057,12 @@ function postRenderBind(r){
     let curGender = "all", curBrand="all";
     function apply(){
       const items = allProducts().filter(p=>(curGender==="all"||p.gender===curGender)&&(curBrand==="all"||p.brandId===curBrand));
+      grid.classList.remove('in','motion-settled');
       grid.innerHTML = items.length ? items.map(productCardHTML).join("") : `<div class="center-empty" style="grid-column:1/-1;">No fragrances match those filters yet.</div>`;
       grid.querySelectorAll("[data-go]").forEach(bindCardNav);
       grid.querySelectorAll("[data-wish-toggle]").forEach(bindWishButton);
       grid.querySelectorAll("[data-quickview]").forEach(bindQuickviewButton);
+      initReveal(grid);
     }
     document.querySelectorAll("[data-cf-gender]").forEach(chip=>{
       chip.onclick = ()=>{ document.querySelectorAll("[data-cf-gender]").forEach(c=>c.classList.remove("active")); chip.classList.add("active"); curGender=chip.dataset.cfGender; apply(); };
@@ -1024,7 +1105,15 @@ function initGlobalUI(){
   initLoadingScreen();
   initVoucherPromo();
   const navStack = document.getElementById("navStack");
-  window.addEventListener("scroll", ()=>{ navStack.classList.toggle("scrolled", window.scrollY>10); }, {passive:true});
+  const progress=document.getElementById('scrollProgress');
+  let scrollFrame=0;
+  const syncScrollUI=()=>{
+    scrollFrame=0;navStack.classList.toggle("scrolled",window.scrollY>10);
+    const max=Math.max(1,document.documentElement.scrollHeight-window.innerHeight);
+    progress?.style.setProperty('--scroll-progress',Math.max(0,Math.min(1,window.scrollY/max)));
+  };
+  const queueScrollUI=()=>{if(!scrollFrame)scrollFrame=requestAnimationFrame(syncScrollUI);};
+  window.addEventListener("scroll",queueScrollUI,{passive:true});window.addEventListener('resize',queueScrollUI,{passive:true});syncScrollUI();
 
   document.getElementById("menuBtn").onclick = ()=>{ document.getElementById("drawer").classList.add("open"); document.getElementById("drawerBackdrop").classList.add("open"); };
   document.getElementById("drawerBackdrop").onclick = closeDrawer;

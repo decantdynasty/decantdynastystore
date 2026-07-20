@@ -30,6 +30,7 @@ Object.assign(INSPIRED_BY,{
   "fragrance-world|Montera Instant Love":"Mancera Instant Crush",
   "paris-corner|Rifaaqat":"Yves Saint Laurent Babycat",
   "rasasi|Hawas Diva":"Valentino Donna Born in Roma Intense",
+  "rasasi|Hawas Majestic":"Maison Francis Kurkdjian Baccarat Rouge 540 Extrait",
   "french-avenue|Aromatix Platine Blanc":"Xerjoff Torino 21",
   "french-avenue|Vulcan Baie":"Stéphane Humbert Lucas Pink Boa",
   "khadlaj|Panache Angel Dust":"Yves Saint Laurent Libre Vanille Couture",

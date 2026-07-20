@@ -800,8 +800,8 @@ add(P("tubbees","Tubbees","Unicorn Vanilla",{gender:"Unisex",
   topNotes:["Black Currant","Citruses","Acai Berry"],heartNotes:["White Flowers","Matcha Tea","Rose"],baseNotes:["Vanilla","Cotton Candy","Sandalwood"],
   description:"A colorful fruit-and-matcha gourmand that settles into white flowers, fluffy cotton candy, vanilla and sandalwood."}));
 add(P("rasasi","Rasasi","Hawas Majestic",{gender:"Unisex",
-  topNotes:["Sharp Citrus","Crushed Green Leaves"],heartNotes:["Dry Woods","Mineral Accord"],baseNotes:["Vetiver","Clean Musk","Oakmoss"],
-  description:"A newly released green-citrus Hawas flanker with crushed leaves, mineral woods, earthy vetiver and clean musk."}));
+  topNotes:["Bitter Almond","Saffron"],heartNotes:["Egyptian Jasmine","Cedar"],baseNotes:["Ambergris","Woody Notes","Musk"],
+  description:"A rich amber-floral profile built around bitter almond and saffron, luminous jasmine, cedar and a dense ambergris-wood trail."}));
 add(P("rayhaan","Rayhaan","Pacific Aura",{gender:"Men",
   topNotes:["Citron","Mint","Orange","Lemon","Black Currant","Coriander"],heartNotes:["Apricot","Basil","Carrot Seeds","May Rose"],baseNotes:["Fig","Dates","Ambrette"],
   description:"A cooling citrus-green summer fragrance with mint, black currant and aromatic herbs over fig, dates and soft ambrette."}));
