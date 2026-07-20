@@ -77,8 +77,10 @@ const PRICE_OVERRIDES = {
   "arabiyat-prestige|Aristo": PRICE_TIERS.prestige,
   "arabiyat-prestige|Marwa": PRICE_TIERS.designer,
   "armaf|Club de Nuit Intense Man EDT": PRICE_TIERS.premium,
+  "armaf|Club de Nuit Intense Man EDP": PRICE_TIERS.premium,
   "armaf|Club de Nuit Intense Man Limited Edition": PRICE_TIERS.prestige,
   "armaf|Club de Nuit Sillage": PRICE_TIERS.premium,
+  "armaf|Club de Nuit Urban Man Elixir": PRICE_TIERS.premium,
   "armaf|Club de Nuit Woman": PRICE_TIERS.premium,
   "armaf|Hunter": PRICE_TIERS.select,
   "armaf|Odyssey Limoni Fresh Edition": PRICE_TIERS.select,
@@ -178,6 +180,7 @@ const PRICE_OVERRIDES = {
   "paris-corner|Taskeen Marina": PRICE_TIERS.everyday,
   "paris-corner|Vibrant Vetiver Delight": PRICE_TIERS.select,
   "rasasi|Hawas Black": PRICE_TIERS.prestige,
+  "rasasi|Hawas Diva": PRICE_TIERS.premium,
   "rasasi|Hawas Eclat": PRICE_TIERS.premium,
   "rasasi|Hawas for Him": PRICE_TIERS.premium,
   "rasasi|Hawas Ice": PRICE_TIERS.prestige,
@@ -231,12 +234,14 @@ let _id = 0;
 const nid = (brand) => `${brand}-${(++_id).toString().padStart(4,"0")}`;
 
 function P(brandId, brandName, name, opts) {
+  const productKey = `${brandId}|${name}`;
+  const exactPriceValues = globalThis.DECANT_PRICES?.[productKey];
   return {
     id: nid(brandId),
     brandId, brand: brandName, name,
     image: `images/products/${brandId}/${name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')}.png`,
     image2: `images/products/${brandId}/${name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')}-decant.png`,
-    prices: opts.prices || PRICE_OVERRIDES[`${brandId}|${name}`] || DEFAULT_PRICE,
+    prices: opts.prices || (Array.isArray(exactPriceValues) ? PH(...exactPriceValues) : PRICE_OVERRIDES[productKey] || DEFAULT_PRICE),
     concentration: opts.concentration || "Eau de Parfum",
     gender: opts.gender || "Unisex",
     description: opts.description || "A distinctive composition worth discovering through a decant before committing to a full bottle.",
@@ -800,5 +805,25 @@ add(P("rasasi","Rasasi","Hawas Majestic",{gender:"Unisex",
 add(P("rayhaan","Rayhaan","Pacific Aura",{gender:"Men",
   topNotes:["Citron","Mint","Orange","Lemon","Black Currant","Coriander"],heartNotes:["Apricot","Basil","Carrot Seeds","May Rose"],baseNotes:["Fig","Dates","Ambrette"],
   description:"A cooling citrus-green summer fragrance with mint, black currant and aromatic herbs over fig, dates and soft ambrette."}));
+
+/* Added later to preserve the stable IDs of the original catalog. */
+add(P("armaf","Armaf","Club de Nuit Intense Man EDP",{gender:"Men",concentration:"Eau de Parfum",
+  topNotes:["Apple","Bergamot","Black Currant","Pineapple","Lemon"],
+  heartNotes:["Rose","Birch","Jasmine"],
+  baseNotes:["Musk","Ambergris","Patchouli","Vanilla"],
+  longevity:"Long (8-10 hours)", projection:"Strong",
+  description:"A smoother eau de parfum concentration of the signature fruity-smoky Club de Nuit profile, balancing pineapple and black currant with birch, ambergris and musk."}));
+add(P("armaf","Armaf","Club de Nuit Urban Man Elixir",{gender:"Men",concentration:"Eau de Parfum",
+  topNotes:["Bergamot","Pink Pepper","Orange Blossom","Jasmine"],
+  heartNotes:["Lavender","Tagetes","Geranium","Vetiver","Elemi","Saffron"],
+  baseNotes:["Ambroxan","Amber","Patchouli","Cedar","Labdanum"],
+  longevity:"Long (8-10 hours)", projection:"Strong",
+  description:"A modern amber-aromatic combining bright citrus, pepper and white florals with aromatic lavender, saffron, ambroxan and a deep woody-resinous base."}));
+add(P("rasasi","Rasasi","Hawas Diva",{gender:"Women",concentration:"Eau de Parfum",
+  topNotes:["Red Fruits","Rhubarb","Litchi"],
+  heartNotes:["Rose","Frankincense","Cedar"],
+  baseNotes:["Vanilla","Musk","Ambergris"],
+  longevity:"Long (8-9 hours)", projection:"Strong",
+  description:"A confident fruity floral for women, opening with tart red fruit and litchi before rose, incense and cedar settle into a warm vanilla, musk and ambergris base."}));
 
 if (typeof module !== "undefined") module.exports = { BRANDS, PRODUCTS };

@@ -24,9 +24,12 @@ const INSPIRED_BY={
 
 Object.assign(INSPIRED_BY,{
   "arabiyat-prestige|Aristo":"Goldfield & Banks Ingenious Ginger",
+  "armaf|Club de Nuit Intense Man EDP":"Creed Aventus",
+  "armaf|Club de Nuit Urban Man Elixir":"Dior Sauvage Eau de Parfum and Creed Aventus",
   "asdaaf|Ameerat Al Arab Prive Rose":"Parfums de Marly Delina Exclusif",
   "fragrance-world|Montera Instant Love":"Mancera Instant Crush",
   "paris-corner|Rifaaqat":"Yves Saint Laurent Babycat",
+  "rasasi|Hawas Diva":"Valentino Donna Born in Roma Intense",
   "french-avenue|Aromatix Platine Blanc":"Xerjoff Torino 21",
   "french-avenue|Vulcan Baie":"Stéphane Humbert Lucas Pink Boa",
   "khadlaj|Panache Angel Dust":"Yves Saint Laurent Libre Vanille Couture",
@@ -54,8 +57,11 @@ const CONCENTRATION={
 "afnan|Supremacy Collector's Edition":"Extrait de Parfum","armaf|Club de Nuit Intense Man EDT":"Eau de Toilette","armaf|Club de Nuit Intense Man Limited Edition":"Parfum","armaf|Hunter":"Eau de Toilette","jpg|Le Male Elixir Absolu":"Parfum Intense","jpg|Le Male Le Parfum":"Eau de Parfum Intense","jpg|Ultra Male":"Eau de Toilette Intense","versace|Dylan Blue":"Eau de Toilette","khadlaj|Island":"Extrait de Parfum","khadlaj|Island Dreams":"Extrait de Parfum","khadlaj|Panache Angel Dust":"Extrait de Parfum","french-avenue|Aether Extrait":"Extrait de Parfum","french-avenue|Atlantis Extrait":"Extrait de Parfum","french-avenue|Vulcan Baie":"Extrait de Parfum","maison-alhambra|Baroque Rouge Extrait":"Extrait de Parfum","fragrance-world|Barakkat Rouge 540 Extrait":"Extrait de Parfum","riiffs|Freeze":"Extrait de Parfum","nautica|Voyage":"Eau de Toilette","al-haramain|Aqua Dubai":"Extrait de Parfum","bujairami|Hectic":"Extrait de Parfum"
 };
 Object.assign(CONCENTRATION,{
+  "armaf|Club de Nuit Intense Man EDP":"Eau de Parfum",
+  "armaf|Club de Nuit Urban Man Elixir":"Eau de Parfum",
   "azzaro|The Most Wanted Intense EDP":"Eau de Parfum Intense",
-  "azzaro|The Most Wanted Parfum":"Parfum"
+  "azzaro|The Most Wanted Parfum":"Parfum",
+  "rasasi|Hawas Diva":"Eau de Parfum"
 });
 const VERY_LONG=new Set(["9PM Night Out","9PM","Supremacy Collector's Edition","Supremacy Not Only Intense","Club de Nuit Intense Man Limited Edition","Le Male Elixir Absolu","Le Male Le Parfum","Eros EDP","Asad","Asad Elixir","Ameer Al Oudh Intense","Bade'e Al Oud Honor & Glory","Khamrah","Khamrah Qahwa","Barakkat Rouge 540 Extrait","Barakkat Satin Oud","Cocktail Intense","Amber Empire","Enigma Deux","Liquid Brun","Spectre Wraith","Baroque Rouge Extrait","Hawas Black","Momento","Spicebomb Extreme","Stronger With You Intensely"]);
 const LONG=new Set(["Turathi Blue","Club de Nuit Sillage","Club de Nuit Intense Man EDT","Club de Nuit Woman","Odyssey Mega Limited Edition","Ultra Male","Dylan Blue","Yara Elixir","Asad Bourbon","Art of Universe","Angham","Eclaire","Fakhar","Khamrah Waha","Liam Grey","Najdia Intense","Nasheet","Rave Now","Island","Island Dreams","Intoxicate Mystique","Shiyaaka Snow","Titan","Aqua Pura","Barakkat Ambre Eve","Barakkat Rouge 540 EDP","Barakkat Gentle Gold","Classy Chic Girl","John Gustav Homme Le Parfum","Harmony Code Absolute","Proud of You Absolute","La Uno Million Elixir","No. 4 After Love","Aether Extrait","Atlantis Extrait","Enigma Une","Vulcan FEU","Candid Pour Homme","Glacier Bold","Jean Lowe Immortal","Versencia Oro","Versencia Rouge","Hawas for Him","Hawas Ice","Hawas Kobra","Hawas Malibu","Obsidian","Elixir","Nocturno Elixir","Regent","Emir Fire Your Desire","Khair Pistachio","Taskeen Caramel Cascade","Y EDP","Hectic","Marwa"]);
@@ -66,6 +72,8 @@ const PERFORMANCE={
   "al-haramain|Aqua Dubai":{longevity:"Very long (9-12+ hours)",projection:"Strong"},
   "al-wataniah|Kayaan Classic":{longevity:"Moderate (5-7 hours)",projection:"Moderate"},
   "arabiyat-prestige|Aristo":{longevity:"Moderate (5-7 hours)",projection:"Moderate"},
+  "armaf|Club de Nuit Intense Man EDP":{longevity:"Long (8-10 hours)",projection:"Strong"},
+  "armaf|Club de Nuit Urban Man Elixir":{longevity:"Long (8-10 hours)",projection:"Strong"},
   "asdaaf|Ameerat Al Arab":{longevity:"Moderate (4-6 hours)",projection:"Moderate"},
   "asdaaf|Ameerat Al Arab Prive Rose":{longevity:"Long (7-10 hours)",projection:"Strong"},
   "azzaro|The Most Wanted Intense EDP":{longevity:"Long (8-10 hours)",projection:"Strong"},
@@ -75,6 +83,7 @@ const PERFORMANCE={
   "fragrance-world|Proud of You Absolute":{longevity:"Long (7-9 hours)",projection:"Moderate to strong"},
   "paris-corner|Rifaaqat":{longevity:"Long (8-10 hours)",projection:"Moderate to strong"},
   "rasasi|Hawas Majestic":{longevity:"Moderate to long (6-8 hours)",projection:"Moderate to strong"},
+  "rasasi|Hawas Diva":{longevity:"Long (8-9 hours)",projection:"Strong"},
   "rayhaan|Pacific Aura":{longevity:"Light to moderate (4-6 hours)",projection:"Moderate"},
   "tubbees|Bubble Gum":{longevity:"Light (2-4 hours)",projection:"Soft"},
   "tubbees|Chocolate Fudge":{longevity:"Moderate (4-7 hours)",projection:"Moderate"},
