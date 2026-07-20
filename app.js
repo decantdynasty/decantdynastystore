@@ -383,7 +383,7 @@ function initReveal(root,reset=false){
     else if(el.classList.contains('product-grid'))el.dataset.motion='products';
     else if(el.classList.contains('why-grid'))el.dataset.motion='features';
     else if(el.classList.contains('story-photo'))el.dataset.motion='image';
-    [...el.children].forEach((child,index)=>child.style.setProperty('--stagger-index',index));
+    [...el.children].forEach((child,index)=>child.style.setProperty('--stagger-index',el.classList.contains('product-grid')?Math.min(index,12):index));
   });
   if(motionMedia.matches||!('IntersectionObserver' in window)){
     document.documentElement.classList.remove('motion-enabled');
@@ -399,7 +399,7 @@ function initReveal(root,reset=false){
       revealObserver.unobserve(entry.target);
       setTimeout(()=>entry.target.classList.add('motion-settled'),1250);
     });
-  },{threshold:.12,rootMargin:'0px 0px -7% 0px'});
+  },{threshold:0,rootMargin:'0px 0px 18% 0px'});
   targets.forEach(el=>revealObserver.observe(el));
 }
 function initBrandInteractions(root){
@@ -641,10 +641,16 @@ function renderCollection(){
           <button class="chip" data-cf-gender="Women">Women</button>
           <button class="chip" data-cf-gender="Unisex">Unisex</button>
         </div>
-        <select class="mini-input" id="brandFilterSelect" style="max-width:220px;">
-          <option value="all">All Brands</option>
-          ${brandOptions.map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join("")}
-        </select>
+        <label class="brand-select-shell" for="brandFilterSelect">
+          <span class="brand-select-label">Fragrance House</span>
+          <span class="brand-select-control">
+            <select id="brandFilterSelect" aria-label="Filter collection by fragrance house">
+              <option value="all">All Brands</option>
+              ${brandOptions.map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join("")}
+            </select>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg>
+          </span>
+        </label>
       </div>
       <div class="product-grid stagger" id="collectionGrid">${products.map(productCardHTML).join("")}</div>
     </div>
