@@ -510,6 +510,17 @@ function renderHome(){
       </div>
     </div>
   </section>
+
+  <section class="motion-section motion-section-products home-full-collection">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">Every fragrance, one place</div>
+        <h2>The Full Collection</h2>
+        <p>Explore every authentic decant currently available from Decant Dynasty.</p>
+      </div>
+      <div class="product-grid stagger">${allProducts().map(productCardHTML).join("")}</div>
+    </div>
+  </section>
   `;
 }
 function whyCard(path, title, body){
