@@ -167,7 +167,7 @@ function defaultContent(){
     ],
     about: {
       photo: "images/our-story.png",
-      heading: "From a college collection to Decant Dynasty",
+      heading: "Where Decant Dynasty Began",
       paragraph: "Decant Dynasty began in 2024 while I was a college student with a small fragrance collection and a practical goal: earn back some of what I had spent on the bottles I owned, then use it to explore more scents. Selling decants made that possible while giving other people a more affordable way to experience a fragrance before committing to a full bottle. What started as a simple way to support my hobby gradually became a DTI- and BIR-registered business built around careful preparation, honest service, and making fragrance discovery easier. Today, customers can shop with us directly or through our official Shopee store.",
       shopeeUrl: "https://shopee.ph/decantdynasty",
     },
@@ -641,16 +641,27 @@ function renderCollection(){
           <button class="chip" data-cf-gender="Women">Women</button>
           <button class="chip" data-cf-gender="Unisex">Unisex</button>
         </div>
-        <label class="brand-select-shell" for="brandFilterSelect">
-          <span class="brand-select-label">Fragrance House</span>
-          <span class="brand-select-control">
-            <select id="brandFilterSelect" aria-label="Filter collection by fragrance house">
-              <option value="all">All Brands</option>
-              ${brandOptions.map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join("")}
-            </select>
+        <div class="brand-picker" id="brandFilterPicker">
+          <span class="brand-picker-kicker">Browse by house</span>
+          <button class="brand-picker-trigger" id="brandFilterButton" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="brandFilterMenu">
+            <span id="brandFilterValue">All fragrance houses</span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg>
-          </span>
-        </label>
+          </button>
+          <button class="brand-picker-scrim" type="button" tabindex="-1" aria-label="Close fragrance house menu"></button>
+          <div class="brand-picker-menu" id="brandFilterMenu" role="listbox" aria-label="Fragrance houses">
+            <label class="brand-picker-search">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+              <input id="brandFilterSearch" type="search" placeholder="Find a fragrance house" autocomplete="off" aria-label="Find a fragrance house" />
+            </label>
+            <div class="brand-picker-options">
+              <button type="button" role="option" aria-selected="true" data-brand-option="all" data-brand-name="All fragrance houses">
+                <span>All fragrance houses</span><small>${products.length} scents</small>
+              </button>
+              ${brandOptions.map(b=>{const count=products.filter(p=>p.brandId===b.id).length;return `<button type="button" role="option" aria-selected="false" data-brand-option="${b.id}" data-brand-name="${esc(b.name)}"><span>${esc(b.name)}</span><small>${count} ${count===1?'scent':'scents'}</small></button>`;}).join("")}
+              <p class="brand-picker-empty" hidden>No fragrance houses found.</p>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="product-grid stagger" id="collectionGrid">${products.map(productCardHTML).join("")}</div>
     </div>
@@ -847,8 +858,8 @@ function renderAbout(){
     <div class="wrap">
       <div class="about-hero reveal">
         <div class="eyebrow" style="justify-content:center;">Our Story</div>
-        <h1 style="font-family:var(--font-display);font-weight:400;font-size:clamp(30px,4.6vw,48px);">${esc(a.heading)}</h1>
-        <p style="color:var(--ink-soft);font-size:16px;line-height:1.8;margin-top:18px;">
+        <h1 class="story-title">${esc(a.heading)}</h1>
+        <p class="story-copy">
           ${esc(fillTemplate(a.paragraph))}
         </p>
         <a class="story-store-link" href="${esc(a.shopeeUrl)}" target="_blank" rel="noopener">Shop on Shopee · shopee.ph/decantdynasty</a>
@@ -1060,6 +1071,13 @@ function postRenderBind(r){
   }
   if(r.page==="collection"){
     const grid = document.getElementById("collectionGrid");
+    const picker = document.getElementById("brandFilterPicker");
+    const pickerButton = document.getElementById("brandFilterButton");
+    const pickerValue = document.getElementById("brandFilterValue");
+    const pickerSearch = document.getElementById("brandFilterSearch");
+    const pickerScrim = picker.querySelector(".brand-picker-scrim");
+    const pickerEmpty = picker.querySelector(".brand-picker-empty");
+    const pickerOptions = [...picker.querySelectorAll("[data-brand-option]")];
     let curGender = "all", curBrand="all";
     function apply(){
       const items = allProducts().filter(p=>(curGender==="all"||p.gender===curGender)&&(curBrand==="all"||p.brandId===curBrand));
@@ -1073,7 +1091,51 @@ function postRenderBind(r){
     document.querySelectorAll("[data-cf-gender]").forEach(chip=>{
       chip.onclick = ()=>{ document.querySelectorAll("[data-cf-gender]").forEach(c=>c.classList.remove("active")); chip.classList.add("active"); curGender=chip.dataset.cfGender; apply(); };
     });
-    document.getElementById("brandFilterSelect").onchange = (e)=>{ curBrand = e.target.value; apply(); };
+    function setPickerOpen(open){
+      picker.classList.toggle("is-open",open);
+      pickerButton.setAttribute("aria-expanded",String(open));
+      if(!open){pickerSearch.value="";filterPickerOptions();}
+    }
+    function filterPickerOptions(){
+      const query=pickerSearch.value.trim().toLowerCase();
+      let visible=0;
+      pickerOptions.forEach(option=>{
+        const show=!query||option.dataset.brandName.toLowerCase().includes(query);
+        option.hidden=!show;
+        if(show)visible++;
+      });
+      pickerEmpty.hidden=visible!==0;
+    }
+    function chooseBrand(option){
+      curBrand=option.dataset.brandOption;
+      pickerValue.textContent=option.dataset.brandName;
+      pickerOptions.forEach(item=>item.setAttribute("aria-selected",String(item===option)));
+      setPickerOpen(false);
+      apply();
+      pickerButton.focus();
+    }
+    pickerButton.onclick=()=>setPickerOpen(!picker.classList.contains("is-open"));
+    pickerScrim.onclick=()=>setPickerOpen(false);
+    pickerSearch.oninput=filterPickerOptions;
+    pickerSearch.onkeydown=e=>{
+      if(e.key==="Escape"){e.preventDefault();e.stopPropagation();setPickerOpen(false);pickerButton.focus();}
+      if(e.key==="ArrowDown"){e.preventDefault();pickerOptions.find(option=>!option.hidden)?.focus();}
+      if(e.key==="Enter"){const first=pickerOptions.find(option=>!option.hidden);if(first){e.preventDefault();chooseBrand(first);}}
+    };
+    picker.onkeydown=e=>{
+      if(e.key==="Escape"){e.preventDefault();setPickerOpen(false);pickerButton.focus();return;}
+      const visible=pickerOptions.filter(option=>!option.hidden);
+      const index=visible.indexOf(document.activeElement);
+      if(document.activeElement===pickerButton&&(e.key==="ArrowDown"||e.key==="ArrowUp")){
+        e.preventDefault();setPickerOpen(true);(e.key==="ArrowDown"?visible[0]:visible.at(-1))?.focus();return;
+      }
+      if(index<0)return;
+      if(e.key==="ArrowDown"||e.key==="ArrowUp"){
+        e.preventDefault();
+        visible[(index+(e.key==="ArrowDown"?1:-1)+visible.length)%visible.length].focus();
+      }
+    };
+    pickerOptions.forEach(option=>option.onclick=()=>chooseBrand(option));
   }
   if(r.page==="build"){ quizStep=0; quizAnswers={}; renderQuizStep(); }
   if(r.page==="contact"){
