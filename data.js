@@ -8,6 +8,7 @@
 //   prices: PriceMap; concentration: string; gender: "Men"|"Women"|"Unisex";
 //   description: string; topNotes: string[]; heartNotes: string[]; baseNotes: string[];
 //   longevity: string; projection: string; inspiredBy: string|null; recommended: boolean;
+//   outOfStock: boolean;
 // }
 // interface Brand { id: string; name: string; logo: string; }
 // ============================================================
@@ -92,7 +93,7 @@ const PRICE_OVERRIDES = {
   "fragrance-world|Barakkat Ambre Eve": PRICE_TIERS.select,
   "fragrance-world|Barakkat Gentle Gold": PRICE_TIERS.select,
   "fragrance-world|Barakkat Rouge 540 EDP": PRICE_TIERS.everyday,
-  "fragrance-world|Barakkat Rouge Extrait": PRICE_TIERS.select,
+  "fragrance-world|Barakkat Rouge 540 Extrait": PRICE_TIERS.select,
   "fragrance-world|Barakkat Satin Oud": PRICE_TIERS.select,
   "fragrance-world|Classy Chic Girl": PRICE_TIERS.everyday,
   "fragrance-world|Cocktail Intense": PRICE_TIERS.everyday,
@@ -122,7 +123,7 @@ const PRICE_OVERRIDES = {
   "giorgio-armani|Stronger With You Intensely": PRICE_TIERS.elite,
   "jpg|Le Male Elixir Absolu": PRICE_TIERS.elite,
   "jpg|Le Male Le Parfum": PRICE_TIERS.elite,
-  "jpg|Ultramale": PRICE_TIERS.luxury,
+  "jpg|Ultra Male": PRICE_TIERS.luxury,
   "khadlaj|Intoxicate Mystique": PRICE_TIERS.prestige,
   "khadlaj|Island": PRICE_TIERS.prestige,
   "khadlaj|Island Dreams": PRICE_TIERS.prestige,
@@ -214,6 +215,18 @@ const PRICE_OVERRIDES = {
 
 const DEFAULT_PRICE = PRICE_TIERS.premium;
 
+// INVENTORY CONTROL: add or remove exact "brand-id|Product Name" entries here.
+// A listed product is marked unavailable throughout the storefront and cannot
+// be added to the bag or checked out until its entry is removed.
+const OUT_OF_STOCK_PRODUCTS = new Set([
+  "al-haramain|Amber Oud Gold Edition",
+  "azzaro|The Most Wanted Intense EDP",
+  "azzaro|The Most Wanted Parfum",
+  "al-wataniah|Kayaan Classic",
+  "lattafa|Liam Grey",
+  "maison-alhambra|Delilah Blanc",
+]);
+
 let _id = 0;
 const nid = (brand) => `${brand}-${(++_id).toString().padStart(4,"0")}`;
 
@@ -234,6 +247,7 @@ function P(brandId, brandName, name, opts) {
     projection: opts.projection || "Moderate",
     inspiredBy: opts.inspiredBy || null,
     recommended: !!opts.recommended,
+    outOfStock: OUT_OF_STOCK_PRODUCTS.has(`${brandId}|${name}`),
   };
 }
 
@@ -323,7 +337,7 @@ add(P("jpg","Jean Paul Gaultier","Le Male Le Parfum",{gender:"Men",recommended:t
   topNotes:["Cardamom"],heartNotes:["Lavender","Iris"],baseNotes:["Vanilla","Oriental Notes","Woodsy Notes"],
   longevity:"Long (8-10 hours)", projection:"Strong",
   description:"A darker, iris-inflected reading of Le Male — smooth cardamom and lavender resolving into a powdery, vanilla-woods dry-down."}));
-add(P("jpg","Jean Paul Gaultier","Ultramale",{gender:"Men",concentration:"Eau de Toilette",recommended:true,
+add(P("jpg","Jean Paul Gaultier","Ultra Male",{gender:"Men",concentration:"Eau de Toilette Intense",recommended:true,
   topNotes:["Mandarin","Lavender","Cardamom"],heartNotes:["Caramel","Cinnamon"],baseNotes:["Vanilla","Patchouli","Amber"],
   longevity:"Long (8-10 hours)", projection:"Strong",
   description:"A sweeter, caramel-forward twist on the Le Male DNA that became a modern classic in its own right."}));
@@ -458,7 +472,7 @@ add(P("fragrance-world","Fragrance World","Barakkat Ambre Eve",{gender:"Unisex",
 add(P("fragrance-world","Fragrance World","Barakkat Rouge 540 EDP",{gender:"Unisex",concentration:"Eau de Parfum",recommended:true,
   topNotes:["Saffron","Jasmine"],heartNotes:["Amberwood","Ambergris"],baseNotes:["Cedar","Musk"],
   description:"A widely-loved interpretation of the iconic saffron-jasmine-amberwood accord."}));
-add(P("fragrance-world","Fragrance World","Barakkat Rouge Extrait",{gender:"Unisex",concentration:"Extrait de Parfum",recommended:true,
+add(P("fragrance-world","Fragrance World","Barakkat Rouge 540 Extrait",{gender:"Unisex",concentration:"Extrait de Parfum",recommended:true,
   topNotes:["Saffron","Jasmine"],heartNotes:["Amberwood","Ambergris"],baseNotes:["Cedar","Musk","Vanilla"],
   description:"An extrait-strength, longer-lasting reading of the Barakkat Rouge accord."}));
 add(P("fragrance-world","Fragrance World","Barakkat Satin Oud",{gender:"Unisex",

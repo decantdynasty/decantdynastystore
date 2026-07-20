@@ -315,7 +315,7 @@ section{padding:100px 0;}
   width:100%; aspect-ratio: 1 / 1; margin:0 auto 16px; border-radius:var(--radius-sm); background:var(--paper-2);
   display:flex;align-items:center;justify-content:center;overflow:hidden;
 }
-.brand-logo-wrap img{width:80%; height:80%; object-fit:contain;}
+.brand-logo-wrap img{width:80%; height:80%; object-fit:contain;border-radius:16px;}
 .brand-name{font-size:17px;font-weight:700; letter-spacing: -0.02em; margin-bottom:4px;}
 .brand-count{font-size:14px;color:var(--ink-soft); font-weight: 500;}
 .brand-arrow{position:absolute;right:18px;top:18px;width:24px;height:24px;opacity:0;transform:translate(-5px,5px);transition:.3s var(--ease)}
@@ -345,6 +345,8 @@ section{padding:100px 0;}
 .wish-toggle{position:absolute;right:12px;top:12px;width:38px;height:38px;border-radius:50%;background:color-mix(in srgb,var(--paper) 78%,transparent);backdrop-filter:blur(12px);display:grid;place-items:center;z-index:2;box-shadow:var(--shadow)}.wish-toggle svg{width:18px;height:18px;fill:none;stroke:var(--ink);stroke-width:1.6}.wish-toggle.active svg{fill:var(--gold);stroke:var(--gold)}
 .quick-view-btn{position:absolute;left:50%;bottom:14px;transform:translate(-50%,12px);opacity:0;padding:9px 15px;border-radius:999px;background:rgba(10,10,10,.86);color:#fff;font-size:12px;font-weight:650;transition:.3s var(--ease);white-space:nowrap}.product-card:hover .quick-view-btn{opacity:1;transform:translate(-50%,0)}
 .badge-rec{position:absolute;left:12px;top:12px;z-index:2;padding:7px 10px;border-radius:999px;background:var(--gold);color:#111;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.stock-stamp{position:absolute;left:50%;top:50%;z-index:4;transform:translate(-50%,-50%) rotate(-45deg);width:max-content;max-width:88%;padding:9px 15px;border:3px solid #e12d35;border-radius:7px;background:color-mix(in srgb,var(--paper) 84%,transparent);color:#e12d35;box-shadow:0 4px 20px rgba(0,0,0,.22);font-size:clamp(13px,1.35vw,19px);font-weight:900;letter-spacing:.12em;line-height:1;text-align:center;text-transform:uppercase;pointer-events:none;text-shadow:0 1px 0 rgba(255,255,255,.12)}
+.btn:disabled,.btn[aria-disabled="true"]{cursor:not-allowed;opacity:.55;transform:none!important;box-shadow:none!important}
 
 /* ---------- Shared pages and controls ---------- */
 .page-header{padding-top:calc(var(--header-total) + 70px);padding-bottom:56px}.page-header h1{font:700 clamp(42px,7vw,76px)/1.02 var(--font-display);letter-spacing:-.05em;margin:18px 0}.page-header>p{max-width:680px;color:var(--ink-soft);font-size:18px;line-height:1.6}.breadcrumb{font-size:12px;color:var(--ink-soft)}
@@ -365,11 +367,11 @@ section{padding:100px 0;}
 /* ---------- Panels, search results, cart ---------- */
 .panel-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(5px)}.panel-backdrop.open{opacity:1;pointer-events:auto}.side-panel{position:fixed;top:0;right:0;bottom:0;width:min(430px,92vw);z-index:401;background:var(--paper);box-shadow:var(--shadow-lift);transform:translateX(105%);visibility:hidden;transition:transform .42s var(--ease),visibility 0s linear .42s;display:flex;flex-direction:column}.side-panel.open{transform:none;visibility:visible;transition:transform .42s var(--ease),visibility 0s}.panel-head{height:76px;padding:0 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.panel-head h3{margin:0;font-size:20px}.panel-body{padding:20px;overflow:auto;flex:1}.panel-foot{padding:20px;border-top:1px solid var(--line)}
 .search-result{display:flex;align-items:center;gap:14px;padding:10px;border-radius:14px;cursor:pointer;transition:.2s}.search-result:hover,.search-result:focus{background:var(--paper-2);outline:none}.search-result img,.search-result .ph{width:52px;height:52px;min-height:52px;border-radius:12px;object-fit:cover}.sr-name{font-weight:700;font-size:14px}.sr-brand{font-size:12px;color:var(--ink-soft)}
-.cart-item{display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}.cart-item>img,.cart-item>.ph,.cart-product-thumb{width:72px;height:72px;min-height:72px;border-radius:14px;object-fit:cover;flex:none}.cart-product-thumb{display:block;overflow:hidden;background:var(--paper-2);transition:transform .25s var(--ease)}.cart-product-thumb:hover{transform:translateY(-2px)}.cart-product-thumb img,.cart-product-thumb .ph{width:100%;height:100%;min-height:72px;object-fit:cover}.cart-item-content{flex:1;min-width:0}.ci-name{display:block;font-weight:700;font-size:13px;line-height:1.35;transition:color .2s}.ci-name:hover{color:var(--gold)}.cart-size-row{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:9px 0 11px;flex-wrap:wrap}.cart-size-label{display:grid;gap:4px;min-width:0;color:var(--ink-soft);font-size:9px;font-weight:750;text-transform:uppercase;letter-spacing:.07em}.cart-size-label select{width:142px;max-width:100%;height:34px;padding:0 28px 0 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:650 11px var(--font-ui);outline:none}.cart-size-label select:focus{border-color:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 12%,transparent)}.cart-line-total{font-size:12px;font-weight:750;white-space:nowrap}.qty-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.qty-row>button:not(.remove-x){width:28px;height:28px;border:1px solid var(--line);border-radius:50%}.remove-x{color:var(--ink-soft);font-size:11px;margin-left:auto}.subtotal-row{display:flex;justify-content:space-between;font-weight:750;margin-bottom:16px}.empty-state{min-height:300px;display:grid;place-items:center;text-align:center;color:var(--ink-soft)}.empty-state svg{width:34px;fill:none;stroke:currentColor;margin:0 auto 12px}
+.cart-item{display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}.cart-item>img,.cart-item>.ph,.cart-product-thumb{width:72px;height:72px;min-height:72px;border-radius:14px;object-fit:cover;flex:none}.cart-product-thumb{position:relative;display:block;overflow:hidden;background:var(--paper-2);transition:transform .25s var(--ease)}.cart-product-thumb:hover{transform:translateY(-2px)}.cart-product-thumb img,.cart-product-thumb .ph{width:100%;height:100%;min-height:72px;object-fit:cover}.cart-product-thumb .stock-stamp{padding:4px 6px;border-width:1.5px;border-radius:3px;font-size:6px;letter-spacing:.04em}.cart-item-content{flex:1;min-width:0}.ci-name{display:block;font-weight:700;font-size:13px;line-height:1.35;transition:color .2s}.ci-name:hover{color:var(--gold)}.cart-stock-warning{margin-top:5px;color:#e12d35;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.cart-size-row{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:9px 0 11px;flex-wrap:wrap}.cart-size-label{display:grid;gap:4px;min-width:0;color:var(--ink-soft);font-size:9px;font-weight:750;text-transform:uppercase;letter-spacing:.07em}.cart-size-label select{width:142px;max-width:100%;height:34px;padding:0 28px 0 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:650 11px var(--font-ui);outline:none}.cart-size-label select:focus{border-color:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 12%,transparent)}.cart-line-total{font-size:12px;font-weight:750;white-space:nowrap}.qty-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.qty-row>button:not(.remove-x){width:28px;height:28px;border:1px solid var(--line);border-radius:50%}.remove-x{color:var(--ink-soft);font-size:11px;margin-left:auto}.subtotal-row{display:flex;justify-content:space-between;font-weight:750;margin-bottom:16px}.empty-state{min-height:300px;display:grid;place-items:center;text-align:center;color:var(--ink-soft)}.empty-state svg{width:34px;fill:none;stroke:currentColor;margin:0 auto 12px}
 .voucher-entry{padding:14px;border:1px dashed color-mix(in srgb,var(--gold) 52%,var(--line));border-radius:16px;background:color-mix(in srgb,var(--gold) 7%,var(--card));margin-bottom:17px}.voucher-entry label{display:block;font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px}.voucher-entry>div:first-of-type{display:flex;gap:8px}.voucher-entry input{min-width:0;flex:1;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font:700 13px var(--font-ui);text-transform:uppercase;outline:none}.voucher-entry input:focus{border-color:var(--gold)}.voucher-feedback{font-size:10.5px;color:var(--ink-soft);margin-top:8px}.voucher-feedback.success,.discount-row{color:var(--green)}.voucher-feedback.error{color:#d56b63}.discount-row{font-size:13px}.total-row{padding-top:14px;border-top:1px solid var(--line);font-size:17px}
 
 /* ---------- Modal ---------- */
-.modal-close{position:absolute;right:16px;top:16px;width:36px;height:36px;border-radius:50%;background:var(--paper-2);font-size:24px;z-index:2}.modal-inner{display:grid;grid-template-columns:1fr 1fr}.modal-media{background:var(--paper-2);min-height:520px}.modal-media img,.modal-media .ph{width:100%;height:100%;object-fit:cover}.modal-body{padding:50px 38px}.toast{position:fixed;left:50%;bottom:28px;z-index:700;transform:translate(-50%,20px);opacity:0;padding:12px 18px;border-radius:999px;background:var(--ink);color:var(--paper);font-size:13px;box-shadow:var(--shadow-lift);pointer-events:none;transition:.3s}.toast.show{opacity:1;transform:translate(-50%,0)}
+.modal-close{position:absolute;right:16px;top:16px;width:36px;height:36px;border-radius:50%;background:var(--paper-2);font-size:24px;z-index:5}.modal-inner{display:grid;grid-template-columns:1fr 1fr}.modal-media{position:relative;overflow:hidden;background:var(--paper-2);min-height:520px}.modal-media img,.modal-media .ph{width:100%;height:100%;object-fit:cover}.modal-body{padding:50px 38px}.toast{position:fixed;left:50%;bottom:28px;z-index:700;transform:translate(-50%,20px);opacity:0;padding:12px 18px;border-radius:999px;background:var(--ink);color:var(--paper);font-size:13px;box-shadow:var(--shadow-lift);pointer-events:none;transition:.3s}.toast.show{opacity:1;transform:translate(-50%,0)}
 
 @media(max-width:800px){.why-grid{grid-template-columns:1fr 1fr}.grid-toolbar{align-items:stretch;flex-direction:column}.modal-inner{grid-template-columns:1fr}.modal-media{min-height:280px}.modal-body{padding:30px 22px}.pd-facts{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.why-grid{grid-template-columns:1fr}.hero-actions{flex-direction:column}.hero-actions .btn{width:100%}.size-select{grid-template-columns:repeat(2,1fr)}.page-header{padding-top:calc(var(--header-total) + 44px)}.product-body{padding:14px}.quick-view-btn{display:none}}
@@ -404,7 +406,7 @@ section{padding:100px 0;}
 /* ================= PRODUCT DETAIL ================= */
 .pd-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:64px;padding:calc(var(--header-total) + 60px) 0 100px;}
 @media(max-width:860px){.pd-grid{grid-template-columns:1fr; gap:40px;}}
-.pd-media{aspect-ratio:1/1;border-radius:24px;overflow:hidden;background:var(--paper-2);}
+.pd-media{position:relative;aspect-ratio:1/1;border-radius:24px;overflow:hidden;background:var(--paper-2);}
 .pd-media img{width:100%;height:100%;object-fit:cover;}
 .pd-brand{font-size:14px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px;}
 .pd-name{font-family:var(--font-display);font-size:clamp(32px,5vw,64px);margin:0 0 24px;line-height:1.05; letter-spacing: -0.04em; font-weight: 700;}
@@ -544,7 +546,7 @@ section{padding:100px 0;}
       <div>
         <img src="images/logo.png" alt="Decant Dynasty" class="footer-logo" />
         <p class="footer-desc">
-          Elevating your fragrance journey through premium hand-poured decants. Experience luxury, one spray at a time.
+          Helping fragrance enthusiasts discover, experience, and collect exceptional scents.
         </p>
       </div>
       <div class="footer-links">
@@ -574,8 +576,8 @@ section{padding:100px 0;}
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2026 Decant Dynasty. All rights reserved.</p>
-      <p>Hand-poured in the Philippines. · <button id="soundToggle" style="color:inherit;font-size:inherit;text-decoration:underline;text-underline-offset:3px" aria-pressed="false">Sound on</button></p>
+      <p>&copy; 2024 Decant Dynasty. All rights reserved.</p>
+      <p>Hand-poured at Valenzuela City, Metro Manila. · <button id="soundToggle" style="color:inherit;font-size:inherit;text-decoration:underline;text-underline-offset:3px" aria-pressed="false">Sound on</button></p>
       <p><a href="https://sketchfab.com/3d-models/atomizador-para-perfume-1eb44518f21f4da78d26fe40e94b82c7" target="_blank" rel="noopener">3D atomizer by LEOLATO</a> · CC BY 4.0</p>
     </div>
   </div>
@@ -585,8 +587,8 @@ section{padding:100px 0;}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="data.js?v=20260720-8"></script>
-<script src="catalog-research.js?v=20260720-5"></script>
-<script src="app.js?v=20260720-6"></script>
+<script src="data.js?v=20260720-9"></script>
+<script src="catalog-research.js?v=20260720-6"></script>
+<script src="app.js?v=20260720-7"></script>
 </body>
 </html>

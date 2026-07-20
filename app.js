@@ -118,16 +118,16 @@ const WHY_ICONS = [
 function defaultContent(){
   return {
     hero: {
-      eyebrow: "Hand-decanted · Nationwide delivery",
+      eyebrow: "Nationwide Delivery (J&T Express) · Same-Day Delivery (Lalamove)",
       headlineBefore: "Find Your",
       headlineEm: "Signature",
       headlineAfter: "Scent",
-      lede: "Discover authentic fragrance decants before committing to a full bottle — over {count} fragrances from {brands} houses, poured fresh and shipped nationwide.",
+      lede: "Try before you commit. Authentic fragrance decants, poured fresh and prepared for a premium sampling experience.",
     },
     buildBand: {
       eyebrow: "A private consultation",
       heading: "Build My Collection",
-      paragraph: "Answer a few questions about your lifestyle, climate, personality, and budget — we'll curate a personal fragrance wardrobe of decants suited to how you actually live, not just what's trending.",
+      paragraph: "Answer a few quick questions, and we'll recommend a personalized fragrance collection based on your style, lifestyle, and budget.",
     },
     brandsSection: {
       heading: "Explore Brands",
@@ -140,7 +140,7 @@ function defaultContent(){
       cards: [
         {title:"Avoid Expensive Blind Buys", desc:"Test the real thing on your own skin before spending on a full 50–100ml bottle."},
         {title:"Experience Before Committing", desc:"Notes read differently on paper than on skin. Live with a scent for days, not seconds."},
-        {title:"Authentic, Hand-Decanted", desc:"Every decant is poured by hand from authentic, verified bottles — never diluted, never fake."},
+        {title:"Authentic, Hand-Decanted", desc:"Hand-decanted from authentic bottles to ensure the original fragrance experience."},
         {title:"Affordable Exploration", desc:"Build a rotation of five fragrances for the price most people pay for one full bottle."},
       ],
     },
@@ -221,11 +221,15 @@ function persistTheme(){ localSet("prefs:theme",state.theme); }
 
 /* ---------------- cart / wishlist logic ---------------- */
 function addToCart(productId, size, qty){
+  const product = getProduct(productId);
+  if(!product){ toast("That fragrance could not be found"); return false; }
+  if(product.outOfStock){ toast(`${product.name} is currently out of stock`); return false; }
   qty = qty || 1;
   const existing = state.cart.find(c=>c.productId===productId && c.size===size);
   if(existing) existing.qty += qty;
   else state.cart.push({productId, size, qty});
   persistCart(); updateBadges(); renderCartPanel(); toast("Added to your bag");
+  return true;
 }
 function removeFromCart(idx){ state.cart.splice(idx,1); persistCart(); updateBadges(); renderCartPanel(); }
 function changeQty(idx, delta){
@@ -295,6 +299,8 @@ function buildOrderMessage(){
 }
 function openCheckout(){
   if(state.cart.length===0){ toast("Your bag is empty"); return; }
+  const unavailable = state.cart.map(c=>getProduct(c.productId)).filter(p=>p&&p.outOfStock);
+  if(unavailable.length){ toast("Remove out-of-stock items before checkout"); return; }
   const {text} = buildOrderMessage();
   navigator.clipboard?.writeText(text).catch(()=>{});
   showCheckoutModal(text);
@@ -389,7 +395,7 @@ function renderHome(){
         </svg>
         <div class="bottle-callout callout-seal" data-callout="seal"><b>PARAFILM Sealed</b><span>Locked in for a clean, leak-resistant journey.</span></div>
         <div class="bottle-callout callout-atomizer" data-callout="atomizer"><b>QUALITY Atomizer</b><span>A smooth, controlled mist with every press.</span></div>
-        <div class="bottle-callout callout-sticker" data-callout="sticker"><b>STICKER Label</b><span>Finished with the Decant Dynasty signature.</span></div>
+        <div class="bottle-callout callout-sticker" data-callout="sticker"><b>STICKER Label</b><span>Custom labels inspired by the original fragrance presentation.</span></div>
         <div class="bottle-callout callout-glass" data-callout="glass"><b>HARD Glass Bottle</b><span>Clear, durable glass protects every decant.</span></div>
       </div>
     </div>
@@ -402,7 +408,7 @@ function renderHome(){
         <p>${esc(c.brandsSection.paragraph)}</p>
       </div>
       <div class="brand-grid stagger">
-        ${brands.map(brandCardHTML).join("")}
+        ${brands.map(b=>brandCardHTML(b)).join("")}
       </div>
       <div style="text-align:center;margin-top:48px;">
         <a href="#/brands" class="btn btn-ghost">View All Brands</a>
@@ -452,17 +458,20 @@ function testiCard(t){
 /* ================================================================
    RENDER: BRAND CARD / PRODUCT CARD (reused everywhere)
    ================================================================ */
-function brandCardHTML(b){
+function brandCardHTML(b, hideName=false){
   const count = brandProductCount(b.id);
-  return `<div class="brand-card" data-go="/brand/${b.id}">
+  return `<div class="brand-card ${hideName?'brand-card-logo-only':''}" data-go="/brand/${b.id}" aria-label="Explore ${esc(b.name)} fragrances">
     <div class="brand-arrow"><svg viewBox="0 0 24 24" stroke="var(--ink)" fill="none" stroke-width="1.6"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="9 5 19 5 19 15"/></svg></div>
     <div class="brand-logo-wrap">
       ${b.logo ? imgTag(b.logo, b.name, "", b.name[0]) : `<span class="fallback">${esc(b.name[0])}</span>`}
     </div>
-    <div class="brand-name">${esc(b.name)}</div>
+    ${hideName?"":`<div class="brand-name">${esc(b.name)}</div>`}
     <div class="brand-count">${count} fragrance${count===1?"":"s"}</div>
     <div class="brand-desc">Tap to explore the full ${esc(b.name)} decant range.</div>
   </div>`;
+}
+function stockStampHTML(p){
+  return p.outOfStock ? `<div class="stock-stamp" aria-label="Out of stock">OUT OF STOCK</div>` : "";
 }
 function productCardHTML(p){
   const isWish = state.wishlist.includes(p.id);
@@ -471,6 +480,7 @@ function productCardHTML(p){
     ${p.recommended ? `<div class="badge-rec">Best Seller</div>` : ""}
     <div class="product-media">
       ${imgTag(p.image, `${p.brand} ${p.name}`, "", `${p.brand} — ${p.name}`)}
+      ${stockStampHTML(p)}
       <button class="wish-toggle ${isWish?'active':''}" data-wish-toggle="${p.id}" data-stop aria-label="Wishlist">
         <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.2 2.4 5 6 5c2 0 3.4 1 4.5 2.4l1.5 1.9 1.5-1.9C14.6 6 16 5 18 5c3.6 0 5.5 3.2 4 6.7C19.5 16.3 12 21 12 21z"/></svg>
       </button>
@@ -501,7 +511,7 @@ function renderBrandsIndex(){
   </div>
   <section style="padding-top:0;">
     <div class="wrap">
-      <div class="brand-grid stagger in">${allBrands().map(brandCardHTML).join("")}</div>
+      <div class="brand-grid stagger in">${allBrands().map(b=>brandCardHTML(b,true)).join("")}</div>
     </div>
   </section>`;
 }
@@ -590,7 +600,7 @@ function renderProductDetail(productId){
   return `
   <div class="wrap pd-grid" id="pdWrap" data-pid="${p.id}" data-size="${firstSize}">
     <div>
-      <div class="pd-media">${imgTag(p.image, `${p.brand} ${p.name}`, "", `${p.brand} — ${p.name}`)}</div>
+      <div class="pd-media">${imgTag(p.image, `${p.brand} ${p.name}`, "", `${p.brand} — ${p.name}`)}${stockStampHTML(p)}</div>
       ${hasImage2 ? `<div class="pd-media pd-media-2"><img src="${esc(p.image2)}" alt="${esc(`${p.brand} ${p.name} decant bottle`)}" loading="lazy" onerror="this.parentElement.remove()" /></div>` : ""}
     </div>
     <div>
@@ -609,7 +619,7 @@ function renderProductDetail(productId){
       <div class="eyebrow" style="margin-bottom:12px;">Choose Size</div>
       <div class="size-select" id="sizeSelectWrap">${sizeSelectHTML(p, firstSize)}</div>
       <div class="pd-actions">
-        <button class="btn btn-primary" id="pdAddToCart">Add to Bag</button>
+        <button class="btn btn-primary" id="pdAddToCart" ${p.outOfStock?'disabled aria-disabled="true"':''}>${p.outOfStock?'Out of Stock':'Add to Bag'}</button>
         <button class="btn btn-ghost" id="pdWishBtn" data-wish-toggle="${p.id}">${state.wishlist.includes(p.id) ? "♥ In Wishlist" : "♡ Add to Wishlist"}</button>
       </div>
     </div>
@@ -634,7 +644,7 @@ function openQuickView(productId){
   modal.innerHTML = `
     <button class="modal-close" data-close-modal>&times;</button>
     <div class="modal-inner" data-pid="${p.id}" data-size="${firstSize}">
-      <div class="modal-media">${imgTag(p.image, `${p.brand} ${p.name}`, "", `${p.brand} — ${p.name}`)}</div>
+      <div class="modal-media">${imgTag(p.image, `${p.brand} ${p.name}`, "", `${p.brand} — ${p.name}`)}${stockStampHTML(p)}</div>
       <div class="modal-body">
         <div class="pd-brand">${esc(p.brand)}</div>
         <h2 class="pd-name" style="font-size:26px;">${esc(p.name)}</h2>
@@ -644,7 +654,7 @@ function openQuickView(productId){
         <div class="eyebrow" style="margin-bottom:10px;">Choose Size</div>
         <div class="size-select" id="qvSizeWrap">${sizeSelectHTML(p, firstSize)}</div>
         <div class="pd-actions">
-          <button class="btn btn-primary" id="qvAddToCart">Add to Bag</button>
+          <button class="btn btn-primary" id="qvAddToCart" ${p.outOfStock?'disabled aria-disabled="true"':''}>${p.outOfStock?'Out of Stock':'Add to Bag'}</button>
           <a class="btn btn-ghost" href="#/product/${p.id}">Full Details</a>
         </div>
       </div>
@@ -680,7 +690,7 @@ function pickForAnswers(){
   const wanted={"Fresh & effortless":"fresh","Warm & magnetic":"warm","Elegant & polished":"floral","Bold & unexpected":"bold"}[quizAnswers.character];
   const wantedGender={Masculine:"Men",Feminine:"Women",Unisex:"Unisex"}[quizAnswers.gender];
   const budgetCap={"Under ₱300":300,"₱300–₱700":700,"₱700–₱1,500":1500,"No limit — I want the full experience":Infinity}[quizAnswers.budget]||Infinity;
-  const scored=allProducts().map(p=>{
+  const scored=allProducts().filter(p=>!p.outOfStock).map(p=>{
     const text=[p.description,...p.topNotes,...p.heartNotes,...p.baseNotes,p.longevity,p.projection].join(' ').toLowerCase();
     let score=0;const reasons=[];
     if(wanted){const hits=groups[wanted].filter(n=>text.includes(n)).length;score+=hits*3.2;if(hits)reasons.push(`${wanted} scent profile`);}
@@ -711,7 +721,7 @@ function renderBuild(){
   <div class="page-header wrap">
     <div class="breadcrumb"><a href="#/">Home</a> / Build My Collection</div>
     <h1>Build My Collection</h1>
-    <p>A private consultation, not a quiz for a quiz's sake. Answer a few questions about your lifestyle, the climate you wear scent in, the personality you want to express, and your budget — we'll curate a personal fragrance wardrobe of decants suited to you.</p>
+    <p>Answer a few quick questions, and we'll recommend a personalized fragrance collection based on your style, lifestyle, and budget.</p>
   </div>
   <section style="padding-top:0;">
     <div class="wrap" style="max-width:640px;">
@@ -808,7 +818,7 @@ function renderWishPanel(){
         <div class="ci-name">${esc(p.brand)} — ${esc(p.name)}</div>
         <div class="ci-meta">Starting at ${peso(Math.min(...Object.values(p.prices)))}</div>
         <div style="display:flex;gap:10px;">
-          <button class="btn btn-sm btn-ghost" data-wish-add-cart="${p.id}">Add to Bag</button>
+          <button class="btn btn-sm btn-ghost" data-wish-add-cart="${p.id}" ${p.outOfStock?'disabled aria-disabled="true"':''}>${p.outOfStock?'Out of Stock':'Add to Bag'}</button>
           <button class="remove-x" data-wish-toggle="${p.id}">Remove</button>
         </div>
       </div>
@@ -833,9 +843,11 @@ function renderCartPanel(){
     return `<div class="cart-item">
       <a class="cart-product-thumb" href="#/product/${esc(p.id)}" data-cart-product aria-label="View ${esc(p.brand)} ${esc(p.name)}">
         ${imgTag(p.image, p.name, "", p.name)}
+        ${stockStampHTML(p)}
       </a>
       <div class="cart-item-content">
         <a class="ci-name" href="#/product/${esc(p.id)}" data-cart-product>${esc(p.brand)} — ${esc(p.name)}</a>
+        ${p.outOfStock?`<div class="cart-stock-warning">Out of stock — remove to checkout</div>`:""}
         <div class="cart-size-row">
           <label class="cart-size-label">Size
             <select data-cart-size="${idx}" aria-label="Size for ${esc(p.name)}">
@@ -854,6 +866,7 @@ function renderCartPanel(){
     </div>`;
   }).join("");
   const subtotal=cartTotal(),discount=voucherDiscount();
+  const hasUnavailable=state.cart.some(c=>getProduct(c.productId)?.outOfStock);
   const voucherMessage=state.voucherCode?(discount?`<div class="voucher-feedback success">DD50 applied — you saved ${peso(discount)}.</div>`:state.voucherCode==="DD50"?`<div class="voucher-feedback">Spend ${peso(Math.max(0,599-subtotal))} more to unlock DD50.</div>`:`<div class="voucher-feedback error">That voucher code isn't valid.</div>`):"";
   foot.innerHTML = `
     <div class="voucher-entry">
@@ -864,7 +877,7 @@ function renderCartPanel(){
     <div class="subtotal-row"><span>Subtotal</span><span>${peso(subtotal)}</span></div>
     ${discount?`<div class="subtotal-row discount-row"><span>DD50 discount</span><span>−${peso(discount)}</span></div>`:""}
     <div class="subtotal-row total-row"><span>Total</span><span>${peso(subtotal-discount)}</span></div>
-    <button class="btn btn-primary" style="width:100%;" id="checkoutBtn">Checkout via Messenger</button>
+    <button class="btn btn-primary" style="width:100%;" id="checkoutBtn" ${hasUnavailable?'disabled aria-disabled="true"':''}>${hasUnavailable?'Remove unavailable items':'Checkout via Messenger'}</button>
     <p style="font-size:11.5px;color:var(--ink-soft);margin-top:10px;text-align:center;">Shipping fee shouldered by buyer · No COD</p>
   `;
   body.querySelectorAll("[data-qty-minus]").forEach(b=>b.onclick=()=>changeQty(+b.dataset.qtyMinus,-1));
