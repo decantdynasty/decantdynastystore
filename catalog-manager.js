@@ -135,28 +135,36 @@ function suggestedProductPath(){
   const brandId=productForm.elements.brandId.value||"brand";const name=productForm.elements.name.value||"product-name";
   return `images/products/${brandId}/${managerSlug(name)||"product-name"}.png`;
 }
+function validateEditorForm(form){
+  const invalid=form.querySelector(":invalid");if(!invalid)return true;
+  const label=invalid.closest(".field")?.querySelector("span")?.childNodes?.[0]?.textContent?.trim()||"the highlighted field";
+  invalid.scrollIntoView({behavior:"smooth",block:"center"});invalid.focus();form.reportValidity();toast(`Please complete ${label}`);return false;
+}
 function editProduct(id=null){
   state.editingProductId=id;state.productFile=null;const product=id?productById(id):null;
   fillProductForm(product);openEditor("product",product?product.name:"Add fragrance",product?"Product editor":"New catalog entry");
 }
 function saveProduct(event){
-  event.preventDefault();if(!productForm.reportValidity())return;
-  const fields=productForm.elements,existing=state.editingProductId?productById(state.editingProductId):null;
-  const brand=brandById(fields.brandId.value);if(!brand){toast("Choose a valid brand");return;}
-  const id=existing.id||nextProductId(brand.id,fields.name.value);
-  const image=state.productFile?suggestedProductPath():(existing?.image||suggestedProductPath());
-  const product={
-    ...(existing||{}),id,brandId:brand.id,brand:brand.name,name:fields.name.value.trim(),image,
-    image2:existing?.image2||`images/products/${brand.id}/${managerSlug(fields.name.value)}-decant.png`,
-    prices:{"1ml":Number(fields.price1.value),"2ml":Number(fields.price2.value),"3ml":Number(fields.price3.value),"5ml":Number(fields.price5.value)},
-    concentration:fields.concentration.value.trim(),gender:fields.gender.value,description:fields.description.value.trim(),
-    topNotes:noteList(fields.topNotes.value),heartNotes:noteList(fields.heartNotes.value),baseNotes:noteList(fields.baseNotes.value),
-    longevity:fields.longevity.value.trim(),projection:fields.projection.value.trim(),inspiredBy:fields.inspiredBy.value.trim()||null,
-    recommended:fields.recommended.checked,outOfStock:fields.outOfStock.checked
-  };
-  if(existing)state.products[state.products.indexOf(existing)]=product;else state.products.push(product);
-  if(state.productFile)state.pendingAssets.set(image,state.productFile);
-  persistDraft();renderAll();closeEditor();toast(`${product.name} saved to your draft`);
+  event.preventDefault();
+  try{
+    if(!validateEditorForm(productForm))return;
+    const fields=productForm.elements,existing=state.editingProductId?productById(state.editingProductId):null;
+    const brand=brandById(fields.brandId.value);if(!brand){toast("Choose a valid brand");return;}
+    const id=existing?.id||nextProductId(brand.id,fields.name.value);
+    const image=state.productFile?suggestedProductPath():(existing?.image||suggestedProductPath());
+    const product={
+      ...(existing||{}),id,brandId:brand.id,brand:brand.name,name:fields.name.value.trim(),image,
+      image2:existing?.image2||`images/products/${brand.id}/${managerSlug(fields.name.value)}-decant.png`,
+      prices:{"1ml":Number(fields.price1.value),"2ml":Number(fields.price2.value),"3ml":Number(fields.price3.value),"5ml":Number(fields.price5.value)},
+      concentration:fields.concentration.value.trim(),gender:fields.gender.value,description:fields.description.value.trim(),
+      topNotes:noteList(fields.topNotes.value),heartNotes:noteList(fields.heartNotes.value),baseNotes:noteList(fields.baseNotes.value),
+      longevity:fields.longevity.value.trim(),projection:fields.projection.value.trim(),inspiredBy:fields.inspiredBy.value.trim()||null,
+      recommended:fields.recommended.checked,outOfStock:fields.outOfStock.checked
+    };
+    if(existing)state.products[state.products.indexOf(existing)]=product;else state.products.push(product);
+    if(state.productFile)state.pendingAssets.set(image,state.productFile);
+    persistDraft();renderAll();closeEditor();toast(`${product.name} added. Click Save to Storefront when ready.`);
+  }catch(error){console.error("Product save failed",error);toast(`Product could not be saved: ${error.message}`);}
 }
 function deleteProduct(){
   const product=productById(state.editingProductId);if(!product)return;
@@ -177,17 +185,20 @@ function editBrand(id=null){
   fillBrandForm(brand);openEditor("brand",brand?brand.name:"Add brand",brand?"Brand editor":"New fragrance house");
 }
 function saveBrand(event){
-  event.preventDefault();if(!brandForm.reportValidity())return;
-  const fields=brandForm.elements,existing=state.editingBrandId?brandById(state.editingBrandId):null;
-  const id=existing?.id||managerSlug(fields.id.value||fields.name.value),name=fields.name.value.trim();
-  if(!id||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)){toast("Use a lowercase, hyphenated brand ID");return;}
-  if(!existing&&brandById(id)){toast("That brand ID already exists");return;}
-  const logo=state.brandFile?`images/brands/${id}.png`:(existing?.logo||`images/brands/${id}.png`);
-  const brand={id,name,logo};
-  if(existing)state.brands[state.brands.indexOf(existing)]=brand;else state.brands.push(brand);
-  state.products.filter(product=>product.brandId===id).forEach(product=>product.brand=name);
-  if(state.brandFile)state.pendingAssets.set(logo,state.brandFile);
-  persistDraft();renderAll();closeEditor();toast(`${name} saved to your draft`);
+  event.preventDefault();
+  try{
+    if(!validateEditorForm(brandForm))return;
+    const fields=brandForm.elements,existing=state.editingBrandId?brandById(state.editingBrandId):null;
+    const id=existing?.id||managerSlug(fields.id.value||fields.name.value),name=fields.name.value.trim();
+    if(!id||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)){toast("Use a lowercase, hyphenated brand ID");return;}
+    if(!existing&&brandById(id)){toast("That brand ID already exists");return;}
+    const logo=state.brandFile?`images/brands/${id}.png`:(existing?.logo||`images/brands/${id}.png`);
+    const brand={id,name,logo};
+    if(existing)state.brands[state.brands.indexOf(existing)]=brand;else state.brands.push(brand);
+    state.products.filter(product=>product.brandId===id).forEach(product=>product.brand=name);
+    if(state.brandFile)state.pendingAssets.set(logo,state.brandFile);
+    persistDraft();renderAll();closeEditor();toast(`${name} added. Click Save to Storefront when ready.`);
+  }catch(error){console.error("Brand save failed",error);toast(`Brand could not be saved: ${error.message}`);}
 }
 function deleteBrand(){
   const brand=brandById(state.editingBrandId);if(!brand)return;

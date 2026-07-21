@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-21T05:37:57.249Z",
+  "updatedAt": "2026-07-21T05:50:04.956Z",
   "brands": [
     {
       "id": "afnan",
@@ -2780,6 +2780,45 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "inspiredBy": "Dior Rouge Trafalgar",
       "recommended": false,
       "outOfStock": false
+    },
+    {
+      "id": "khadlaj-managed-shiyaaka-sky",
+      "brandId": "khadlaj",
+      "brand": "Khadlaj",
+      "name": "Shiyaaka Sky",
+      "image": "images/products/khadlaj/shiyaaka-sky.png",
+      "image2": "images/products/khadlaj/shiyaaka-sky-decant.png",
+      "prices": {
+        "1ml": 65,
+        "2ml": 125,
+        "3ml": 185,
+        "5ml": 315
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Men",
+      "description": "Opens with a crisp burst of bright citrus and airy freshness, evolving into an elegant heart of aromatic florals and subtle spices. As it settles, warm woods, smooth musk, and soft amber create a clean, long-lasting trail that feels both modern and timeless.",
+      "topNotes": [
+        "Verbana",
+        "Bergamot",
+        "Mandarin"
+      ],
+      "heartNotes": [
+        "Orange Blossom",
+        "Green Accord",
+        "Neroli",
+        "Geranium"
+      ],
+      "baseNotes": [
+        "Musk",
+        "Ambroxan",
+        "Sandalwood",
+        "Vetiver"
+      ],
+      "longevity": "Moderate (5–8 hours)",
+      "projection": "Moderate",
+      "inspiredBy": "Guerlain Herbes Troublantes",
+      "recommended": false,
+      "outOfStock": true
     },
     {
       "id": "khadlaj-0052",
