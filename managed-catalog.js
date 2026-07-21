@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-21T05:54:04.724Z",
+  "updatedAt": "2026-07-21T06:23:25.119Z",
   "brands": [
     {
       "id": "afnan",
@@ -220,7 +220,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       ],
       "longevity": "Light to moderate (4–6 hours)",
       "projection": "Soft to moderate",
-      "inspiredBy": null,
+      "inspiredBy": "Maison Francis Kurkdjian Aqua Vitae Forte",
       "recommended": false,
       "outOfStock": false
     },
