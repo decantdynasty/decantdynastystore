@@ -29,6 +29,10 @@ brands, prices, photos, inventory, scent notes, performance, descriptions and
 6. Preview the storefront locally. The changes become public only after the
    changed files are committed and pushed to GitHub.
 
+The launcher uses Windows PowerShell and does not require Python, Node.js or a
+server installation. It starts listening before opening the browser, avoiding
+local connection timing errors.
+
 The dashboard is deliberately disabled when opened from the public website.
 It uses browser folder permission only for the current session and never stores
 a GitHub password or access token. Chrome or Edge is recommended for direct
