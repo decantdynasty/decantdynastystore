@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-21T06:23:25.119Z",
+  "updatedAt": "2026-07-21T10:05:27.623Z",
   "brands": [
     {
       "id": "afnan",
@@ -74,6 +74,11 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "id": "jpg",
       "name": "Jean Paul Gaultier",
       "logo": "images/brands/jpg.png"
+    },
+    {
+      "id": "jovan",
+      "name": "Jovan",
+      "logo": "images/brands/jovan.png"
     },
     {
       "id": "khadlaj",
@@ -395,7 +400,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "3ml": 225,
         "5ml": 395
       },
-      "concentration": "Eau de Parfum",
+      "concentration": "Extrait de Parfum",
       "gender": "Men",
       "description": "A powerful fruity-mossy extrait with dark berries, bergamot, oakmoss and a mineral ambergris trail.",
       "topNotes": [
@@ -416,7 +421,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "longevity": "Very long (9–12+ hours)",
       "projection": "Strong to very strong",
       "inspiredBy": "Nishane Hacivat",
-      "recommended": false,
+      "recommended": true,
       "outOfStock": false
     },
     {
@@ -2064,8 +2069,8 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "3ml": 209,
         "5ml": 329
       },
-      "concentration": "Eau de Parfum",
-      "gender": "Unisex",
+      "concentration": "Extrait de Parfum",
+      "gender": "Men",
       "description": "A lavish spicy amber with incense and cinnamon over vanilla, tonka, cashmeran and musk.",
       "topNotes": [
         "Bergamot",
@@ -2102,7 +2107,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "3ml": 219,
         "5ml": 349
       },
-      "concentration": "Eau de Parfum",
+      "concentration": "Extrait de Parfum",
       "gender": "Unisex",
       "description": "A crisp citrus-aromatic composition with mint, tonic water and rosemary over a clean mossy musk and sandalwood base.",
       "topNotes": [
@@ -2214,7 +2219,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "5ml": 229
       },
       "concentration": "Eau de Parfum",
-      "gender": "Unisex",
+      "gender": "Men",
       "description": "The original Enigma — a mysterious, saffron-laced oud oriental.",
       "topNotes": [
         "Saffron",
@@ -2650,7 +2655,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "5ml": 289
       },
       "concentration": "Extrait de Parfum",
-      "gender": "Unisex",
+      "gender": "Men",
       "description": "A creamy tropical woody extrait with pineapple, coconut and iris over tonka, amber and sandalwood.",
       "topNotes": [
         "Pineapple",
@@ -5209,7 +5214,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "5ml": 295
       },
       "concentration": "Eau de Parfum",
-      "gender": "Unisex",
+      "gender": "Men",
       "description": "A nocturnal, deeply resinous oud elixir for evening wear.",
       "topNotes": [
         "Spices",
@@ -5476,25 +5481,28 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "5ml": 335
       },
       "concentration": "Extrait de Parfum",
-      "gender": "Women",
+      "gender": "Unisex",
       "description": "A cooling citrus-mint fragrance with ginger, sage and tea over airy woods, amber and white peony.",
       "topNotes": [
-        "Ginger",
-        "Sage",
-        "Tea"
+        "Spearmint",
+        "Lemon Zest",
+        "Calabrian Bergamot",
+        "Grapefruit",
+        "Snow"
       ],
       "heartNotes": [
-        "Mint",
-        "Citrus",
-        "Aquatic Notes"
+        "Ice",
+        "Tea",
+        "Ginger",
+        "Sage"
       ],
       "baseNotes": [
         "Ambermax",
-        "Cedarwood",
-        "White Peony"
+        "Peony",
+        "Cedar"
       ],
-      "longevity": "Moderate (5–8 hours)",
-      "projection": "Moderate",
+      "longevity": "Long (7–10 hours)",
+      "projection": "Strong",
       "inspiredBy": "Roja Dove Oceania",
       "recommended": true,
       "outOfStock": false
