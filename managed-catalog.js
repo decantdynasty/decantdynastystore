@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-21T10:05:27.623Z",
+  "updatedAt": "2026-07-21T10:31:29.348Z",
   "brands": [
     {
       "id": "afnan",
@@ -305,6 +305,44 @@ globalThis.DECANT_MANAGED_CATALOG = {
       ],
       "longevity": "Very long (9–12+ hours)",
       "projection": "Strong to very strong",
+      "inspiredBy": null,
+      "recommended": true,
+      "outOfStock": true
+    },
+    {
+      "id": "afnan-managed-9pm-rebel",
+      "brandId": "afnan",
+      "brand": "Afnan",
+      "name": "9PM Rebel",
+      "image": "images/products/afnan/9pm-rebel.png",
+      "image2": "images/products/afnan/9pm-rebel-decant.png",
+      "prices": {
+        "1ml": 65,
+        "2ml": 125,
+        "3ml": 185,
+        "5ml": 315
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Unisex",
+      "description": "A unisex fragrance that offers a vibrant blend of fruity and woody notes. The composition opens with refreshing mandarin, pineapple, and Granny Smith apple, leading to a heart of cedarwood, oakmoss, and vanilla. The base notes of caramel, dry woods, ambergris, and musk provide a warm and lasting finish.",
+      "topNotes": [
+        "Pineapple",
+        "Granny Smith Apple",
+        "Mandarin"
+      ],
+      "heartNotes": [
+        "Oakmoss",
+        "Cedarwood",
+        "Vanilla"
+      ],
+      "baseNotes": [
+        "Dry Wood",
+        "Amergris",
+        "Caramel",
+        "Musk"
+      ],
+      "longevity": "Moderate (5–8 hours)",
+      "projection": "Moderate",
       "inspiredBy": null,
       "recommended": true,
       "outOfStock": true
@@ -2606,6 +2644,104 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "inspiredBy": null,
       "recommended": true,
       "outOfStock": false
+    },
+    {
+      "id": "jovan-managed-musk-for-women",
+      "brandId": "jovan",
+      "brand": "Jovan",
+      "name": "Musk for Women",
+      "image": "images/products/jovan/musk-for-women.png",
+      "image2": "images/products/jovan/musk-for-women-decant.png",
+      "prices": {
+        "1ml": 35,
+        "2ml": 65,
+        "3ml": 95,
+        "5ml": 165
+      },
+      "concentration": "Cologne",
+      "gender": "Women",
+      "description": "Experience the sexy feeling with this mysterious fragrance. It unleashes your own natural powers of seduction.\nJasmine, neroli, and bergamot blend with the earthy, seductive musk in its composition.",
+      "topNotes": [
+        "Musk",
+        "Jasmine",
+        "Neroli",
+        "Bergamot"
+      ],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "Moderate (5–8 hours)",
+      "projection": "Moderate",
+      "inspiredBy": null,
+      "recommended": false,
+      "outOfStock": true
+    },
+    {
+      "id": "jovan-managed-white-musk-for-women",
+      "brandId": "jovan",
+      "brand": "Jovan",
+      "name": "White Musk for Women",
+      "image": "images/products/jovan/white-musk-for-women.png",
+      "image2": "images/products/jovan/white-musk-for-women-decant.png",
+      "prices": {
+        "1ml": 35,
+        "2ml": 65,
+        "3ml": 95,
+        "5ml": 165
+      },
+      "concentration": "Cologne",
+      "gender": "Women",
+      "description": "This is clear, a warm and purely feminine fragrance. Jasmine, ylang-ylang, and honeysuckle blend with sensual musk and amber.",
+      "topNotes": [
+        "Musk",
+        "Honeysuckle",
+        "Ylang-Ylang",
+        "Jasmine",
+        "Amber",
+        "Woody Notes"
+      ],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "Moderate (5–8 hours)",
+      "projection": "Moderate",
+      "inspiredBy": null,
+      "recommended": false,
+      "outOfStock": true
+    },
+    {
+      "id": "jovan-managed-white-musk-pour-homme",
+      "brandId": "jovan",
+      "brand": "Jovan",
+      "name": "White Musk Pour Homme",
+      "image": "images/products/jovan/white-musk-pour-homme.png",
+      "image2": "images/products/jovan/white-musk-pour-homme-decant.png",
+      "prices": {
+        "1ml": 35,
+        "2ml": 65,
+        "3ml": 95,
+        "5ml": 165
+      },
+      "concentration": "Cologne",
+      "gender": "Men",
+      "description": "A clean, long-lasting fragrance. Citruses are combined with clove, peppermint and thyme, and complimented by geranium, melon, and green apple. A unique, sea-like fresh perfume.",
+      "topNotes": [
+        "Granny Smith Apple",
+        "Mint",
+        "Melon",
+        "Citruses",
+        "Thyme"
+      ],
+      "heartNotes": [
+        "Cloves",
+        "Geranium"
+      ],
+      "baseNotes": [
+        "White Musk"
+      ],
+      "longevity": "Moderate (5–8 hours)",
+      "projection": "Moderate",
+      "inspiredBy": null,
+      "recommended": false,
+      "outOfStock": true
     },
     {
       "id": "khadlaj-0049",
