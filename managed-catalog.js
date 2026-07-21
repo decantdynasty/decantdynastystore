@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-21T05:50:04.956Z",
+  "updatedAt": "2026-07-21T05:54:04.724Z",
   "brands": [
     {
       "id": "afnan",
@@ -2789,10 +2789,10 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "image": "images/products/khadlaj/shiyaaka-sky.png",
       "image2": "images/products/khadlaj/shiyaaka-sky-decant.png",
       "prices": {
-        "1ml": 65,
-        "2ml": 125,
-        "3ml": 185,
-        "5ml": 315
+        "1ml": 79,
+        "2ml": 155,
+        "3ml": 225,
+        "5ml": 365
       },
       "concentration": "Eau de Parfum",
       "gender": "Men",
