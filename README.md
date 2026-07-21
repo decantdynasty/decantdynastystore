@@ -12,6 +12,40 @@ This is a responsive, framework-free fragrance storefront. Open `index.html` dir
 
 ## Catalog editing
 
+### Private Catalog Manager (recommended)
+
+The storefront now includes a local-only owner dashboard for editing products,
+brands, prices, photos, inventory, scent notes, performance, descriptions and
+“Inspired by” information without editing JavaScript by hand.
+
+1. Double-click `start-catalog-manager.bat` and keep its terminal window open.
+2. The browser opens `http://127.0.0.1:8765/catalog-manager.html`.
+3. Click **Connect Store Folder** and choose this folder—the one containing
+   `index.html`.
+4. Make changes. Product photos and brand logos must be PNG files; the manager
+   automatically gives them the correct lowercase, hyphenated path.
+5. Click **Save to Storefront**. This updates `managed-catalog.js` and writes any
+   selected PNGs into their correct image folders.
+6. Preview the storefront locally. The changes become public only after the
+   changed files are committed and pushed to GitHub.
+
+The dashboard is deliberately disabled when opened from the public website.
+It uses browser folder permission only for the current session and never stores
+a GitHub password or access token. Chrome or Edge is recommended for direct
+folder saving. Other browsers can download `managed-catalog.js` as a fallback.
+
+`data.js`, `prices.js`, and `catalog-research.js` remain the safe fallback when
+`managed-catalog.js` is empty. After the first dashboard save, the managed file
+becomes the storefront’s complete catalog snapshot.
+
+The manual instructions below are retained only for maintaining that fallback.
+Once a managed catalog has been saved, make all normal catalog changes through
+the dashboard so the generated snapshot and storefront stay synchronized.
+
+Run `node catalog-manager.test.js` after catalog-system changes to validate all
+brand references, product IDs, required price sizes, note arrays, PNG paths and
+the managed-catalog override.
+
 ### Add a brand
 
 1. Create a lowercase, hyphenated brand ID, such as `al-haramain`.

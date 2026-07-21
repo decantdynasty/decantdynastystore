@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow,noarchive" />
+  <title>Catalog Manager — Decant Dynasty</title>
+  <link rel="icon" href="images/logo.png" type="image/png" />
+  <link rel="stylesheet" href="catalog-manager.css?v=20260721-2" />
+</head>
+<body>
+  <div class="public-lock" id="publicLock" hidden>
+    <div class="lock-card">
+      <img src="images/logo.png" alt="Decant Dynasty" />
+      <span>Owner tools</span>
+      <h1>Catalog Manager is locked.</h1>
+      <p>This interface is intentionally disabled on the public website. Open it from the local store folder to manage the catalog.</p>
+    </div>
+  </div>
+
+  <div class="manager-app" id="managerApp" hidden>
+    <header class="manager-topbar">
+      <a class="manager-brand" href="index.html" aria-label="Open storefront">
+        <img src="images/logo.png" alt="" />
+        <span><b>Decant Dynasty</b><small>Catalog Manager</small></span>
+      </a>
+      <div class="topbar-actions">
+        <span class="save-state" id="saveState"><i></i>Catalog loaded</span>
+        <button class="button button-ghost" id="connectFolder">Connect Store Folder</button>
+        <button class="button button-primary" id="publishCatalog">Save to Storefront</button>
+      </div>
+    </header>
+
+    <div class="manager-layout">
+      <aside class="manager-sidebar">
+        <nav aria-label="Catalog sections">
+          <button class="side-link active" data-section="products">
+            <svg viewBox="0 0 24 24"><path d="M6 3h12l2 5-2 13H6L4 8l2-5zm-2 5h16M9 12h6"/></svg>
+            Products <span id="sideProductCount">0</span>
+          </button>
+          <button class="side-link" data-section="brands">
+            <svg viewBox="0 0 24 24"><path d="M4 20V8l8-5 8 5v12M4 10l8 5 8-5M12 15v6"/></svg>
+            Brands <span id="sideBrandCount">0</span>
+          </button>
+        </nav>
+
+        <div class="inventory-card">
+          <span>Inventory pulse</span>
+          <strong id="inventoryAvailable">0 available</strong>
+          <div class="inventory-track"><i id="inventoryBar"></i></div>
+          <small id="inventoryStockText">0 products out of stock</small>
+        </div>
+
+        <div class="manager-data-tools">
+          <button id="exportBackup">Export backup</button>
+          <label>Import backup<input id="importBackup" type="file" accept="application/json,.json" /></label>
+        </div>
+
+        <div class="manager-help">
+          <span>Publishing workflow</span>
+          <p>Save locally here, review the storefront, then ask Codex to commit and push when you are ready.</p>
+        </div>
+      </aside>
+
+      <main class="manager-main">
+        <section id="productsSection">
+          <div class="manager-heading">
+            <div><span class="eyebrow">Collection control</span><h1>Products</h1><p>Edit every detail without touching code.</p></div>
+            <button class="button button-primary" id="addProduct">+ Add Product</button>
+          </div>
+          <div class="manager-toolbar">
+            <label class="manager-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="productSearch" type="search" placeholder="Search products or inspiration" autocomplete="off" /></label>
+            <select id="brandFilter" aria-label="Filter by brand"><option value="">All brands</option></select>
+            <select id="stockFilter" aria-label="Filter by inventory"><option value="">All inventory</option><option value="available">Available</option><option value="out">Out of stock</option></select>
+          </div>
+          <div class="catalog-meta"><span id="productResultCount">0 products</span><span>Sorted alphabetically by brand</span></div>
+          <div class="product-table" id="productTable"></div>
+        </section>
+
+        <section id="brandsSection" hidden>
+          <div class="manager-heading">
+            <div><span class="eyebrow">House directory</span><h1>Brands</h1><p>Manage brand names and transparent PNG logos.</p></div>
+            <button class="button button-primary" id="addBrand">+ Add Brand</button>
+          </div>
+          <div class="manager-toolbar brand-toolbar">
+            <label class="manager-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="brandSearch" type="search" placeholder="Search brands" autocomplete="off" /></label>
+          </div>
+          <div class="brand-manager-grid" id="brandGrid"></div>
+        </section>
+      </main>
+    </div>
+
+    <div class="editor-scrim" id="editorScrim"></div>
+    <aside class="editor-panel" id="editorPanel" aria-hidden="true">
+      <div class="editor-head">
+        <div><span id="editorKicker">Product editor</span><h2 id="editorTitle">Edit fragrance</h2></div>
+        <button class="icon-button" id="closeEditor" aria-label="Close editor">×</button>
+      </div>
+      <form id="productForm" class="editor-form" hidden>
+        <input type="hidden" name="id" />
+        <div class="form-section">
+          <div class="section-label"><span>01</span>Identity</div>
+          <div class="field-grid two">
+            <label class="field"><span>Product name</span><input name="name" required /></label>
+            <label class="field"><span>Brand</span><select name="brandId" required></select></label>
+          </div>
+          <div class="image-field">
+            <div class="image-preview" id="productImagePreview"><span>No photo</span></div>
+            <div><b>Product photo</b><p id="productImagePath">PNG path will appear here.</p><label class="button button-ghost file-button">Choose PNG<input id="productImageInput" type="file" accept="image/png,.png" /></label></div>
+          </div>
+          <div class="field-grid two">
+            <label class="field"><span>Concentration</span><input name="concentration" list="concentrations" required /></label>
+            <label class="field"><span>Gender</span><select name="gender"><option>Men</option><option>Women</option><option>Unisex</option></select></label>
+          </div>
+          <div class="switch-row"><label><input name="recommended" type="checkbox" /><span></span>Best seller</label><label class="stock-switch"><input name="outOfStock" type="checkbox" /><span></span>Out of stock</label></div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-label"><span>02</span>Pricing</div>
+          <div class="price-grid">
+            <label class="field"><span>1ml</span><div class="currency"><i>₱</i><input name="price1" type="number" min="0" step="1" required /></div></label>
+            <label class="field"><span>2ml</span><div class="currency"><i>₱</i><input name="price2" type="number" min="0" step="1" required /></div></label>
+            <label class="field"><span>3ml</span><div class="currency"><i>₱</i><input name="price3" type="number" min="0" step="1" required /></div></label>
+            <label class="field"><span>5ml</span><div class="currency"><i>₱</i><input name="price5" type="number" min="0" step="1" required /></div></label>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-label"><span>03</span>Scent profile</div>
+          <label class="field"><span>Inspired by <small>Leave empty for original blends</small></span><input name="inspiredBy" placeholder="e.g. Louis Vuitton Imagination" /></label>
+          <label class="field"><span>Description</span><textarea name="description" rows="4" required></textarea></label>
+          <label class="field"><span>Top notes <small>Separate with commas</small></span><textarea name="topNotes" rows="2"></textarea></label>
+          <label class="field"><span>Heart notes <small>Separate with commas</small></span><textarea name="heartNotes" rows="2"></textarea></label>
+          <label class="field"><span>Base notes <small>Separate with commas</small></span><textarea name="baseNotes" rows="2"></textarea></label>
+        </div>
+
+        <div class="form-section">
+          <div class="section-label"><span>04</span>Performance</div>
+          <div class="field-grid two">
+            <label class="field"><span>Longevity</span><input name="longevity" placeholder="Long (7–10 hours)" required /></label>
+            <label class="field"><span>Projection</span><input name="projection" placeholder="Moderate to strong" required /></label>
+          </div>
+        </div>
+        <div class="editor-actions"><button class="button button-danger" id="deleteProduct" type="button">Delete</button><span></span><button class="button button-ghost" id="cancelProduct" type="button">Cancel</button><button class="button button-primary" type="submit">Save Product</button></div>
+      </form>
+
+      <form id="brandForm" class="editor-form" hidden>
+        <input type="hidden" name="originalId" />
+        <div class="form-section">
+          <div class="section-label"><span>01</span>Brand identity</div>
+          <label class="field"><span>Brand name</span><input name="name" required /></label>
+          <label class="field"><span>Brand ID <small>Lowercase and hyphenated</small></span><input name="id" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" /></label>
+          <div class="image-field brand-image-field">
+            <div class="image-preview" id="brandImagePreview"><span>No logo</span></div>
+            <div><b>Brand logo</b><p id="brandImagePath">images/brands/brand-name.png</p><label class="button button-ghost file-button">Choose PNG<input id="brandImageInput" type="file" accept="image/png,.png" /></label></div>
+          </div>
+        </div>
+        <div class="editor-actions"><button class="button button-danger" id="deleteBrand" type="button">Delete</button><span></span><button class="button button-ghost" id="cancelBrand" type="button">Cancel</button><button class="button button-primary" type="submit">Save Brand</button></div>
+      </form>
+    </aside>
+
+    <dialog class="export-dialog" id="exportDialog">
+      <button class="icon-button dialog-close" data-close-dialog aria-label="Close">×</button>
+      <span class="eyebrow">Catalog ready</span><h2>Storefront file prepared</h2>
+      <p>Your browser cannot write directly to the project folder. Download the file, replace <b>managed-catalog.js</b> in the store folder, then ask Codex to commit it.</p>
+      <div class="dialog-actions"><button class="button button-primary" id="downloadCatalog">Download managed-catalog.js</button><button class="button button-ghost" id="downloadBackup">Download JSON backup</button></div>
+    </dialog>
+
+    <div class="manager-toast" id="managerToast" role="status"></div>
+    <datalist id="concentrations"><option value="Eau de Toilette"><option value="Eau de Parfum"><option value="Eau de Parfum Intense"><option value="Extrait de Parfum"><option value="Parfum"><option value="Parfum Intense"></datalist>
+  </div>
+
+  <script src="prices.js?v=20260720-1"></script>
+  <script src="data.js?v=20260720-11"></script>
+  <script src="catalog-research.js?v=20260720-8"></script>
+  <script src="managed-catalog.js?v=20260721-1"></script>
+  <script src="catalog-manager.js?v=20260721-2"></script>
+</body>
+</html>

@@ -6,6 +6,25 @@
 (function(){
 "use strict";
 
+/* ---------------- owner-managed catalog ---------------- */
+function applyManagedCatalog(){
+  const managed=globalThis.DECANT_MANAGED_CATALOG;
+  if(!managed||managed.version!==1||!Array.isArray(managed.brands)||!Array.isArray(managed.products))return;
+  const brands=managed.brands.filter(brand=>brand&&brand.id&&brand.name&&brand.logo);
+  const brandMap=new Map(brands.map(brand=>[brand.id,brand]));
+  const products=managed.products.filter(product=>{
+    const prices=product?.prices;
+    return product?.id&&product?.name&&brandMap.has(product.brandId)&&prices&&["1ml","2ml","3ml","5ml"].every(size=>Number.isFinite(Number(prices[size]))&&Number(prices[size])>=0);
+  }).map(product=>({...product,brand:brandMap.get(product.brandId).name,prices:Object.fromEntries(Object.entries(product.prices).map(([size,price])=>[size,Number(price)]))}));
+  const uniqueBrandIds=new Set(brands.map(brand=>brand.id));
+  const uniqueProductIds=new Set(products.map(product=>product.id));
+  const invalid=brands.length!==managed.brands.length||products.length!==managed.products.length||uniqueBrandIds.size!==brands.length||uniqueProductIds.size!==products.length;
+  if(invalid||!brands.length||!products.length){console.warn("Managed catalog ignored because it is empty or invalid.");return;}
+  BRANDS.splice(0,BRANDS.length,...brands.map(brand=>({...brand})));
+  PRODUCTS.splice(0,PRODUCTS.length,...products.map(product=>({...product,topNotes:[...(product.topNotes||[])],heartNotes:[...(product.heartNotes||[])],baseNotes:[...(product.baseNotes||[])]})));
+}
+applyManagedCatalog();
+
 /* ---------------- device-local preferences ---------------- */
 function localGet(key){ try{return localStorage.getItem(key);}catch(e){return null;} }
 function localSet(key,value){ try{localStorage.setItem(key,value);}catch(e){} }
