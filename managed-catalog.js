@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-21T10:31:29.348Z",
+  "updatedAt": "2026-07-21T10:38:14.418Z",
   "brands": [
     {
       "id": "afnan",
@@ -54,6 +54,11 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "id": "calvin-klein",
       "name": "Calvin Klein",
       "logo": "images/brands/calvin-klein.png"
+    },
+    {
+      "id": "cristiano-ronaldo",
+      "name": "Cristiano Ronaldo",
+      "logo": "images/brands/cristiano-ronaldo.png"
     },
     {
       "id": "fragrance-world",
@@ -1387,6 +1392,45 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "inspiredBy": null,
       "recommended": false,
       "outOfStock": false
+    },
+    {
+      "id": "cristiano-ronaldo-managed-cr7",
+      "brandId": "cristiano-ronaldo",
+      "brand": "Cristiano Ronaldo",
+      "name": "CR7",
+      "image": "images/products/cristiano-ronaldo/cr7.png",
+      "image2": "images/products/cristiano-ronaldo/cr7-decant.png",
+      "prices": {
+        "1ml": 75,
+        "2ml": 140,
+        "3ml": 215,
+        "5ml": 365
+      },
+      "concentration": "Eau de Toilette",
+      "gender": "Men",
+      "description": "Is an Aromatic Fougere fragrance for men. CR7 was launched in 2017. Top notes are Lavender, Cardamom, Bergamot and Artemisia; middle notes are Tobacco, Cinnamon, Cedar and Iris; base notes are Vanilla, Musk, Sandalwood and Amber.",
+      "topNotes": [
+        "Lavender",
+        "Cardamom",
+        "Bergamot"
+      ],
+      "heartNotes": [
+        "Tobacco",
+        "Cinnamon",
+        "Cedar",
+        "Iris"
+      ],
+      "baseNotes": [
+        "Vanilla",
+        "Musk",
+        "Sandalwood",
+        "Amber"
+      ],
+      "longevity": "Moderate (5–8 hours)",
+      "projection": "Moderate",
+      "inspiredBy": null,
+      "recommended": false,
+      "outOfStock": true
     },
     {
       "id": "fragrance-world-0054",
