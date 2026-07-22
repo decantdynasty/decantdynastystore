@@ -28,6 +28,8 @@ applyManagedCatalog();
 const SITE_SETTINGS={...(globalThis.DECANT_DEFAULT_SETTINGS||{}),...(globalThis.DECANT_MANAGED_CATALOG?.settings||{})};
 if(!SITE_SETTINGS.paymentImage&&SITE_SETTINGS.paymentLogisticsImage)SITE_SETTINGS.paymentImage=SITE_SETTINGS.paymentLogisticsImage;
 if(!SITE_SETTINGS.logisticsImage&&SITE_SETTINGS.paymentLogisticsImage)SITE_SETTINGS.logisticsImage=SITE_SETTINGS.paymentLogisticsImage;
+if(!Array.isArray(SITE_SETTINGS.paymentImages))SITE_SETTINGS.paymentImages=SITE_SETTINGS.paymentImage?[SITE_SETTINGS.paymentImage]:[];
+if(!Array.isArray(SITE_SETTINGS.logisticsImages))SITE_SETTINGS.logisticsImages=SITE_SETTINGS.logisticsImage?[SITE_SETTINGS.logisticsImage]:[];
 const BUNDLES=(Array.isArray(globalThis.DECANT_MANAGED_CATALOG?.bundles)?globalThis.DECANT_MANAGED_CATALOG.bundles:globalThis.DECANT_DEFAULT_BUNDLES||[]).filter(bundle=>bundle&&bundle.id&&bundle.name&&bundle.active!==false);
 const catalogPageSize=()=>window.innerWidth<=960?18:20;
 const track=(name,params={})=>globalThis.DDAnalytics?.track(name,params);
@@ -256,13 +258,20 @@ function performanceScore(value,fallback=3){
   if(/soft|intimate|light|short/.test(text))return 2;
   return fallback;
 }
+function researchedProductProfile(p){
+  return globalThis.DECANT_PRODUCT_PROFILES?.[p?.id]||null;
+}
+function performanceLabel(type,score){
+  return globalThis.DECANT_PERFORMANCE_SCALES?.[type]?.[score]||`${score}/5`;
+}
 function productAccords(p){
   return globalThis.DECANT_ACCORDS?.derive(p)||["aromatic","woody","musky"];
 }
 function productProfile(p){
+  const researched=researchedProductProfile(p);
   return {
-    longevityScore:performanceScore(p.longevityScore??p.longevity),
-    projectionScore:performanceScore(p.projectionScore??p.projection)
+    longevityScore:performanceScore(p.longevityScore??researched?.longevityScore??p.longevity),
+    projectionScore:performanceScore(p.projectionScore??researched?.projectionScore??p.projection)
   };
 }
 function similarProducts(p){
@@ -571,8 +580,8 @@ function heroArtSVG(){
 }
 
 function renderHome(){
-  const bestSellers = allProducts().filter(p=>p.recommended).slice(0,6);
-  const brands = allBrands().slice(0,8);
+  const bestSellers = allProducts().filter(p=>p.recommended).slice(0,8);
+  const brands = allBrands().slice(0,10);
   const homeCatalog=allProducts();
   const initialCatalogCount=Math.min(catalogPageSize(),homeCatalog.length);
   const c = state.content;
@@ -908,8 +917,8 @@ function renderProductDetail(productId){
       <div class="pd-facts">
         <div class="pd-fact">Concentration<b>${esc(p.concentration)}</b></div>
         <div class="pd-fact">Gender<b>${esc(p.gender)}</b></div>
-        <div class="pd-fact pd-fact-level">Longevity<b>${profile.longevityScore}/5</b><i style="--score:${profile.longevityScore}"></i></div>
-        <div class="pd-fact pd-fact-level">Projection<b>${profile.projectionScore}/5</b><i style="--score:${profile.projectionScore}"></i></div>
+        <div class="pd-fact pd-fact-level">Longevity<b>${esc(performanceLabel("longevity",profile.longevityScore))} · ${profile.longevityScore}/5</b><i style="--score:${profile.longevityScore}"></i></div>
+        <div class="pd-fact pd-fact-level">Projection<b>${esc(performanceLabel("projection",profile.projectionScore))} · ${profile.projectionScore}/5</b><i style="--score:${profile.projectionScore}"></i></div>
       </div>
       <p class="pd-desc">${esc(p.description)}</p>
       ${accordsHTML(p)}
@@ -1256,6 +1265,13 @@ function saveCurrentScroll(){
   clearTimeout(scrollSaveTimer);scrollSaveTimer=0;
   try{history.replaceState({...history.state,ddManaged:true,scrollY:Math.max(0,window.scrollY)},"",location.href);}catch(e){}
 }
+function currentCatalogView(){
+  const view=history.state?.catalogView;
+  return view&&typeof view==="object"?view:{};
+}
+function saveCatalogView(next){
+  try{history.replaceState({...history.state,ddManaged:true,catalogView:{...currentCatalogView(),...next}},"",location.href);}catch(e){}
+}
 function scheduleScrollSave(){
   if(scrollSaveTimer)return;
   scrollSaveTimer=setTimeout(saveCurrentScroll,140);
@@ -1365,10 +1381,14 @@ function paintProductPage(grid,pagerHost,items,page=1){
 }
 function bindSimplePager(gridId,pagerId,getItems,sortId=null){
   const grid=document.getElementById(gridId),pager=document.getElementById(pagerId),sort=sortId?document.getElementById(sortId):null;if(!grid||!pager)return;
-  let page=1;
+  const saved=currentCatalogView();
+  if(sort&&[...sort.options].some(option=>option.value===saved.sort))sort.value=saved.sort;
+  let page=Math.max(1,Number(saved.page)||1);
+  const persist=()=>saveCatalogView({page,sort:sort?.value||"featured"});
   const paint=()=>{const items=sortedCatalogItems(getItems(),sort?.value);page=paintProductPage(grid,pager,items,page);};
-  pager.onclick=e=>{const button=e.target.closest("[data-page]");if(!button||button.disabled)return;page=Number(button.dataset.page)||1;paint();grid.scrollIntoView({behavior:"smooth",block:"start"});};
-  if(sort)sort.onchange=()=>{page=1;paint();};
+  pager.onclick=e=>{const button=e.target.closest("[data-page]");if(!button||button.disabled)return;page=Number(button.dataset.page)||1;paint();persist();grid.scrollIntoView({behavior:"smooth",block:"start"});};
+  if(sort)sort.onchange=()=>{page=1;paint();persist();};
+  paint();persist();
 }
 
 function postRenderBind(r){
@@ -1400,16 +1420,21 @@ function postRenderBind(r){
   if(r.page==="brand"){
     const grid = document.getElementById("brandProductGrid");
     const pager=document.getElementById("brandProductPager"),sort=document.getElementById("brandSort"),count=document.getElementById("brandResultCount");
-    let gender="all",page=1;
+    const saved=currentCatalogView();
+    if([...sort.options].some(option=>option.value===saved.sort))sort.value=saved.sort;
+    let gender=["all","Men","Women","Unisex"].includes(saved.gender)?saved.gender:"all",page=Math.max(1,Number(saved.page)||1);
+    const persist=()=>saveCatalogView({page,gender,sort:sort.value});
     const apply=()=>{let items=productsByBrand(r.id).filter(p=>gender==="all"||p.gender===gender);items=sortedCatalogItems(items,sort.value);count.textContent=`${items.length} fragrance${items.length===1?'':'s'}`;page=paintProductPage(grid,pager,items,page);};
+    document.querySelectorAll("[data-filter-gender]").forEach(chip=>chip.classList.toggle("active",chip.dataset.filterGender===gender));
     document.querySelectorAll("[data-filter-gender]").forEach(chip=>{
       chip.onclick = ()=>{
         document.querySelectorAll("[data-filter-gender]").forEach(c=>c.classList.remove("active"));
         chip.classList.add("active");
-        gender=chip.dataset.filterGender;page=1;apply();
+        gender=chip.dataset.filterGender;page=1;apply();persist();
       };
     });
-    sort.onchange=()=>{page=1;apply();};pager.onclick=e=>{const button=e.target.closest("[data-page]");if(!button||button.disabled)return;page=Number(button.dataset.page);apply();grid.scrollIntoView({behavior:"smooth",block:"start"});};
+    sort.onchange=()=>{page=1;apply();persist();};pager.onclick=e=>{const button=e.target.closest("[data-page]");if(!button||button.disabled)return;page=Number(button.dataset.page);apply();persist();grid.scrollIntoView({behavior:"smooth",block:"start"});};
+    apply();persist();
   }
   if(r.page==="collection"){
     const grid = document.getElementById("collectionGrid");
@@ -1421,13 +1446,24 @@ function postRenderBind(r){
     const pickerEmpty = picker.querySelector(".brand-picker-empty");
     const pickerOptions = [...picker.querySelectorAll("[data-brand-option]")];
     const pager=document.getElementById("collectionPager"),sort=document.getElementById("collectionSort"),count=document.getElementById("collectionResultCount");
-    let curGender = "all", curBrand="all",page=1;
+    const saved=currentCatalogView();
+    if([...sort.options].some(option=>option.value===saved.sort))sort.value=saved.sort;
+    let curGender=["all","Men","Women","Unisex"].includes(saved.gender)?saved.gender:"all";
+    let curBrand=pickerOptions.some(option=>option.dataset.brandOption===saved.brand)?saved.brand:"all";
+    let page=Math.max(1,Number(saved.page)||1);
+    const persist=()=>saveCatalogView({page,gender:curGender,brand:curBrand,sort:sort.value});
     function apply(){
       const items = sortedCatalogItems(allProducts().filter(p=>(curGender==="all"||p.gender===curGender)&&(curBrand==="all"||p.brandId===curBrand)),sort.value);
       count.textContent=`${items.length} fragrance${items.length===1?'':'s'}`;page=paintProductPage(grid,pager,items,page);
     }
+    document.querySelectorAll("[data-cf-gender]").forEach(chip=>chip.classList.toggle("active",chip.dataset.cfGender===curGender));
+    const restoredBrandOption=pickerOptions.find(option=>option.dataset.brandOption===curBrand)||pickerOptions[0];
+    if(restoredBrandOption){
+      pickerValue.textContent=restoredBrandOption.dataset.brandName;
+      pickerOptions.forEach(item=>item.setAttribute("aria-selected",String(item===restoredBrandOption)));
+    }
     document.querySelectorAll("[data-cf-gender]").forEach(chip=>{
-      chip.onclick = ()=>{ document.querySelectorAll("[data-cf-gender]").forEach(c=>c.classList.remove("active")); chip.classList.add("active"); curGender=chip.dataset.cfGender;page=1; apply(); };
+      chip.onclick = ()=>{ document.querySelectorAll("[data-cf-gender]").forEach(c=>c.classList.remove("active")); chip.classList.add("active"); curGender=chip.dataset.cfGender;page=1; apply();persist(); };
     });
     function setPickerOpen(open){
       picker.classList.toggle("is-open",open);
@@ -1451,6 +1487,7 @@ function postRenderBind(r){
       setPickerOpen(false);
       page=1;
       apply();
+      persist();
       pickerButton.focus();
     }
     pickerButton.onclick=()=>setPickerOpen(!picker.classList.contains("is-open"));
@@ -1475,7 +1512,8 @@ function postRenderBind(r){
       }
     };
     pickerOptions.forEach(option=>option.onclick=()=>chooseBrand(option));
-    sort.onchange=()=>{page=1;apply();};pager.onclick=e=>{const button=e.target.closest("[data-page]");if(!button||button.disabled)return;page=Number(button.dataset.page);apply();grid.scrollIntoView({behavior:"smooth",block:"start"});};
+    sort.onchange=()=>{page=1;apply();persist();};pager.onclick=e=>{const button=e.target.closest("[data-page]");if(!button||button.disabled)return;page=Number(button.dataset.page);apply();persist();grid.scrollIntoView({behavior:"smooth",block:"start"});};
+    apply();persist();
   }
   if(r.page==="build"){ quizStep=0; quizAnswers={}; renderQuizStep(); }
   if(r.page==="contact"){
@@ -1512,12 +1550,17 @@ function initVoucherPromo(){
 }
 function syncFooterPartners(){
   const grid=document.querySelector(".footer-grid");
-  const refresh=()=>{if(grid)grid.dataset.partnerCount=String([["footerPayment"],["footerLogistics"]].filter(([id])=>{const section=document.getElementById(id);return section&&!section.hidden&&!section.querySelector("img")?.hidden;}).length);};
-  [["footerPayment","paymentImage"],["footerLogistics","logisticsImage"]].forEach(([sectionId,setting])=>{
-    const section=document.getElementById(sectionId),image=section?.querySelector("img");if(!section||!image)return;
-    const source=String(SITE_SETTINGS[setting]||"").trim();section.hidden=!source;
-    if(!source)return;
-    image.hidden=false;image.src=source;image.onerror=()=>{image.hidden=true;section.hidden=true;refresh();};
+  const configs=[
+    ["footerPayment","paymentImages","Secure payment options"],
+    ["footerLogistics","logisticsImages","Nationwide and same-day delivery"]
+  ];
+  const refresh=()=>{if(grid)grid.dataset.partnerCount="2";};
+  configs.forEach(([sectionId,setting,emptyLabel])=>{
+    const section=document.getElementById(sectionId),list=section?.querySelector(".footer-partner-list");if(!section||!list)return;
+    const sources=[...new Set((SITE_SETTINGS[setting]||[]).map(source=>String(source||"").trim()).filter(Boolean))];
+    section.hidden=false;
+    list.innerHTML=sources.length?sources.map(source=>`<img class="footer-partner-img" src="${esc(source)}" alt="" loading="lazy" />`).join(""):`<span class="footer-partner-empty">${esc(emptyLabel)}</span>`;
+    list.querySelectorAll("img").forEach(image=>image.onerror=()=>{image.remove();if(!list.querySelector("img"))list.innerHTML=`<span class="footer-partner-empty">${esc(emptyLabel)}</span>`;});
   });
   refresh();
 }

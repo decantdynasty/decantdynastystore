@@ -97,8 +97,8 @@
           <div class="manager-heading"><div><span class="eyebrow">Storefront tools</span><h1>Settings</h1><p>Connect analytics and manage the footer partner artwork.</p></div></div>
           <div class="form-section" style="max-width:720px">
             <label class="field"><span>Google Analytics measurement ID <small>Optional · free GA4 property, format G-XXXXXXXXXX</small></span><input id="analyticsMeasurementId" placeholder="G-XXXXXXXXXX" /></label>
-            <div class="image-field"><div class="image-preview" id="paymentMediaPreview"><span>No artwork</span></div><div><b>Payment artwork</b><p id="paymentMediaPath">No image selected</p><div class="inline-actions"><label class="button button-ghost file-button">Choose PNG<input id="paymentMediaInput" type="file" accept="image/png,.png" /></label><button class="button button-ghost" id="removePaymentMedia" type="button">Remove</button></div></div></div>
-            <div class="image-field"><div class="image-preview" id="logisticsMediaPreview"><span>No artwork</span></div><div><b>Logistics artwork</b><p id="logisticsMediaPath">No image selected</p><div class="inline-actions"><label class="button button-ghost file-button">Choose PNG<input id="logisticsMediaInput" type="file" accept="image/png,.png" /></label><button class="button button-ghost" id="removeLogisticsMedia" type="button">Remove</button></div></div></div>
+            <div class="partner-settings-group"><div class="partner-settings-head"><div><b>Payment logos</b><p>Add individual PNG logos; they appear as compact cards in the footer.</p></div><label class="button button-ghost file-button">Add PNGs<input id="paymentMediaInput" type="file" accept="image/png,.png" multiple /></label></div><div class="partner-media-manager-grid" id="paymentMediaList"></div></div>
+            <div class="partner-settings-group"><div class="partner-settings-head"><div><b>Logistics logos</b><p>Upload one or several delivery-partner PNG logos.</p></div><label class="button button-ghost file-button">Add PNGs<input id="logisticsMediaInput" type="file" accept="image/png,.png" multiple /></label></div><div class="partner-media-manager-grid" id="logisticsMediaList"></div></div>
             <button class="button button-primary" id="saveSettings">Save Settings</button>
           </div>
           <div class="inventory-card" style="max-width:720px;margin-top:20px"><span>Tracked business events</span><p style="font-size:11px;line-height:1.7;color:var(--muted)">Searches and no-result searches · product views · cart abandonment · quiz completion · Messenger checkout clicks · voucher usage · product comparisons. Connect GA4 above for aggregated customer reporting.</p></div>
@@ -151,8 +151,8 @@
         <div class="form-section">
           <div class="section-label"><span>04</span>Performance</div>
           <div class="field-grid two">
-            <label class="field"><span>Longevity level <small>1–5</small></span><input name="longevityScore" type="number" min="1" max="5" step="1" required /></label>
-            <label class="field"><span>Projection level <small>1–5</small></span><input name="projectionScore" type="number" min="1" max="5" step="1" required /></label>
+            <label class="field"><span>Longevity level <small>Fragrantica scale</small></span><select name="longevityScore" required><option value="1">1 — Very weak</option><option value="2">2 — Weak</option><option value="3">3 — Moderate</option><option value="4">4 — Long lasting</option><option value="5">5 — Eternal</option></select></label>
+            <label class="field"><span>Projection level <small>Fragrantica scale</small></span><select name="projectionScore" required><option value="1">1 — Intimate</option><option value="3">3 — Moderate</option><option value="4">4 — Strong</option><option value="5">5 — Enormous</option></select></label>
           </div>
           <label class="field"><span>Similar fragrances <small>Product IDs, separated with commas</small></span><input name="similarProductIds" placeholder="afnan-0002, rasasi-0098" /></label>
         </div>
@@ -196,7 +196,8 @@
   <script src="catalog-research.js?v=20260720-8"></script>
   <script src="managed-catalog.js?v=20260721-1"></script>
   <script src="catalog-extras.js?v=20260722-2"></script>
-  <script src="catalog-accords.js?v=20260722-1"></script>
-  <script src="catalog-manager.js?v=20260722-2"></script>
+  <script src="catalog-profiles.js?v=20260722-1"></script>
+  <script src="catalog-accords.js?v=20260722-2"></script>
+  <script src="catalog-manager.js?v=20260722-3"></script>
 </body>
 </html>

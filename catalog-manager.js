@@ -16,9 +16,16 @@ const noteList=value=>String(value||"").split(/[,\n]/).map(note=>note.trim()).fi
 const DRAFT_KEY="dd:catalog-manager:draft:v1";
 const managed=globalThis.DECANT_MANAGED_CATALOG;
 const source=managed?.version===1&&Array.isArray(managed.brands)&&Array.isArray(managed.products)?managed:{brands:BRANDS,products:PRODUCTS};
-const state={brands:clone(source.brands),products:clone(source.products),bundles:clone(Array.isArray(source.bundles)?source.bundles:globalThis.DECANT_DEFAULT_BUNDLES||[]),settings:{...(globalThis.DECANT_DEFAULT_SETTINGS||{}),...(source.settings||{})},section:"products",editingProductId:null,editingBrandId:null,editingBundleId:null,productFile:null,brandFile:null,paymentMediaFile:null,logisticsMediaFile:null,rootHandle:null,pendingAssets:new Map(),dirty:false,restored:false};
-if(!state.settings.paymentImage&&state.settings.paymentLogisticsImage)state.settings.paymentImage=state.settings.paymentLogisticsImage;
-if(!state.settings.logisticsImage&&state.settings.paymentLogisticsImage)state.settings.logisticsImage=state.settings.paymentLogisticsImage;
+const state={brands:clone(source.brands),products:clone(source.products),bundles:clone(Array.isArray(source.bundles)?source.bundles:globalThis.DECANT_DEFAULT_BUNDLES||[]),settings:{...(globalThis.DECANT_DEFAULT_SETTINGS||{}),...(source.settings||{})},section:"products",editingProductId:null,editingBrandId:null,editingBundleId:null,productFile:null,brandFile:null,rootHandle:null,pendingAssets:new Map(),partnerPreviewUrls:new Map(),dirty:false,restored:false};
+function normalizePartnerSettings(){
+  const combined=state.settings.paymentLogisticsImage||"";
+  if(!Array.isArray(state.settings.paymentImages))state.settings.paymentImages=state.settings.paymentImage?[state.settings.paymentImage]:(combined?[combined]:[]);
+  if(!Array.isArray(state.settings.logisticsImages))state.settings.logisticsImages=state.settings.logisticsImage?[state.settings.logisticsImage]:(combined?[combined]:[]);
+  state.settings.paymentImages=[...new Set(state.settings.paymentImages.map(value=>String(value||"").trim()).filter(Boolean))];
+  state.settings.logisticsImages=[...new Set(state.settings.logisticsImages.map(value=>String(value||"").trim()).filter(Boolean))];
+  delete state.settings.paymentImage;delete state.settings.logisticsImage;delete state.settings.paymentLogisticsImage;
+}
+normalizePartnerSettings();
 
 try{
   const draft=JSON.parse(localStorage.getItem(DRAFT_KEY)||"null");
@@ -26,8 +33,7 @@ try{
     state.brands=draft.brands;state.products=draft.products;state.bundles=clone(Array.isArray(draft.bundles)?draft.bundles:state.bundles);state.settings={...state.settings,...(draft.settings||{})};state.dirty=true;state.restored=true;
   }
 }catch(error){console.warn("Catalog draft could not be restored",error);}
-if(!state.settings.paymentImage&&state.settings.paymentLogisticsImage)state.settings.paymentImage=state.settings.paymentLogisticsImage;
-if(!state.settings.logisticsImage&&state.settings.paymentLogisticsImage)state.settings.logisticsImage=state.settings.paymentLogisticsImage;
+normalizePartnerSettings();
 
 const productForm=$("#productForm");
 const brandForm=$("#brandForm");
@@ -114,10 +120,37 @@ function renderBundles(){
 }
 function renderSettings(){
   $("#analyticsMeasurementId").value=state.settings.analyticsMeasurementId||"";
-  const payment=state.settings.paymentImage||"",logistics=state.settings.logisticsImage||"";
-  $("#paymentMediaPath").textContent=payment||"No image selected";setPreview($("#paymentMediaPreview"),payment,state.paymentMediaFile,true);
-  $("#logisticsMediaPath").textContent=logistics||"No image selected";setPreview($("#logisticsMediaPreview"),logistics,state.logisticsMediaFile,true);
-  $("#removePaymentMedia").disabled=!payment&&!state.paymentMediaFile;$("#removeLogisticsMedia").disabled=!logistics&&!state.logisticsMediaFile;
+  renderPartnerImages("payment");
+  renderPartnerImages("logistics");
+}
+function partnerPreviewSource(path){
+  const file=state.pendingAssets.get(path);if(!file)return path;
+  if(!state.partnerPreviewUrls.has(path))state.partnerPreviewUrls.set(path,URL.createObjectURL(file));
+  return state.partnerPreviewUrls.get(path);
+}
+function renderPartnerImages(type){
+  const key=`${type}Images`,images=state.settings[key]||[],host=$(`#${type}MediaList`);
+  if(!host)return;
+  host.innerHTML=images.length?images.map(path=>`<article class="partner-media-card"><img src="${esc(partnerPreviewSource(path))}" alt="" /><span title="${esc(path)}">${esc(path.split("/").at(-1))}</span><button type="button" data-remove-partner="${type}" data-partner-path="${esc(path)}" aria-label="Remove image">×</button></article>`).join(""):`<div class="partner-media-empty">No ${type} logos yet. Add one or several PNG files.</div>`;
+}
+function nextPartnerPath(type,fileName){
+  const existing=new Set([...(state.settings[`${type}Images`]||[]),...state.pendingAssets.keys()]);
+  const base=managerSlug(String(fileName||"partner").replace(/\.png$/i,""))||"partner";
+  let path=`images/partners/${type}/${base}.png`,index=2;
+  while(existing.has(path))path=`images/partners/${type}/${base}-${index++}.png`;
+  return path;
+}
+function addPartnerImages(type,fileList){
+  const files=[...fileList];if(!files.length)return;
+  const invalid=files.filter(file=>!validatePng(file));if(invalid.length){toast("Payment and logistics artwork must be PNG files");return;}
+  const key=`${type}Images`;state.settings[key]=state.settings[key]||[];
+  files.forEach(file=>{const path=nextPartnerPath(type,file.name);state.settings[key].push(path);state.pendingAssets.set(path,file);});
+  persistDraft();renderSettings();toast(`${files.length} ${type} image${files.length===1?"":"s"} added to the draft`);
+}
+function removePartnerImage(type,path){
+  const key=`${type}Images`;state.settings[key]=(state.settings[key]||[]).filter(source=>source!==path);state.pendingAssets.delete(path);
+  if(state.partnerPreviewUrls.has(path)){URL.revokeObjectURL(state.partnerPreviewUrls.get(path));state.partnerPreviewUrls.delete(path);}
+  persistDraft();renderSettings();
 }
 function renderAll(){renderSummary();renderBrandOptions();renderProducts();renderBrands();renderBundles();renderSettings();setSaveState();}
 
@@ -144,7 +177,8 @@ function fillProductForm(product){
   fields.price1.value=product?.prices?.["1ml"]??"";fields.price2.value=product?.prices?.["2ml"]??"";fields.price3.value=product?.prices?.["3ml"]??"";fields.price5.value=product?.prices?.["5ml"]??"";
   fields.inspiredBy.value=product?.inspiredBy||"";fields.description.value=product?.description||"";
   fields.accords.value=(product?(globalThis.DECANT_ACCORDS?.derive(product)||["aromatic","woody","musky"]):["aromatic","woody","musky"]).join(", ");
-  fields.longevityScore.value=product?.longevityScore||3;fields.projectionScore.value=product?.projectionScore||3;
+  const researched=globalThis.DECANT_PRODUCT_PROFILES?.[product?.id]||{};
+  fields.longevityScore.value=product?.longevityScore??researched.longevityScore??3;fields.projectionScore.value=product?.projectionScore??researched.projectionScore??3;
   fields.similarProductIds.value=(product?.similarProductIds||[]).join(", ");
   const path=product?.image||suggestedProductPath();$("#productImagePath").textContent=path;setPreview($("#productImagePreview"),path,null);
   $("#deleteProduct").hidden=!product;
@@ -245,9 +279,7 @@ function deleteBundle(){const bundle=bundleById(state.editingBundleId);if(!bundl
 function saveSettings(){
   const measurementId=$("#analyticsMeasurementId").value.trim().toUpperCase();if(measurementId&&!/^G-[A-Z0-9]+$/.test(measurementId)){toast("Use a GA4 ID beginning with G-");return;}
   state.settings.analyticsMeasurementId=measurementId;
-  if(state.paymentMediaFile){state.settings.paymentImage="images/payment.png";state.pendingAssets.set(state.settings.paymentImage,state.paymentMediaFile);}
-  if(state.logisticsMediaFile){state.settings.logisticsImage="images/logistics.png";state.pendingAssets.set(state.settings.logisticsImage,state.logisticsMediaFile);}
-  delete state.settings.paymentLogisticsImage;persistDraft();renderSettings();toast("Storefront settings saved to your draft");
+  normalizePartnerSettings();persistDraft();renderSettings();toast("Storefront settings saved to your draft");
 }
 
 function validatePng(file){return file&&(/\.png$/i.test(file.name)||file.type==="image/png");}
@@ -327,10 +359,9 @@ productForm.elements.brandId.onchange=()=>{if(!state.editingProductId&&!state.pr
 brandForm.elements.name.oninput=()=>{if(!state.editingBrandId){brandForm.elements.id.value=managerSlug(brandForm.elements.name.value);$("#brandImagePath").textContent=`images/brands/${managerSlug(brandForm.elements.name.value)||"brand-name"}.png`;}};
 productImageInput.onchange=()=>{const file=productImageInput.files[0];if(!file)return;if(!validatePng(file)){productImageInput.value="";toast("Product photos must be PNG files");return;}state.productFile=file;$("#productImagePath").textContent=suggestedProductPath();setPreview($("#productImagePreview"),"",file);};
 brandImageInput.onchange=()=>{const file=brandImageInput.files[0];if(!file)return;if(!validatePng(file)){brandImageInput.value="";toast("Brand logos must be PNG files");return;}state.brandFile=file;const id=state.editingBrandId||managerSlug(brandForm.elements.id.value||brandForm.elements.name.value);$("#brandImagePath").textContent=`images/brands/${id||"brand-name"}.png`;setPreview($("#brandImagePreview"),"",file,true);};
-$("#paymentMediaInput").onchange=()=>{const file=$("#paymentMediaInput").files[0];if(!file)return;if(!validatePng(file)){toast("Payment artwork must be a PNG file");return;}state.paymentMediaFile=file;state.settings.paymentImage="images/payment.png";renderSettings();};
-$("#logisticsMediaInput").onchange=()=>{const file=$("#logisticsMediaInput").files[0];if(!file)return;if(!validatePng(file)){toast("Logistics artwork must be a PNG file");return;}state.logisticsMediaFile=file;state.settings.logisticsImage="images/logistics.png";renderSettings();};
-$("#removePaymentMedia").onclick=()=>{state.paymentMediaFile=null;state.settings.paymentImage=null;state.pendingAssets.delete("images/payment.png");persistDraft();renderSettings();};
-$("#removeLogisticsMedia").onclick=()=>{state.logisticsMediaFile=null;state.settings.logisticsImage=null;state.pendingAssets.delete("images/logistics.png");persistDraft();renderSettings();};
+$("#paymentMediaInput").onchange=event=>{addPartnerImages("payment",event.target.files);event.target.value="";};
+$("#logisticsMediaInput").onchange=event=>{addPartnerImages("logistics",event.target.files);event.target.value="";};
+$("#settingsSection").onclick=event=>{const button=event.target.closest("[data-remove-partner]");if(button)removePartnerImage(button.dataset.removePartner,button.dataset.partnerPath);};
 $("#saveSettings").onclick=saveSettings;
 $("#connectFolder").onclick=connectFolder;$("#publishCatalog").onclick=saveToStorefront;
 $("#downloadCatalog").onclick=()=>{download("managed-catalog.js",catalogSource());toast("Catalog file downloaded — your draft remains until it is installed");};
@@ -341,7 +372,7 @@ $("#importBackup").onchange=async event=>{
   try{
     const payload=JSON.parse(await file.text());const error=validateCatalog(payload);if(error)throw new Error(error);
     if(!confirm(`Import ${payload.products.length} products and ${payload.brands.length} brands? This replaces the current draft.`))return;
-    state.brands=clone(payload.brands);state.products=clone(payload.products);state.bundles=clone(Array.isArray(payload.bundles)?payload.bundles:state.bundles);state.settings={...state.settings,...(payload.settings||{})};state.pendingAssets.clear();persistDraft();renderAll();toast("Catalog backup imported into your draft");
+    state.brands=clone(payload.brands);state.products=clone(payload.products);state.bundles=clone(Array.isArray(payload.bundles)?payload.bundles:state.bundles);state.settings={...state.settings,...(payload.settings||{})};normalizePartnerSettings();state.pendingAssets.clear();persistDraft();renderAll();toast("Catalog backup imported into your draft");
   }catch(error){toast(`Backup could not be imported: ${error.message}`);}finally{event.target.value="";}
 };
 $$('[data-close-dialog]').forEach(button=>button.onclick=()=>$("#exportDialog").close());
