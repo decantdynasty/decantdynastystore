@@ -767,7 +767,7 @@ function renderHome(){
         <h2>${esc(c.brandsSection.heading)}</h2>
         <p>${esc(c.brandsSection.paragraph)}</p>
       </div>
-      ${showcaseRailHTML(brands.map(b=>brandCardHTML(b)).join(""),'brand-showcase','Explore fragrance brands',36)}
+      ${showcaseRailHTML(brands.map(b=>brandCardHTML(b)).join(""),'brand-showcase','Explore fragrance brands',42)}
       <div style="text-align:center;margin-top:48px;">
         <a href="#/brands" class="btn btn-ghost">View All Brands</a>
       </div>
@@ -781,7 +781,7 @@ function renderHome(){
         <div class="eyebrow">Loved by the Dynasty</div>
         <h2>Best Sellers</h2>
       </div>
-      ${showcaseRailHTML(bestSellers.map(productCardHTML).join(""),'best-seller-showcase','Explore best sellers',32)}
+      ${showcaseRailHTML(bestSellers.map(productCardHTML).join(""),'best-seller-showcase','Explore best sellers',38)}
       <div style="text-align:center;margin-top:32px"><a class="btn btn-ghost" href="#/bestsellers">View All Best Sellers</a></div>
     </div>
   </section>
@@ -795,6 +795,7 @@ function renderHome(){
     </div>
   </section>
 
+  <div class="section-divider" aria-hidden="true"></div>
   <section class="motion-section motion-section-features">
     <div class="wrap">
       <div class="section-head reveal">
