@@ -16,7 +16,9 @@ const noteList=value=>String(value||"").split(/[,\n]/).map(note=>note.trim()).fi
 const DRAFT_KEY="dd:catalog-manager:draft:v1";
 const managed=globalThis.DECANT_MANAGED_CATALOG;
 const source=managed?.version===1&&Array.isArray(managed.brands)&&Array.isArray(managed.products)?managed:{brands:BRANDS,products:PRODUCTS};
-const state={brands:clone(source.brands),products:clone(source.products),bundles:clone(Array.isArray(source.bundles)?source.bundles:globalThis.DECANT_DEFAULT_BUNDLES||[]),settings:{...(globalThis.DECANT_DEFAULT_SETTINGS||{}),...(source.settings||{})},section:"products",editingProductId:null,editingBrandId:null,editingBundleId:null,productFile:null,brandFile:null,siteMediaFile:null,rootHandle:null,pendingAssets:new Map(),dirty:false,restored:false};
+const state={brands:clone(source.brands),products:clone(source.products),bundles:clone(Array.isArray(source.bundles)?source.bundles:globalThis.DECANT_DEFAULT_BUNDLES||[]),settings:{...(globalThis.DECANT_DEFAULT_SETTINGS||{}),...(source.settings||{})},section:"products",editingProductId:null,editingBrandId:null,editingBundleId:null,productFile:null,brandFile:null,paymentMediaFile:null,logisticsMediaFile:null,rootHandle:null,pendingAssets:new Map(),dirty:false,restored:false};
+if(!state.settings.paymentImage&&state.settings.paymentLogisticsImage)state.settings.paymentImage=state.settings.paymentLogisticsImage;
+if(!state.settings.logisticsImage&&state.settings.paymentLogisticsImage)state.settings.logisticsImage=state.settings.paymentLogisticsImage;
 
 try{
   const draft=JSON.parse(localStorage.getItem(DRAFT_KEY)||"null");
@@ -24,6 +26,8 @@ try{
     state.brands=draft.brands;state.products=draft.products;state.bundles=clone(Array.isArray(draft.bundles)?draft.bundles:state.bundles);state.settings={...state.settings,...(draft.settings||{})};state.dirty=true;state.restored=true;
   }
 }catch(error){console.warn("Catalog draft could not be restored",error);}
+if(!state.settings.paymentImage&&state.settings.paymentLogisticsImage)state.settings.paymentImage=state.settings.paymentLogisticsImage;
+if(!state.settings.logisticsImage&&state.settings.paymentLogisticsImage)state.settings.logisticsImage=state.settings.paymentLogisticsImage;
 
 const productForm=$("#productForm");
 const brandForm=$("#brandForm");
@@ -32,7 +36,6 @@ const editorPanel=$("#editorPanel");
 const editorScrim=$("#editorScrim");
 const productImageInput=$("#productImageInput");
 const brandImageInput=$("#brandImageInput");
-let previewUrl="";
 let toastTimer=0;
 
 function toast(message){
@@ -59,8 +62,8 @@ function nextProductId(brandId,name){
   while(productById(id)){id=`${base}-${index++}`;}return id;
 }
 function setPreview(element,path,file,contain=false){
-  if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl="";}
-  const sourceUrl=file?(previewUrl=URL.createObjectURL(file)):path;
+  if(element._previewUrl){URL.revokeObjectURL(element._previewUrl);element._previewUrl="";}
+  const sourceUrl=file?(element._previewUrl=URL.createObjectURL(file)):path;
   element.innerHTML=sourceUrl?`<img src="${esc(sourceUrl)}" alt="" style="object-fit:${contain?'contain':'cover'}" />`:`<span>No photo</span>`;
 }
 function renderSummary(){
@@ -111,8 +114,10 @@ function renderBundles(){
 }
 function renderSettings(){
   $("#analyticsMeasurementId").value=state.settings.analyticsMeasurementId||"";
-  $("#siteMediaPath").textContent=state.settings.paymentLogisticsImage||"images/payment-logistics.png";
-  setPreview($("#siteMediaPreview"),state.settings.paymentLogisticsImage||"images/payment-logistics.png",null,true);
+  const payment=state.settings.paymentImage||"",logistics=state.settings.logisticsImage||"";
+  $("#paymentMediaPath").textContent=payment||"No image selected";setPreview($("#paymentMediaPreview"),payment,state.paymentMediaFile,true);
+  $("#logisticsMediaPath").textContent=logistics||"No image selected";setPreview($("#logisticsMediaPreview"),logistics,state.logisticsMediaFile,true);
+  $("#removePaymentMedia").disabled=!payment&&!state.paymentMediaFile;$("#removeLogisticsMedia").disabled=!logistics&&!state.logisticsMediaFile;
 }
 function renderAll(){renderSummary();renderBrandOptions();renderProducts();renderBrands();renderBundles();renderSettings();setSaveState();}
 
@@ -129,7 +134,7 @@ function openEditor(type,title,kicker){
 }
 function closeEditor(){
   editorPanel.classList.remove("open");editorScrim.classList.remove("open");editorPanel.setAttribute("aria-hidden","true");
-  state.productFile=null;state.brandFile=null;if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl="";}
+  state.productFile=null;state.brandFile=null;
 }
 function fillProductForm(product){
   const fields=productForm.elements;
@@ -138,10 +143,9 @@ function fillProductForm(product){
   fields.recommended.checked=!!product?.recommended;fields.outOfStock.checked=!!product?.outOfStock;
   fields.price1.value=product?.prices?.["1ml"]??"";fields.price2.value=product?.prices?.["2ml"]??"";fields.price3.value=product?.prices?.["3ml"]??"";fields.price5.value=product?.prices?.["5ml"]??"";
   fields.inspiredBy.value=product?.inspiredBy||"";fields.description.value=product?.description||"";
-  fields.topNotes.value=(product?.topNotes||[]).join(", ");fields.heartNotes.value=(product?.heartNotes||[]).join(", ");fields.baseNotes.value=(product?.baseNotes||[]).join(", ");
-  fields.longevity.value=product?.longevity||"Moderate (5–8 hours)";fields.projection.value=product?.projection||"Moderate";
+  fields.accords.value=(product?(globalThis.DECANT_ACCORDS?.derive(product)||["aromatic","woody","musky"]):["aromatic","woody","musky"]).join(", ");
   fields.longevityScore.value=product?.longevityScore||3;fields.projectionScore.value=product?.projectionScore||3;
-  fields.bestFor.value=(product?.bestFor||[]).join(", ");fields.weather.value=(product?.weather||[]).join(", ");fields.dayNight.value=product?.dayNight||"";fields.scentFamilies.value=(product?.scentFamilies||[]).join(", ");fields.similarProductIds.value=(product?.similarProductIds||[]).join(", ");
+  fields.similarProductIds.value=(product?.similarProductIds||[]).join(", ");
   const path=product?.image||suggestedProductPath();$("#productImagePath").textContent=path;setPreview($("#productImagePreview"),path,null);
   $("#deleteProduct").hidden=!product;
 }
@@ -171,10 +175,10 @@ function saveProduct(event){
       image2:existing?.image2||`images/products/${brand.id}/${managerSlug(fields.name.value)}-decant.png`,
       prices:{"1ml":Number(fields.price1.value),"2ml":Number(fields.price2.value),"3ml":Number(fields.price3.value),"5ml":Number(fields.price5.value)},
       concentration:fields.concentration.value.trim(),gender:fields.gender.value,description:fields.description.value.trim(),
-      topNotes:noteList(fields.topNotes.value),heartNotes:noteList(fields.heartNotes.value),baseNotes:noteList(fields.baseNotes.value),
-      longevity:fields.longevity.value.trim(),projection:fields.projection.value.trim(),inspiredBy:fields.inspiredBy.value.trim()||null,
+      topNotes:existing?.topNotes||[],heartNotes:existing?.heartNotes||[],baseNotes:existing?.baseNotes||[],
+      longevity:existing?.longevity||"",projection:existing?.projection||"",inspiredBy:fields.inspiredBy.value.trim()||null,
       longevityScore:Number(fields.longevityScore.value)||3,projectionScore:Number(fields.projectionScore.value)||3,
-      bestFor:noteList(fields.bestFor.value),weather:noteList(fields.weather.value),dayNight:fields.dayNight.value.trim(),scentFamilies:noteList(fields.scentFamilies.value),similarProductIds:noteList(fields.similarProductIds.value).filter(otherId=>otherId!==id),
+      accords:noteList(fields.accords.value).map(accord=>globalThis.DECANT_ACCORDS?.normalize(accord)||accord.toLowerCase()),similarProductIds:noteList(fields.similarProductIds.value).filter(otherId=>otherId!==id),
       recommended:fields.recommended.checked,outOfStock:fields.outOfStock.checked
     };
     if(existing)state.products[state.products.indexOf(existing)]=product;else state.products.push(product);
@@ -240,7 +244,10 @@ function saveBundle(event){
 function deleteBundle(){const bundle=bundleById(state.editingBundleId);if(!bundle)return;if(!confirm(`Delete ${bundle.name}?`))return;state.bundles=state.bundles.filter(item=>item.id!==bundle.id);persistDraft();renderAll();closeEditor();toast(`${bundle.name} deleted`);}
 function saveSettings(){
   const measurementId=$("#analyticsMeasurementId").value.trim().toUpperCase();if(measurementId&&!/^G-[A-Z0-9]+$/.test(measurementId)){toast("Use a GA4 ID beginning with G-");return;}
-  state.settings.analyticsMeasurementId=measurementId;state.settings.paymentLogisticsImage="images/payment-logistics.png";if(state.siteMediaFile)state.pendingAssets.set(state.settings.paymentLogisticsImage,state.siteMediaFile);persistDraft();toast("Storefront settings saved to your draft");
+  state.settings.analyticsMeasurementId=measurementId;
+  if(state.paymentMediaFile){state.settings.paymentImage="images/payment.png";state.pendingAssets.set(state.settings.paymentImage,state.paymentMediaFile);}
+  if(state.logisticsMediaFile){state.settings.logisticsImage="images/logistics.png";state.pendingAssets.set(state.settings.logisticsImage,state.logisticsMediaFile);}
+  delete state.settings.paymentLogisticsImage;persistDraft();renderSettings();toast("Storefront settings saved to your draft");
 }
 
 function validatePng(file){return file&&(/\.png$/i.test(file.name)||file.type==="image/png");}
@@ -257,6 +264,7 @@ function validateCatalog(payload){
     if(!product.id||!product.name||productIds.has(product.id))return`Invalid or duplicate product: ${product.name||product.id}`;
     if(!brandIds.has(product.brandId))return`${product.name} has no valid brand`;
     if(!["1ml","2ml","3ml","5ml"].every(size=>Number.isFinite(product.prices[size])&&product.prices[size]>=0))return`${product.name} has invalid prices`;
+    if(!(globalThis.DECANT_ACCORDS?.derive(product)||[]).length)return`${product.name} needs at least one main accord`;
     productIds.add(product.id);
   }
   const bundleIds=new Set();
@@ -319,7 +327,10 @@ productForm.elements.brandId.onchange=()=>{if(!state.editingProductId&&!state.pr
 brandForm.elements.name.oninput=()=>{if(!state.editingBrandId){brandForm.elements.id.value=managerSlug(brandForm.elements.name.value);$("#brandImagePath").textContent=`images/brands/${managerSlug(brandForm.elements.name.value)||"brand-name"}.png`;}};
 productImageInput.onchange=()=>{const file=productImageInput.files[0];if(!file)return;if(!validatePng(file)){productImageInput.value="";toast("Product photos must be PNG files");return;}state.productFile=file;$("#productImagePath").textContent=suggestedProductPath();setPreview($("#productImagePreview"),"",file);};
 brandImageInput.onchange=()=>{const file=brandImageInput.files[0];if(!file)return;if(!validatePng(file)){brandImageInput.value="";toast("Brand logos must be PNG files");return;}state.brandFile=file;const id=state.editingBrandId||managerSlug(brandForm.elements.id.value||brandForm.elements.name.value);$("#brandImagePath").textContent=`images/brands/${id||"brand-name"}.png`;setPreview($("#brandImagePreview"),"",file,true);};
-$("#siteMediaInput").onchange=()=>{const file=$("#siteMediaInput").files[0];if(!file)return;if(!validatePng(file)){toast("Payment and logistics artwork must be a PNG file");return;}state.siteMediaFile=file;setPreview($("#siteMediaPreview"),"",file,true);};
+$("#paymentMediaInput").onchange=()=>{const file=$("#paymentMediaInput").files[0];if(!file)return;if(!validatePng(file)){toast("Payment artwork must be a PNG file");return;}state.paymentMediaFile=file;state.settings.paymentImage="images/payment.png";renderSettings();};
+$("#logisticsMediaInput").onchange=()=>{const file=$("#logisticsMediaInput").files[0];if(!file)return;if(!validatePng(file)){toast("Logistics artwork must be a PNG file");return;}state.logisticsMediaFile=file;state.settings.logisticsImage="images/logistics.png";renderSettings();};
+$("#removePaymentMedia").onclick=()=>{state.paymentMediaFile=null;state.settings.paymentImage=null;state.pendingAssets.delete("images/payment.png");persistDraft();renderSettings();};
+$("#removeLogisticsMedia").onclick=()=>{state.logisticsMediaFile=null;state.settings.logisticsImage=null;state.pendingAssets.delete("images/logistics.png");persistDraft();renderSettings();};
 $("#saveSettings").onclick=saveSettings;
 $("#connectFolder").onclick=connectFolder;$("#publishCatalog").onclick=saveToStorefront;
 $("#downloadCatalog").onclick=()=>{download("managed-catalog.js",catalogSource());toast("Catalog file downloaded — your draft remains until it is installed");};

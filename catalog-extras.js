@@ -1,6 +1,7 @@
 /* Storefront extras kept separate from the core fragrance research data. */
 globalThis.DECANT_DEFAULT_SETTINGS = {
-  paymentLogisticsImage: "images/payment-logistics.png",
+  paymentImage: null,
+  logisticsImage: null,
   analyticsMeasurementId: ""
 };
 

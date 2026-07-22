@@ -26,8 +26,10 @@ function applyManagedCatalog(){
 applyManagedCatalog();
 
 const SITE_SETTINGS={...(globalThis.DECANT_DEFAULT_SETTINGS||{}),...(globalThis.DECANT_MANAGED_CATALOG?.settings||{})};
+if(!SITE_SETTINGS.paymentImage&&SITE_SETTINGS.paymentLogisticsImage)SITE_SETTINGS.paymentImage=SITE_SETTINGS.paymentLogisticsImage;
+if(!SITE_SETTINGS.logisticsImage&&SITE_SETTINGS.paymentLogisticsImage)SITE_SETTINGS.logisticsImage=SITE_SETTINGS.paymentLogisticsImage;
 const BUNDLES=(Array.isArray(globalThis.DECANT_MANAGED_CATALOG?.bundles)?globalThis.DECANT_MANAGED_CATALOG.bundles:globalThis.DECANT_DEFAULT_BUNDLES||[]).filter(bundle=>bundle&&bundle.id&&bundle.name&&bundle.active!==false);
-const PAGE_SIZE=24;
+const catalogPageSize=()=>window.innerWidth<=960?18:20;
 const track=(name,params={})=>globalThis.DDAnalytics?.track(name,params);
 
 /* ---------------- device-local preferences ---------------- */
@@ -59,9 +61,8 @@ function initHeroBottle(){
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(34,container.clientWidth/Math.max(container.clientHeight,1),.1,100);
   camera.position.set(0,.05,8.8);
-  const mobileRenderer=window.innerWidth<720;
-  const renderer=new THREE.WebGLRenderer({antialias:!mobileRenderer,alpha:true,powerPreference:'high-performance'});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,mobileRenderer?1.25:2));renderer.setSize(container.clientWidth,container.clientHeight);
+  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(container.clientWidth,container.clientHeight);
   renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   container.querySelector('canvas')?.remove();container.prepend(renderer.domElement);
   scene.add(new THREE.HemisphereLight(0xfffaf0,0x10131a,1.65));
@@ -84,7 +85,8 @@ function initHeroBottle(){
     labelContext.fillRect(0,0,labelCanvas.width,labelCanvas.height);
     if(logo){
       labelContext.save();
-      labelContext.filter='contrast(3.2) brightness(.22)';
+      labelContext.globalAlpha=1;
+      labelContext.filter='brightness(0) contrast(6)';
       labelContext.drawImage(logo,560,70,928,500);
       labelContext.restore();
     }
@@ -94,13 +96,14 @@ function initHeroBottle(){
   const labelMaterial=new THREE.MeshPhysicalMaterial({map:labelTexture,color:0xffffff,roughness:.42,metalness:0,transparent:false,opacity:1,side:THREE.DoubleSide,depthWrite:true});disposables.push(labelMaterial);
   const logoImage=new Image();logoImage.onload=()=>{drawLabel(logoImage);labelTexture.needsUpdate=true;};logoImage.src='images/bottle-logo.png';
   const loader=new THREE.GLTFLoader();
+  let modelRoot=null;
   loader.load('models/decant.gltf',gltf=>{
     const model=gltf.scene;
     model.traverse(node=>{if(!node.isMesh)return;node.castShadow=false;node.receiveShadow=false;if(node.material){node.material=Array.isArray(node.material)?node.material.map(m=>m.clone()):node.material.clone();const materials=Array.isArray(node.material)?node.material:[node.material];materials.forEach(m=>{disposables.push(m);if(m.transparent){m.depthWrite=false;m.side=THREE.DoubleSide;}m.needsUpdate=true;});}});
     const initialBox=new THREE.Box3().setFromObject(model),initialSize=initialBox.getSize(new THREE.Vector3());
     const scale=4.85/Math.max(initialSize.x,initialSize.y,initialSize.z);model.scale.setScalar(scale);
     const box=new THREE.Box3().setFromObject(model),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
-    model.position.sub(center);group.add(model);
+    model.position.sub(center);group.add(model);modelRoot=model;
     const radius=Math.max(size.x,size.z)*.515;
     const labelGeometry=new THREE.CylinderGeometry(radius,radius,size.y*.185,96,1,true);disposables.push(labelGeometry);
     const label=new THREE.Mesh(labelGeometry,labelMaterial);label.position.y=-size.y*.12;label.rotation.y=-Math.PI/2;label.renderOrder=8;group.add(label);
@@ -110,12 +113,22 @@ function initHeroBottle(){
     featurePoints.glass.set(radius*.92,-size.y*.24,0);
     container.classList.add('model-ready');
   },undefined,()=>{container.classList.add('model-error');toast('The 3D bottle could not be loaded.');});
+  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
   let dragging=false,lastX=0,lastY=0,velocityX=0,velocityY=.004,raf=0;
   let userRotationX=group.rotation.x,userRotationY=group.rotation.y;
   let scrollTarget=0,scrollCurrent=0,heroStart=0,heroRange=Math.max(window.innerHeight,1);
-  const down=e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;container.setPointerCapture?.(e.pointerId);};
+  const down=e=>{
+    if(!modelRoot)return;
+    const rect=renderer.domElement.getBoundingClientRect();
+    pointer.x=((e.clientX-rect.left)/Math.max(rect.width,1))*2-1;
+    pointer.y=-((e.clientY-rect.top)/Math.max(rect.height,1))*2+1;
+    raycaster.setFromCamera(pointer,camera);
+    if(!raycaster.intersectObject(modelRoot,true).length)return;
+    dragging=true;lastX=e.clientX;lastY=e.clientY;container.classList.add('is-dragging');
+    renderer.domElement.setPointerCapture?.(e.pointerId);
+  };
   const move=e=>{if(!dragging)return;velocityY=(e.clientX-lastX)*.008;velocityX=(e.clientY-lastY)*.006;lastX=e.clientX;lastY=e.clientY;};
-  const up=()=>{dragging=false;};
+  const up=()=>{dragging=false;container.classList.remove('is-dragging');};
   container.addEventListener('pointerdown',down);container.addEventListener('pointermove',move);container.addEventListener('pointerup',up);container.addEventListener('pointercancel',up);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const syncScrollTarget=()=>{scrollTarget=(reduced||window.innerWidth<720)?0:Math.max(0,Math.min(1,(window.scrollY-heroStart)/(heroRange*.82)));};
@@ -243,21 +256,11 @@ function performanceScore(value,fallback=3){
   if(/soft|intimate|light|short/.test(text))return 2;
   return fallback;
 }
-function inferredFamilies(p){
-  if(Array.isArray(p.scentFamilies)&&p.scentFamilies.length)return p.scentFamilies;
-  const notes=[...(p.topNotes||[]),...(p.heartNotes||[]),...(p.baseNotes||[])].join(" ").toLowerCase();
-  const matches=[];
-  [["Fresh",/citrus|bergamot|lemon|marine|aquatic|ozonic|mint/],["Woody",/wood|cedar|sandal|vetiver|oud/],["Sweet",/vanilla|caramel|praline|honey|tonka|marshmallow/],["Spicy",/pepper|cinnamon|cardamom|ginger|spice/],["Floral",/rose|jasmine|lavender|iris|flower|tuberose/],["Fruity",/apple|pear|berry|peach|mango|pineapple|plum/],["Amber",/amber|benzoin|resin|labdanum/],["Musky",/musk|ambroxan/]].forEach(([label,re])=>{if(re.test(notes))matches.push(label);});
-  return matches.slice(0,4).length?matches.slice(0,4):["Balanced"];
+function productAccords(p){
+  return globalThis.DECANT_ACCORDS?.derive(p)||["aromatic","woody","musky"];
 }
 function productProfile(p){
-  const families=inferredFamilies(p);
-  const fresh=families.some(x=>["Fresh","Fruity","Aquatic"].includes(x));
   return {
-    bestFor:Array.isArray(p.bestFor)&&p.bestFor.length?p.bestFor:[fresh?"Daily wear":"Evenings",p.gender==="Unisex"?"Shared rotation":"Signature scent"],
-    weather:Array.isArray(p.weather)&&p.weather.length?p.weather:[fresh?"Warm weather":"Cool weather","Air-conditioned spaces"],
-    dayNight:p.dayNight|| (fresh?"Day to evening":"Evening & night"),
-    families,
     longevityScore:performanceScore(p.longevityScore??p.longevity),
     projectionScore:performanceScore(p.projectionScore??p.projection)
   };
@@ -265,11 +268,11 @@ function productProfile(p){
 function similarProducts(p){
   const explicit=(p.similarProductIds||[]).map(getProduct).filter(Boolean).filter(x=>x.id!==p.id);
   if(explicit.length)return explicit.slice(0,4);
-  const families=new Set(inferredFamilies(p));
-  return allProducts().filter(x=>x.id!==p.id).map(x=>({p:x,score:(x.brandId===p.brandId?2:0)+inferredFamilies(x).filter(f=>families.has(f)).length+(x.gender===p.gender?1:0)})).sort((a,b)=>b.score-a.score).slice(0,4).map(x=>x.p);
+  const accords=new Set(productAccords(p));
+  return allProducts().filter(x=>x.id!==p.id).map(x=>({p:x,score:(x.brandId===p.brandId?2:0)+productAccords(x).filter(accord=>accords.has(accord)).length+(x.gender===p.gender?1:0)})).sort((a,b)=>b.score-a.score).slice(0,4).map(x=>x.p);
 }
 function backButtonHTML(fallback="#/collection"){return `<button class="page-back" data-back data-fallback="${esc(fallback)}" type="button" aria-label="Go back">← Back</button>`;}
-function pagerHTML(total,page=1,pageSize=PAGE_SIZE){
+function pagerHTML(total,page=1,pageSize=catalogPageSize()){
   const pages=Math.max(1,Math.ceil(total/pageSize));if(pages<=1)return "";
   const visible=[...new Set([1,page-1,page,page+1,pages].filter(n=>n>=1&&n<=pages))];
   return `<nav class="catalog-pager" aria-label="Product pages"><button data-page="${page-1}" ${page===1?"disabled":""}>←</button>${visible.map((n,i)=>`${i&&n-visible[i-1]>1?`<span class="catalog-pager-label">…</span>`:""}<button data-page="${n}" class="${n===page?'active':''}" aria-current="${n===page?'page':'false'}">${n}</button>`).join("")}<button data-page="${page+1}" ${page===pages?"disabled":""}>→</button></nav>`;
@@ -461,7 +464,7 @@ function showCheckoutModal(text){
       <div class="checkout-instructions">
         <h3>How to order?</h3>
         <ol>
-          <li><strong>Fill out the form above and send it to us by clicking “Open Messenger”.</strong></li>
+          <li><strong>Your order summary is already copied to your clipboard. Tap Open Messenger and send it to us.</strong></li>
           <li><strong>Ask our admin for the payment details.</strong></li>
           <li><strong>Kindly wait for our admin to send your invoice.</strong></li>
           <li><strong>Settle your payment and send your proof of payment.</strong></li>
@@ -568,10 +571,10 @@ function heroArtSVG(){
 }
 
 function renderHome(){
-  const bestSellers = allProducts().filter(p=>p.recommended).slice(0,4);
+  const bestSellers = allProducts().filter(p=>p.recommended).slice(0,6);
   const brands = allBrands().slice(0,8);
   const homeCatalog=allProducts();
-  const initialCatalogCount=Math.min(PAGE_SIZE,homeCatalog.length);
+  const initialCatalogCount=Math.min(catalogPageSize(),homeCatalog.length);
   const c = state.content;
   return `
   <section class="hero">
@@ -621,7 +624,7 @@ function renderHome(){
         <div class="eyebrow">Loved by the Dynasty</div>
         <h2>Best Sellers</h2>
       </div>
-      <div class="product-grid stagger">${bestSellers.map(productCardHTML).join("")}</div>
+      <div class="product-grid best-seller-preview stagger">${bestSellers.map(productCardHTML).join("")}</div>
       <div style="text-align:center;margin-top:32px"><a class="btn btn-ghost" href="#/bestsellers">View All Best Sellers</a></div>
     </div>
   </section>
@@ -753,7 +756,7 @@ function bundleCardHTML(bundle){
 }
 function renderBestSellers(){
   const products=allProducts().filter(product=>product.recommended);
-  return `<div class="page-header wrap">${backButtonHTML("#/")}<div class="breadcrumb"><a href="#/">Home</a> / Best Sellers</div><h1>Best Sellers</h1><p>The fragrances customers return to most, gathered in one easy-to-browse edit.</p></div><section style="padding-top:0"><div class="wrap"><div class="catalog-tools"><div class="catalog-result-count">${products.length} best sellers</div><label class="catalog-sort"><span>Sort price</span><select id="bestSellerSort"><option value="featured">Featured</option><option value="low">Price: Low to High</option><option value="high">Price: High to Low</option></select></label></div><div class="product-grid stagger" id="bestSellerGrid">${products.slice(0,PAGE_SIZE).map(productCardHTML).join("")}</div><div id="bestSellerPager">${pagerHTML(products.length,1)}</div></div></section>`;
+  return `<div class="page-header wrap">${backButtonHTML("#/")}<div class="breadcrumb"><a href="#/">Home</a> / Best Sellers</div><h1>Best Sellers</h1><p>The fragrances customers return to most, gathered in one easy-to-browse edit.</p></div><section style="padding-top:0"><div class="wrap"><div class="catalog-tools"><div class="catalog-result-count">${products.length} best sellers</div><label class="catalog-sort"><span>Sort price</span><select id="bestSellerSort"><option value="featured">Featured</option><option value="low">Price: Low to High</option><option value="high">Price: High to Low</option></select></label></div><div class="product-grid stagger" id="bestSellerGrid">${products.slice(0,catalogPageSize()).map(productCardHTML).join("")}</div><div id="bestSellerPager">${pagerHTML(products.length,1)}</div></div></section>`;
 }
 function renderBundles(){
   return `<div class="page-header wrap">${backButtonHTML("#/")}<div class="breadcrumb"><a href="#/">Home</a> / Discovery Sets</div><h1>Curated Fragrance Sets</h1><p>Purpose-built collections for the way you live, work, travel, and discover scent.</p></div><section style="padding-top:0"><div class="wrap"><div class="bundle-grid stagger">${BUNDLES.map(bundleCardHTML).join("")}</div></div></section>`;
@@ -813,7 +816,7 @@ function renderBrandDetail(brandId){
         </div>
       </div>
       <div class="catalog-tools"><div class="catalog-result-count" id="brandResultCount">${products.length} fragrances</div><label class="catalog-sort"><span>Sort price</span><select id="brandSort"><option value="featured">Alphabetical</option><option value="low">Price: Low to High</option><option value="high">Price: High to Low</option></select></label></div>
-      <div class="product-grid stagger" id="brandProductGrid">${products.slice(0,PAGE_SIZE).map(productCardHTML).join("")}</div><div id="brandProductPager">${pagerHTML(products.length,1)}</div>
+      <div class="product-grid stagger" id="brandProductGrid">${products.slice(0,catalogPageSize()).map(productCardHTML).join("")}</div><div id="brandProductPager">${pagerHTML(products.length,1)}</div>
     </div>
   </section>`;
 }
@@ -863,7 +866,7 @@ function renderCollection(){
         </div>
       </div>
       <div class="catalog-tools"><div class="catalog-result-count" id="collectionResultCount">${products.length} fragrances</div><label class="catalog-sort"><span>Sort price</span><select id="collectionSort"><option value="featured">Brand &amp; name</option><option value="low">Price: Low to High</option><option value="high">Price: High to Low</option></select></label></div>
-      <div class="product-grid stagger" id="collectionGrid">${products.slice(0,PAGE_SIZE).map(productCardHTML).join("")}</div><div id="collectionPager">${pagerHTML(products.length,1)}</div>
+      <div class="product-grid stagger" id="collectionGrid">${products.slice(0,catalogPageSize()).map(productCardHTML).join("")}</div><div id="collectionPager">${pagerHTML(products.length,1)}</div>
     </div>
   </section>`;
 }
@@ -871,9 +874,12 @@ function renderCollection(){
 /* ================================================================
    RENDER: PRODUCT DETAIL
    ================================================================ */
-function notesPyramid(p){
-  const row = (lbl, arr) => arr && arr.length ? `<div class="notes-row"><div class="lbl">${lbl}</div><div class="notes-tags">${arr.map(n=>`<span class="note-tag">${esc(n)}</span>`).join("")}</div></div>` : "";
-  return `<div class="notes-pyramid">${row("Top",p.topNotes)}${row("Heart",p.heartNotes)}${row("Base",p.baseNotes)}</div>`;
+function accordsHTML(p){
+  const chips=productAccords(p).map(name=>{
+    const accord=globalThis.DECANT_ACCORDS?.meta(name)||{name,color:"#9a8460",ink:"#fffaf2"};
+    return `<span class="accord-chip" style="--accord-color:${accord.color};--accord-ink:${accord.ink}">${esc(accord.name)}</span>`;
+  }).join("");
+  return `<div class="accord-block"><div class="eyebrow">Main accords</div><div class="accord-list" aria-label="Main accords">${chips}</div></div>`;
 }
 function sizeSelectHTML(p, selected){
   return Object.entries(p.prices).map(([size,price])=>
@@ -902,18 +908,11 @@ function renderProductDetail(productId){
       <div class="pd-facts">
         <div class="pd-fact">Concentration<b>${esc(p.concentration)}</b></div>
         <div class="pd-fact">Gender<b>${esc(p.gender)}</b></div>
-        <div class="pd-fact">Longevity<b>${esc(p.longevity)}</b></div>
-        <div class="pd-fact">Projection<b>${esc(p.projection)}</b></div>
+        <div class="pd-fact pd-fact-level">Longevity<b>${profile.longevityScore}/5</b><i style="--score:${profile.longevityScore}"></i></div>
+        <div class="pd-fact pd-fact-level">Projection<b>${profile.projectionScore}/5</b><i style="--score:${profile.projectionScore}"></i></div>
       </div>
       <p class="pd-desc">${esc(p.description)}</p>
-      ${notesPyramid(p)}
-      <div class="family-viz" aria-label="Scent families">${profile.families.map(family=>`<span>${esc(family)}</span>`).join("")}</div>
-      <div class="profile-grid">
-        <div class="profile-card"><span>Best for</span><b>${esc(profile.bestFor.join(" · "))}</b></div>
-        <div class="profile-card"><span>Weather</span><b>${esc(profile.weather.join(" · "))}</b></div>
-        <div class="profile-card"><span>Wear time</span><b>${esc(profile.dayNight)}</b></div>
-      </div>
-      <div class="performance-panel"><div class="performance-meter" style="--score:${profile.longevityScore}"><span><b>Longevity</b><b>${profile.longevityScore}/5</b></span><i></i></div><div class="performance-meter" style="--score:${profile.projectionScore}"><span><b>Projection</b><b>${profile.projectionScore}/5</b></span><i></i></div></div>
+      ${accordsHTML(p)}
       <div class="eyebrow" style="margin-bottom:12px;">Choose Size</div>
       <div class="size-select" id="sizeSelectWrap">${sizeSelectHTML(p, firstSize)}</div>
       <div class="pd-actions">
@@ -926,7 +925,7 @@ function renderProductDetail(productId){
   </div>
   <section>
     <div class="wrap">
-      <div class="section-head reveal similar-heading"><div><div class="eyebrow">You may also like</div><h2>Similar Fragrances</h2></div><p>Matched by scent family, wear style, and character.</p></div>
+      <div class="section-head reveal similar-heading"><div><div class="eyebrow">You may also like</div><h2>Similar Fragrances</h2></div><p>Matched by main accords and fragrance character.</p></div>
       <div class="product-grid stagger">${similar.map(productCardHTML).join("")}</div>
     </div>
   </section>
@@ -951,7 +950,7 @@ function openQuickView(productId){
         <h2 class="pd-name" style="font-size:26px;">${esc(p.name)}</h2>
         ${p.inspiredBy?`<div class="pd-inspiration"><span>Inspired by</span> ${esc(p.inspiredBy)}</div>`:""}
         <p class="pd-desc" style="font-size:13.5px;">${esc(p.description)}</p>
-        ${notesPyramid(p)}
+        ${accordsHTML(p)}
         <div class="eyebrow" style="margin-bottom:10px;">Choose Size</div>
         <div class="size-select" id="qvSizeWrap">${sizeSelectHTML(p, firstSize)}</div>
         <div class="pd-actions">
@@ -991,18 +990,15 @@ function renderComparisonModal(){
   const items=state.compare.map(getProduct).filter(Boolean);
   if(items.length<2){closeCompare();toast("Choose at least two fragrances to compare");return;}
   const body=document.getElementById("compareModalBody");
-  const notes=(list)=>list?.length?list.map(esc).join(" · "):"—";
   body.innerHTML=`<div class="comparison-scroll"><div class="comparison-table" style="--compare-columns:${items.length}">
     <div class="comparison-row comparison-products"><div class="comparison-label"><span>Side by side</span></div>${items.map(p=>`<div class="comparison-product"><button data-compare-remove="${p.id}" aria-label="Remove ${esc(p.name)}">&times;</button><div class="comparison-image">${imgTag(p.image,`${p.brand} ${p.name}`,"",p.name)}</div><small>${esc(p.brand)}</small><h3>${esc(p.name)}</h3>${p.inspiredBy?`<p>Inspired by ${esc(p.inspiredBy)}</p>`:`<p>Original fragrance profile</p>`}</div>`).join("")}</div>
     ${comparisonRow("Starting price",items,p=>`<strong class="comparison-price">${peso(Math.min(...Object.values(p.prices)))}</strong>`)}
     ${comparisonRow("Available sizes",items,p=>Object.entries(p.prices).map(([size,price])=>`<span class="comparison-size">${esc(size)} <b>${peso(price)}</b></span>`).join(""))}
     ${comparisonRow("Concentration",items,p=>esc(p.concentration||"—"))}
     ${comparisonRow("Gender",items,p=>esc(p.gender||"—"))}
-    ${comparisonRow("Longevity",items,p=>esc(p.longevity||"—"))}
-    ${comparisonRow("Projection",items,p=>esc(p.projection||"—"))}
-    ${comparisonRow("Top notes",items,p=>notes(p.topNotes))}
-    ${comparisonRow("Heart notes",items,p=>notes(p.heartNotes))}
-    ${comparisonRow("Base notes",items,p=>notes(p.baseNotes))}
+    ${comparisonRow("Longevity",items,p=>`${productProfile(p).longevityScore}/5`)}
+    ${comparisonRow("Projection",items,p=>`${productProfile(p).projectionScore}/5`)}
+    ${comparisonRow("Main accords",items,p=>productAccords(p).map(esc).join(" · "))}
   </div></div>`;
 }
 function openCompare(){
@@ -1359,10 +1355,11 @@ function sortedCatalogItems(items,sortValue){
   return list;
 }
 function paintProductPage(grid,pagerHost,items,page=1){
-  const pages=Math.max(1,Math.ceil(items.length/PAGE_SIZE));page=Math.max(1,Math.min(page,pages));
+  const pageSize=catalogPageSize();
+  const pages=Math.max(1,Math.ceil(items.length/pageSize));page=Math.max(1,Math.min(page,pages));
   grid.classList.remove("in","motion-settled");
-  grid.innerHTML=items.length?items.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE).map(productCardHTML).join(""):`<div class="center-empty" style="grid-column:1/-1">No fragrances match those filters yet.</div>`;
-  if(pagerHost)pagerHost.innerHTML=pagerHTML(items.length,page);
+  grid.innerHTML=items.length?items.slice((page-1)*pageSize,page*pageSize).map(productCardHTML).join(""):`<div class="center-empty" style="grid-column:1/-1">No fragrances match those filters yet.</div>`;
+  if(pagerHost)pagerHost.innerHTML=pagerHTML(items.length,page,pageSize);
   grid.querySelectorAll("[data-go]").forEach(bindCardNav);grid.querySelectorAll("[data-wish-toggle]").forEach(bindWishButton);grid.querySelectorAll("[data-quickview]").forEach(bindQuickviewButton);grid.querySelectorAll("[data-compare-toggle]").forEach(bindCompareButton);initReveal(grid);
   return page;
 }
@@ -1494,6 +1491,7 @@ function closeAllPanels(){
     document.getElementById(id)?.classList.remove("open");
   });
   document.getElementById('searchPopover')?.classList.remove('open');
+  document.body.classList.remove('cart-panel-open');
   closeModal();
 }
 function initLoadingScreen(){
@@ -1512,9 +1510,21 @@ function initVoucherPromo(){
   document.getElementById("shopPromo").onclick=()=>{close();navigateTo("#/collection");};
   if(!seen)setTimeout(()=>{backdrop.classList.add("open");modal.classList.add("open");},1750);
 }
+function syncFooterPartners(){
+  const grid=document.querySelector(".footer-grid");
+  const refresh=()=>{if(grid)grid.dataset.partnerCount=String([["footerPayment"],["footerLogistics"]].filter(([id])=>{const section=document.getElementById(id);return section&&!section.hidden&&!section.querySelector("img")?.hidden;}).length);};
+  [["footerPayment","paymentImage"],["footerLogistics","logisticsImage"]].forEach(([sectionId,setting])=>{
+    const section=document.getElementById(sectionId),image=section?.querySelector("img");if(!section||!image)return;
+    const source=String(SITE_SETTINGS[setting]||"").trim();section.hidden=!source;
+    if(!source)return;
+    image.hidden=false;image.src=source;image.onerror=()=>{image.hidden=true;section.hidden=true;refresh();};
+  });
+  refresh();
+}
 function initGlobalUI(){
   initLoadingScreen();
   initVoucherPromo();
+  syncFooterPartners();
   const navStack = document.getElementById("navStack");
   const progress=document.getElementById('scrollProgress');
   let scrollFrame=0;
@@ -1546,9 +1556,10 @@ function initGlobalUI(){
   document.querySelector("[data-close-wish]").onclick = ()=>{ document.getElementById("wishBackdrop").classList.remove("open"); document.getElementById("wishPanel").classList.remove("open"); };
 
   // cart panel
-  document.getElementById("cartBtn").onclick = ()=>{ renderCartPanel(); document.getElementById("cartBackdrop").classList.add("open"); document.getElementById("cartPanel").classList.add("open"); };
-  document.getElementById("cartBackdrop").onclick = ()=>{ document.getElementById("cartBackdrop").classList.remove("open"); document.getElementById("cartPanel").classList.remove("open"); };
-  document.querySelector("[data-close-cart]").onclick = ()=>{ document.getElementById("cartBackdrop").classList.remove("open"); document.getElementById("cartPanel").classList.remove("open"); };
+  const closeCart=()=>{document.getElementById("cartBackdrop").classList.remove("open");document.getElementById("cartPanel").classList.remove("open");document.body.classList.remove("cart-panel-open");};
+  document.getElementById("cartBtn").onclick = ()=>{ renderCartPanel(); document.getElementById("cartBackdrop").classList.add("open"); document.getElementById("cartPanel").classList.add("open");document.body.classList.add("cart-panel-open"); };
+  document.getElementById("cartBackdrop").onclick = closeCart;
+  document.querySelector("[data-close-cart]").onclick = closeCart;
 
   // inline fragrance search with recent searches
   const input=document.getElementById('searchInput'),popover=document.getElementById('searchPopover'),clear=document.getElementById('searchClear');

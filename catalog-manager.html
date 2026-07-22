@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow,noarchive" />
   <title>Catalog Manager — Decant Dynasty</title>
   <link rel="icon" href="images/logo.png" type="image/png" />
-  <link rel="stylesheet" href="catalog-manager.css?v=20260721-2" />
+  <link rel="stylesheet" href="catalog-manager.css?v=20260722-1" />
 </head>
 <body>
   <div class="public-lock" id="publicLock" hidden>
@@ -97,7 +97,8 @@
           <div class="manager-heading"><div><span class="eyebrow">Storefront tools</span><h1>Settings</h1><p>Connect analytics and manage the footer partner artwork.</p></div></div>
           <div class="form-section" style="max-width:720px">
             <label class="field"><span>Google Analytics measurement ID <small>Optional · free GA4 property, format G-XXXXXXXXXX</small></span><input id="analyticsMeasurementId" placeholder="G-XXXXXXXXXX" /></label>
-            <div class="image-field"><div class="image-preview" id="siteMediaPreview"><span>No artwork</span></div><div><b>Payment &amp; logistics artwork</b><p id="siteMediaPath">images/payment-logistics.png</p><label class="button button-ghost file-button">Choose PNG<input id="siteMediaInput" type="file" accept="image/png,.png" /></label></div></div>
+            <div class="image-field"><div class="image-preview" id="paymentMediaPreview"><span>No artwork</span></div><div><b>Payment artwork</b><p id="paymentMediaPath">No image selected</p><div class="inline-actions"><label class="button button-ghost file-button">Choose PNG<input id="paymentMediaInput" type="file" accept="image/png,.png" /></label><button class="button button-ghost" id="removePaymentMedia" type="button">Remove</button></div></div></div>
+            <div class="image-field"><div class="image-preview" id="logisticsMediaPreview"><span>No artwork</span></div><div><b>Logistics artwork</b><p id="logisticsMediaPath">No image selected</p><div class="inline-actions"><label class="button button-ghost file-button">Choose PNG<input id="logisticsMediaInput" type="file" accept="image/png,.png" /></label><button class="button button-ghost" id="removeLogisticsMedia" type="button">Remove</button></div></div></div>
             <button class="button button-primary" id="saveSettings">Save Settings</button>
           </div>
           <div class="inventory-card" style="max-width:720px;margin-top:20px"><span>Tracked business events</span><p style="font-size:11px;line-height:1.7;color:var(--muted)">Searches and no-result searches · product views · cart abandonment · quiz completion · Messenger checkout clicks · voucher usage · product comparisons. Connect GA4 above for aggregated customer reporting.</p></div>
@@ -144,27 +145,15 @@
           <div class="section-label"><span>03</span>Scent profile</div>
           <label class="field"><span>Inspired by <small>Leave empty for original blends</small></span><input name="inspiredBy" placeholder="e.g. Louis Vuitton Imagination" /></label>
           <label class="field"><span>Description</span><textarea name="description" rows="4" required></textarea></label>
-          <label class="field"><span>Top notes <small>Separate with commas</small></span><textarea name="topNotes" rows="2"></textarea></label>
-          <label class="field"><span>Heart notes <small>Separate with commas</small></span><textarea name="heartNotes" rows="2"></textarea></label>
-          <label class="field"><span>Base notes <small>Separate with commas</small></span><textarea name="baseNotes" rows="2"></textarea></label>
+          <label class="field"><span>Main accords <small>Fragrantica-style, separated with commas</small></span><textarea name="accords" rows="2" placeholder="citrus, woody, aromatic, musky" required></textarea></label>
         </div>
 
         <div class="form-section">
           <div class="section-label"><span>04</span>Performance</div>
           <div class="field-grid two">
-            <label class="field"><span>Longevity</span><input name="longevity" placeholder="Long (7–10 hours)" required /></label>
-            <label class="field"><span>Projection</span><input name="projection" placeholder="Moderate to strong" required /></label>
+            <label class="field"><span>Longevity level <small>1–5</small></span><input name="longevityScore" type="number" min="1" max="5" step="1" required /></label>
+            <label class="field"><span>Projection level <small>1–5</small></span><input name="projectionScore" type="number" min="1" max="5" step="1" required /></label>
           </div>
-          <div class="field-grid two">
-            <label class="field"><span>Longevity meter <small>1–5</small></span><input name="longevityScore" type="number" min="1" max="5" step="1" /></label>
-            <label class="field"><span>Projection meter <small>1–5</small></span><input name="projectionScore" type="number" min="1" max="5" step="1" /></label>
-          </div>
-        </div>
-        <div class="form-section">
-          <div class="section-label"><span>05</span>Wear guidance</div>
-          <label class="field"><span>Best for <small>Separate with commas</small></span><input name="bestFor" placeholder="Office, Dates, Everyday wear" /></label>
-          <label class="field"><span>Weather <small>Separate with commas</small></span><input name="weather" placeholder="Warm weather, Cool evenings" /></label>
-          <div class="field-grid two"><label class="field"><span>Day / night suitability</span><input name="dayNight" placeholder="Day to evening" /></label><label class="field"><span>Scent families <small>Separate with commas</small></span><input name="scentFamilies" placeholder="Fresh, Woody, Citrus" /></label></div>
           <label class="field"><span>Similar fragrances <small>Product IDs, separated with commas</small></span><input name="similarProductIds" placeholder="afnan-0002, rasasi-0098" /></label>
         </div>
         <div class="editor-actions"><button class="button button-danger" id="deleteProduct" type="button">Delete</button><span></span><button class="button button-ghost" id="cancelProduct" type="button">Cancel</button><button class="button button-primary" type="submit">Save Product</button></div>
@@ -206,7 +195,8 @@
   <script src="data.js?v=20260720-11"></script>
   <script src="catalog-research.js?v=20260720-8"></script>
   <script src="managed-catalog.js?v=20260721-1"></script>
-  <script src="catalog-extras.js?v=20260722-1"></script>
-  <script src="catalog-manager.js?v=20260722-1"></script>
+  <script src="catalog-extras.js?v=20260722-2"></script>
+  <script src="catalog-accords.js?v=20260722-1"></script>
+  <script src="catalog-manager.js?v=20260722-2"></script>
 </body>
 </html>
