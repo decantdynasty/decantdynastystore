@@ -58,6 +58,11 @@ let bottleCleanup = null;
 function initHeroBottle(){
   const container=document.getElementById('heroBottleContainer');
   if(!container)return;
+  const track=container.closest('.hero-art-track')||container;
+  const hero=container.closest('.hero');
+  const heroGrid=container.closest('.hero-grid');
+  const heroCopy=hero?.querySelector('.hero-copy');
+  const annotations=container.querySelector('.hero-annotation-layer');
   if(bottleCleanup)bottleCleanup();
   if(!window.THREE||!THREE.GLTFLoader){container.innerHTML='<div class="ph">Interactive decant bottle</div>';return;}
   const scene=new THREE.Scene();
@@ -116,9 +121,15 @@ function initHeroBottle(){
     container.classList.add('model-ready');
   },undefined,()=>{container.classList.add('model-error');toast('The 3D bottle could not be loaded.');});
   const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const mobileMedia=matchMedia('(max-width: 960px)');
+  const clamp01=value=>Math.max(0,Math.min(1,value));
+  const smoothstep=(start,end,value)=>{const t=clamp01((value-start)/Math.max(end-start,.0001));return t*t*(3-(2*t));};
   let dragging=false,lastX=0,lastY=0,velocityX=0,velocityY=.004,raf=0;
   let userRotationX=group.rotation.x,userRotationY=group.rotation.y;
-  let scrollTarget=0,scrollCurrent=0,heroStart=0,heroRange=Math.max(window.innerHeight,1);
+  let scrollTarget=0,scrollCurrent=0,heroStart=0,heroRange=Math.max(window.innerHeight*.35,1),centerShift=0,centerShiftY=0;
+  let heroVisible=true;
+  let lastFrameTime=performance.now();
   const down=e=>{
     if(!modelRoot)return;
     const rect=renderer.domElement.getBoundingClientRect();
@@ -132,25 +143,74 @@ function initHeroBottle(){
   const move=e=>{if(!dragging)return;velocityY=(e.clientX-lastX)*.008;velocityX=(e.clientY-lastY)*.006;lastX=e.clientX;lastY=e.clientY;};
   const up=()=>{dragging=false;container.classList.remove('is-dragging');};
   container.addEventListener('pointerdown',down);container.addEventListener('pointermove',move);container.addEventListener('pointerup',up);container.addEventListener('pointercancel',up);
-  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const syncScrollTarget=()=>{scrollTarget=(reduced||window.innerWidth<720)?0:Math.max(0,Math.min(1,(window.scrollY-heroStart)/(heroRange*.82)));};
-  const measureScroll=()=>{const hero=container.closest('.hero');heroStart=hero?.offsetTop||0;heroRange=Math.max(hero?.offsetHeight||window.innerHeight,window.innerHeight*.8);syncScrollTarget();};
-  function animate(){
+  const syncScrollTarget=()=>{scrollTarget=reduced?0:clamp01((window.scrollY-heroStart)/heroRange);};
+  const measureScroll=()=>{
+    const heroRect=hero?.getBoundingClientRect();
+    heroStart=(heroRect?.top||0)+window.scrollY;
+    heroRange=Math.max((hero?.offsetHeight||window.innerHeight)-window.innerHeight,1);
+    const gridRect=heroGrid?.getBoundingClientRect();
+    const trackRect=track.getBoundingClientRect();
+    const matrix=globalThis.DOMMatrixReadOnly?new DOMMatrixReadOnly(getComputedStyle(track).transform):{m41:0,m42:0};
+    const layoutCenterX=trackRect.left+(trackRect.width/2)-matrix.m41;
+    const layoutCenterY=trackRect.top+(trackRect.height/2)-matrix.m42;
+    centerShift=mobileMedia.matches?0:((gridRect?.left||0)+((gridRect?.width||trackRect.width)/2))-layoutCenterX;
+    centerShiftY=mobileMedia.matches?((gridRect?.top||0)+((gridRect?.height||trackRect.height)/2))-layoutCenterY:0;
+    syncScrollTarget();
+  };
+  const syncCinematicMotion=progress=>{
+    const mobile=mobileMedia.matches;
+    const focus=smoothstep(mobile?.08:.06,mobile?.55:.48,progress);
+    const departure=smoothstep(mobile?.80:.73,1,progress);
+    const copyExit=smoothstep(mobile?.10:.06,mobile?.48:.38,progress);
+    const annotationExit=smoothstep(.015,mobile?.24:.20,progress);
+    const viewportTravel=window.innerHeight*(mobile?.11:.19);
+    const trackX=centerShift*focus;
+    const trackY=(centerShiftY*focus)-(10*focus)-(viewportTravel*departure);
+    track.style.transform=`translate3d(${trackX.toFixed(2)}px,${trackY.toFixed(2)}px,0)`;
+    track.style.opacity=String(1-(departure*(mobile?.62:.78)));
+    track.style.filter=`blur(${(departure*(mobile?1.5:3.5)).toFixed(2)}px)`;
+    if(heroCopy){
+      heroCopy.style.opacity=String(1-copyExit);
+      heroCopy.style.transform=`translate3d(0,${(-58*copyExit).toFixed(2)}px,0)`;
+      heroCopy.style.filter=`blur(${(copyExit*(mobile?3:6)).toFixed(2)}px)`;
+    }
+    if(annotations){
+      annotations.style.opacity=String(1-annotationExit);
+      annotations.style.transform=`scale(${(1-(annotationExit*.035)).toFixed(4)})`;
+    }
+    container.classList.toggle('is-scroll-active',progress>.018);
+    const scrollYaw=(focus*(mobile?.46:.68))+(departure*(mobile?.20:.36));
+    group.rotation.y=userRotationY+scrollYaw;
+    group.rotation.x=userRotationX-(focus*(mobile?.035:.055))+(departure*.025);
+    group.rotation.z=(-.052*(1-focus))+(departure*(mobile?.07:.10));
+    group.position.y=-.15+(focus*.22)+(departure*(mobile?.38:.62));
+    group.position.x=mobile?(-.04+(focus*.04)):0;
+    group.scale.setScalar(.94+(focus*(mobile?.12:.16))-(departure*(mobile?.14:.22)));
+  };
+  function animate(frameTime=performance.now()){
+    if(!heroVisible){raf=0;return;}
     raf=requestAnimationFrame(animate);
-    if(!dragging){velocityX*=.94;velocityY*=.965;if(Math.abs(velocityY)<.001&&!reduced)velocityY=.0015;}
-    userRotationY+=velocityY;
-    userRotationX=Math.max(-.35,Math.min(.35,userRotationX+velocityX));
-    scrollCurrent+=(scrollTarget-scrollCurrent)*(reduced?1:.055);
-    group.rotation.y=userRotationY+(scrollCurrent*.24);
-    group.rotation.x=userRotationX-(scrollCurrent*.045);
-    group.position.y=scrollCurrent*-.18;
-    group.scale.setScalar(1-(scrollCurrent*.035));
+    const delta=Math.min(Math.max((frameTime-lastFrameTime)/1000,0),.05),frameScale=delta*60;
+    lastFrameTime=frameTime;
+    if(!dragging){velocityX*=Math.pow(.94,frameScale);velocityY*=Math.pow(.965,frameScale);if(Math.abs(velocityY)<.001&&!reduced)velocityY=.0015;}
+    userRotationY+=velocityY*frameScale;
+    userRotationX=Math.max(-.35,Math.min(.35,userRotationX+(velocityX*frameScale)));
+    const follow=reduced?1:1-Math.exp(-(mobileMedia.matches?12:9)*delta);
+    scrollCurrent+=(scrollTarget-scrollCurrent)*follow;
+    syncCinematicMotion(scrollCurrent);
     updateGuides();renderer.render(scene,camera);
   }animate();
-  const resize=()=>{const w=container.clientWidth,h=container.clientHeight;camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();renderer.setSize(w,h);measureScroll();};
+  const resize=()=>{const w=container.clientWidth,h=container.clientHeight;camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(w,h);measureScroll();};
+  const resizeObserver='ResizeObserver' in window?new ResizeObserver(resize):null;
+  resizeObserver?.observe(container);
+  const visibilityObserver='IntersectionObserver' in window?new IntersectionObserver(entries=>{
+    heroVisible=entries[0]?.isIntersecting!==false;
+    if(heroVisible&&!raf){lastFrameTime=performance.now();raf=requestAnimationFrame(animate);}
+  },{rootMargin:'180px 0px'}):null;
+  visibilityObserver?.observe(hero||container);
   window.addEventListener('resize',resize,{passive:true});
   window.addEventListener('scroll',syncScrollTarget,{passive:true});measureScroll();
-  bottleCleanup=()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);window.removeEventListener('scroll',syncScrollTarget);container.removeEventListener('pointerdown',down);container.removeEventListener('pointermove',move);container.removeEventListener('pointerup',up);container.removeEventListener('pointercancel',up);renderer.dispose();disposables.forEach(x=>x.dispose?.());};
+  bottleCleanup=()=>{cancelAnimationFrame(raf);resizeObserver?.disconnect();visibilityObserver?.disconnect();window.removeEventListener('resize',resize);window.removeEventListener('scroll',syncScrollTarget);container.removeEventListener('pointerdown',down);container.removeEventListener('pointermove',move);container.removeEventListener('pointerup',up);container.removeEventListener('pointercancel',up);renderer.dispose();disposables.forEach(x=>x.dispose?.());};
 }
 
 /* ---------------- state ---------------- */
@@ -586,7 +646,7 @@ function renderHome(){
   const initialCatalogCount=Math.min(catalogPageSize(),homeCatalog.length);
   const c = state.content;
   return `
-  <section class="hero">
+  <section class="hero hero-cinematic">
     <div class="wrap hero-grid">
       <div class="hero-copy">
         <div class="eyebrow hero-kicker">${esc(c.hero.eyebrow)}</div>
@@ -597,17 +657,21 @@ function renderHome(){
           <a href="#/build" class="btn btn-cta btn-cta-browse">Build My Collection</a>
         </div>
       </div>
-      <div class="hero-art" id="heroBottleContainer" aria-label="Interactive Decant Dynasty atomizer bottle. Drag to rotate.">
-        <svg class="bottle-guides" aria-hidden="true">
-          <line data-guide="seal"/><circle data-dot="seal" r="4"/>
-          <line data-guide="atomizer"/><circle data-dot="atomizer" r="4"/>
-          <line data-guide="sticker"/><circle data-dot="sticker" r="4"/>
-          <line data-guide="glass"/><circle data-dot="glass" r="4"/>
-        </svg>
-        <div class="bottle-callout callout-seal" data-callout="seal"><b>PARAFILM Sealed</b><span>Locked in for a clean, leak-resistant journey.</span></div>
-        <div class="bottle-callout callout-atomizer" data-callout="atomizer"><b>QUALITY Atomizer</b><span>A smooth, controlled mist with every press.</span></div>
-        <div class="bottle-callout callout-sticker" data-callout="sticker"><b>STICKER Label</b><span>Custom labels inspired by the original fragrance presentation.</span></div>
-        <div class="bottle-callout callout-glass" data-callout="glass"><b>HARD Glass Bottle</b><span>Clear, durable glass protects every decant.</span></div>
+      <div class="hero-art-track">
+        <div class="hero-art" id="heroBottleContainer" aria-label="Interactive Decant Dynasty atomizer bottle. Drag to rotate.">
+          <div class="hero-annotation-layer">
+            <svg class="bottle-guides" aria-hidden="true">
+              <line data-guide="seal"/><circle data-dot="seal" r="4"/>
+              <line data-guide="atomizer"/><circle data-dot="atomizer" r="4"/>
+              <line data-guide="sticker"/><circle data-dot="sticker" r="4"/>
+              <line data-guide="glass"/><circle data-dot="glass" r="4"/>
+            </svg>
+            <div class="bottle-callout callout-seal" data-callout="seal"><b>PARAFILM Sealed</b><span>Locked in for a clean, leak-resistant journey.</span></div>
+            <div class="bottle-callout callout-atomizer" data-callout="atomizer"><b>QUALITY Atomizer</b><span>A smooth, controlled mist with every press.</span></div>
+            <div class="bottle-callout callout-sticker" data-callout="sticker"><b>STICKER Label</b><span>Custom labels inspired by the original fragrance presentation.</span></div>
+            <div class="bottle-callout callout-glass" data-callout="glass"><b>HARD Glass Bottle</b><span>Clear, durable glass protects every decant.</span></div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
