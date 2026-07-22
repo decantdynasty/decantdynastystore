@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-22T13:43:42.386Z",
+  "updatedAt": "2026-07-22T13:48:06.878Z",
   "brands": [
     {
       "id": "afnan",
@@ -6487,7 +6487,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "5ml": 265
       },
       "concentration": "Eau de Parfum",
-      "gender": "Unisex",
+      "gender": "Men",
       "description": "A bold, addictive blend of juicy pear, cooling mint and aromatic lavender, warmed by cinnamon and clary sage before settling into smooth vanilla, amber and cedarwood.",
       "topNotes": [],
       "heartNotes": [],
