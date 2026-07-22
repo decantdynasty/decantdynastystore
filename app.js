@@ -227,7 +227,7 @@ function initShowcaseRails(){
     let x=0,velocity=0,dragging=false,hovered=false,visible=true,raf=0,lastFrame=performance.now();
     let pointerId=null,startX=0,startY=0,lastX=0,lastPointerTime=0,horizontalIntent=false,suppressClick=false,clickReset=0,groupWidth=1;
     const baseSpeed=Number(rail.dataset.speed)||(window.innerWidth<=640?18:26);
-    velocity=baseSpeed/1000;
+    velocity=-baseSpeed/1000;
     const measure=()=>{groupWidth=Math.max(group.getBoundingClientRect().width,1);x=((x%groupWidth)-groupWidth)%groupWidth;};
     const render=()=>{track.style.transform=`translate3d(${x.toFixed(2)}px,0,0)`;};
     const wrap=()=>{while(x>=0)x-=groupWidth;while(x<-groupWidth)x+=groupWidth;};
@@ -235,7 +235,7 @@ function initShowcaseRails(){
       const delta=Math.min(Math.max(now-lastFrame,0),40);lastFrame=now;
       if(!reduced&&visible){
         if(!dragging){
-          const target=hovered?0:baseSpeed/1000;
+          const target=hovered?0:-baseSpeed/1000;
           velocity+=(target-velocity)*(1-Math.exp(-delta/(hovered?90:650)));
           x+=velocity*delta;
         }
@@ -767,7 +767,7 @@ function renderHome(){
         <h2>${esc(c.brandsSection.heading)}</h2>
         <p>${esc(c.brandsSection.paragraph)}</p>
       </div>
-      ${showcaseRailHTML(brands.map(b=>brandCardHTML(b)).join(""),'brand-showcase','Explore fragrance brands',34)}
+      ${showcaseRailHTML(brands.map(b=>brandCardHTML(b)).join(""),'brand-showcase','Explore fragrance brands',36)}
       <div style="text-align:center;margin-top:48px;">
         <a href="#/brands" class="btn btn-ghost">View All Brands</a>
       </div>
@@ -781,11 +781,12 @@ function renderHome(){
         <div class="eyebrow">Loved by the Dynasty</div>
         <h2>Best Sellers</h2>
       </div>
-      ${showcaseRailHTML(bestSellers.map(productCardHTML).join(""),'best-seller-showcase','Explore best sellers',30)}
+      ${showcaseRailHTML(bestSellers.map(productCardHTML).join(""),'best-seller-showcase','Explore best sellers',32)}
       <div style="text-align:center;margin-top:32px"><a class="btn btn-ghost" href="#/bestsellers">View All Best Sellers</a></div>
     </div>
   </section>
 
+  <div class="section-divider" aria-hidden="true"></div>
   <section class="motion-section">
     <div class="wrap">
       <div class="section-head reveal"><div class="eyebrow">Curated discovery</div><h2>Fragrance Sets</h2><p>Purpose-built 2ml rotations for exploring more, with less guesswork.</p></div>
@@ -807,6 +808,7 @@ function renderHome(){
     </div>
   </section>
 
+  <div class="section-divider" aria-hidden="true"></div>
   <section class="motion-section motion-section-products home-full-collection">
     <div class="wrap">
       <div class="section-head reveal">
