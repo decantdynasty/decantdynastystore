@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-21T10:38:14.418Z",
+  "updatedAt": "2026-07-22T05:34:22.886Z",
   "brands": [
     {
       "id": "afnan",
@@ -1067,7 +1067,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "3ml": 139,
         "5ml": 249
       },
-      "concentration": "Eau de Toilette",
+      "concentration": "Eau de Parfum",
       "gender": "Men",
       "description": "A fresh spicy woody fragrance that blends aromatic herbs and grapefruit with creamy florals and dry woods.",
       "topNotes": [
@@ -2480,8 +2480,8 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "3ml": 195,
         "5ml": 295
       },
-      "concentration": "Extrait de Parfum",
-      "gender": "Unisex",
+      "concentration": "Eau de Parfum",
+      "gender": "Women",
       "description": "A vivid mixed-berry extrait lifted by rosemary and basil, with a cool vodka nuance and a musky, woody fruit trail.",
       "topNotes": [
         "Blackberry",
@@ -2717,7 +2717,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": false
     },
     {
       "id": "jovan-managed-white-musk-for-women",
@@ -2749,7 +2749,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": false
     },
     {
       "id": "jovan-managed-white-musk-pour-homme",
@@ -2785,7 +2785,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": false
     },
     {
       "id": "khadlaj-0049",
@@ -2800,7 +2800,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "3ml": 245,
         "5ml": 405
       },
-      "concentration": "Eau de Parfum",
+      "concentration": "Extrait de Parfum",
       "gender": "Unisex",
       "description": "A mysterious oud-rose oriental with a saffron-spiced opening.",
       "topNotes": [
