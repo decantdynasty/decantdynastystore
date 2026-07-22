@@ -55,6 +55,7 @@ function setSoundMuted(muted){ sounds.muted=!!muted; localSet('prefs:sound-muted
 
 /* ---------------- 3D Bottle ---------------- */
 let bottleCleanup = null;
+let showcaseCleanup = null;
 function initHeroBottle(){
   const container=document.getElementById('heroBottleContainer');
   if(!container)return;
@@ -67,7 +68,7 @@ function initHeroBottle(){
   if(!window.THREE||!THREE.GLTFLoader){container.innerHTML='<div class="ph">Interactive decant bottle</div>';return;}
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(34,container.clientWidth/Math.max(container.clientHeight,1),.1,100);
-  camera.position.set(0,.05,8.8);
+  camera.position.set(0,.05,window.innerWidth<=960?12.8:9.6);
   const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(container.clientWidth,container.clientHeight);
   renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
@@ -131,7 +132,7 @@ function initHeroBottle(){
   let heroVisible=true;
   let lastFrameTime=performance.now();
   const down=e=>{
-    if(!modelRoot)return;
+    if(!modelRoot||(!reduced&&!hero?.classList.contains('is-bottle-active')))return;
     const rect=renderer.domElement.getBoundingClientRect();
     pointer.x=((e.clientX-rect.left)/Math.max(rect.width,1))*2-1;
     pointer.y=-((e.clientY-rect.top)/Math.max(rect.height,1))*2+1;
@@ -159,26 +160,30 @@ function initHeroBottle(){
   };
   const syncCinematicMotion=progress=>{
     const mobile=mobileMedia.matches;
-    const focus=smoothstep(mobile?.08:.06,mobile?.55:.48,progress);
-    const departure=smoothstep(mobile?.80:.73,1,progress);
-    const copyExit=smoothstep(mobile?.10:.06,mobile?.48:.38,progress);
-    const annotationExit=smoothstep(.015,mobile?.24:.20,progress);
+    const focus=smoothstep(mobile?.14:.11,mobile?.58:.51,progress);
+    const departure=smoothstep(mobile?.82:.77,1,progress);
+    const copyExit=smoothstep(mobile?.035:.025,mobile?.32:.27,progress);
+    const annotationIn=smoothstep(mobile?.43:.39,mobile?.61:.55,progress);
+    const annotationOut=smoothstep(mobile?.73:.69,mobile?.88:.85,progress);
     const viewportTravel=window.innerHeight*(mobile?.11:.19);
+    const entranceTravel=window.innerHeight*(mobile?.42:.36);
     const trackX=centerShift*focus;
-    const trackY=(centerShiftY*focus)-(10*focus)-(viewportTravel*departure);
+    const trackY=(entranceTravel*(1-focus))+(centerShiftY*focus)-(10*focus)-(viewportTravel*departure);
     track.style.transform=`translate3d(${trackX.toFixed(2)}px,${trackY.toFixed(2)}px,0)`;
-    track.style.opacity=String(1-(departure*(mobile?.62:.78)));
-    track.style.filter=`blur(${(departure*(mobile?1.5:3.5)).toFixed(2)}px)`;
+    track.style.opacity=String(focus*(1-(departure*(mobile?.62:.78))));
+    track.style.filter=`blur(${(((1-focus)*(mobile?4:7))+(departure*(mobile?1.5:3.5))).toFixed(2)}px)`;
     if(heroCopy){
       heroCopy.style.opacity=String(1-copyExit);
       heroCopy.style.transform=`translate3d(0,${(-58*copyExit).toFixed(2)}px,0)`;
       heroCopy.style.filter=`blur(${(copyExit*(mobile?3:6)).toFixed(2)}px)`;
     }
     if(annotations){
-      annotations.style.opacity=String(1-annotationExit);
-      annotations.style.transform=`scale(${(1-(annotationExit*.035)).toFixed(4)})`;
+      const annotationVisibility=annotationIn*(1-annotationOut);
+      annotations.style.opacity=String(annotationVisibility);
+      annotations.style.transform=`scale(${(.965+(annotationVisibility*.035)).toFixed(4)})`;
     }
-    container.classList.toggle('is-scroll-active',progress>.018);
+    hero?.classList.toggle('is-bottle-active',focus>.26&&departure<.96);
+    container.classList.toggle('is-scroll-focus',focus>.92&&departure<.12);
     const scrollYaw=(focus*(mobile?.46:.68))+(departure*(mobile?.20:.36));
     group.rotation.y=userRotationY+scrollYaw;
     group.rotation.x=userRotationX-(focus*(mobile?.035:.055))+(departure*.025);
@@ -200,7 +205,7 @@ function initHeroBottle(){
     syncCinematicMotion(scrollCurrent);
     updateGuides();renderer.render(scene,camera);
   }animate();
-  const resize=()=>{const w=container.clientWidth,h=container.clientHeight;camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(w,h);measureScroll();};
+  const resize=()=>{const w=container.clientWidth,h=container.clientHeight;camera.aspect=w/Math.max(h,1);camera.position.z=window.innerWidth<=960?12.8:9.6;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(w,h);measureScroll();};
   const resizeObserver='ResizeObserver' in window?new ResizeObserver(resize):null;
   resizeObserver?.observe(container);
   const visibilityObserver='IntersectionObserver' in window?new IntersectionObserver(entries=>{
@@ -210,7 +215,70 @@ function initHeroBottle(){
   visibilityObserver?.observe(hero||container);
   window.addEventListener('resize',resize,{passive:true});
   window.addEventListener('scroll',syncScrollTarget,{passive:true});measureScroll();
-  bottleCleanup=()=>{cancelAnimationFrame(raf);resizeObserver?.disconnect();visibilityObserver?.disconnect();window.removeEventListener('resize',resize);window.removeEventListener('scroll',syncScrollTarget);container.removeEventListener('pointerdown',down);container.removeEventListener('pointermove',move);container.removeEventListener('pointerup',up);container.removeEventListener('pointercancel',up);renderer.dispose();disposables.forEach(x=>x.dispose?.());};
+  bottleCleanup=()=>{cancelAnimationFrame(raf);resizeObserver?.disconnect();visibilityObserver?.disconnect();window.removeEventListener('resize',resize);window.removeEventListener('scroll',syncScrollTarget);container.removeEventListener('pointerdown',down);container.removeEventListener('pointermove',move);container.removeEventListener('pointerup',up);container.removeEventListener('pointercancel',up);hero?.classList.remove('is-bottle-active');renderer.dispose();disposables.forEach(x=>x.dispose?.());};
+}
+
+function initShowcaseRails(){
+  if(showcaseCleanup)showcaseCleanup();
+  const cleanups=[...document.querySelectorAll('[data-showcase-rail]')].map(rail=>{
+    const track=rail.querySelector('.showcase-track'),group=track?.querySelector('.showcase-group');
+    if(!track||!group)return()=>{};
+    const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let x=0,velocity=0,dragging=false,hovered=false,visible=true,raf=0,lastFrame=performance.now();
+    let pointerId=null,startX=0,startY=0,lastX=0,lastPointerTime=0,horizontalIntent=false,suppressClick=false,clickReset=0,groupWidth=1;
+    const baseSpeed=Number(rail.dataset.speed)||(window.innerWidth<=640?18:26);
+    velocity=baseSpeed/1000;
+    const measure=()=>{groupWidth=Math.max(group.getBoundingClientRect().width,1);x=((x%groupWidth)-groupWidth)%groupWidth;};
+    const render=()=>{track.style.transform=`translate3d(${x.toFixed(2)}px,0,0)`;};
+    const wrap=()=>{while(x>=0)x-=groupWidth;while(x<-groupWidth)x+=groupWidth;};
+    const frame=now=>{
+      const delta=Math.min(Math.max(now-lastFrame,0),40);lastFrame=now;
+      if(!reduced&&visible){
+        if(!dragging){
+          const target=hovered?0:baseSpeed/1000;
+          velocity+=(target-velocity)*(1-Math.exp(-delta/(hovered?90:650)));
+          x+=velocity*delta;
+        }
+        wrap();render();
+      }
+      raf=requestAnimationFrame(frame);
+    };
+    const pointerDown=e=>{
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      dragging=true;horizontalIntent=e.pointerType==='mouse';pointerId=e.pointerId;
+      suppressClick=false;clearTimeout(clickReset);startX=lastX=e.clientX;startY=e.clientY;lastPointerTime=performance.now();velocity=0;
+      if(horizontalIntent){rail.classList.add('is-dragging');rail.setPointerCapture?.(pointerId);}
+    };
+    const pointerMove=e=>{
+      if(!dragging||e.pointerId!==pointerId)return;
+      const totalX=e.clientX-startX,totalY=e.clientY-startY;
+      if(!horizontalIntent){
+        if(Math.abs(totalY)>Math.abs(totalX)+5){pointerEnd();return;}
+        if(Math.abs(totalX)<6)return;
+        horizontalIntent=true;rail.classList.add('is-dragging');rail.setPointerCapture?.(pointerId);
+      }
+      if(Math.abs(totalX)>6)suppressClick=true;
+      const now=performance.now(),dx=e.clientX-lastX,dt=Math.max(now-lastPointerTime,8);
+      x+=dx;velocity=(velocity*.35)+(dx/dt*.65);lastX=e.clientX;lastPointerTime=now;
+      wrap();render();
+    };
+    const pointerEnd=()=>{
+      if(!dragging)return;
+      dragging=false;horizontalIntent=false;
+      try{if(pointerId!==null&&rail.hasPointerCapture?.(pointerId))rail.releasePointerCapture(pointerId);}catch{}
+      pointerId=null;rail.classList.remove('is-dragging');
+      clickReset=setTimeout(()=>{suppressClick=false;},0);
+    };
+    const captureClick=e=>{if(!suppressClick)return;e.preventDefault();e.stopImmediatePropagation();suppressClick=false;};
+    const enter=e=>{if(e.pointerType!=='touch')hovered=true;};
+    const leave=e=>{if(e.pointerType!=='touch')hovered=false;pointerEnd();};
+    const focusIn=()=>{hovered=true;},focusOut=e=>{if(!rail.contains(e.relatedTarget))hovered=false;};
+    const observer='IntersectionObserver' in window?new IntersectionObserver(entries=>{visible=entries[0]?.isIntersecting!==false;},{rootMargin:'160px 0px'}):null;
+    rail.addEventListener('pointerdown',pointerDown);rail.addEventListener('pointermove',pointerMove);rail.addEventListener('pointerup',pointerEnd);rail.addEventListener('pointercancel',pointerEnd);rail.addEventListener('pointerenter',enter);rail.addEventListener('pointerleave',leave);rail.addEventListener('click',captureClick,true);rail.addEventListener('focusin',focusIn);rail.addEventListener('focusout',focusOut);window.addEventListener('resize',measure,{passive:true});observer?.observe(rail);
+    measure();x=-groupWidth;render();raf=requestAnimationFrame(frame);
+    return()=>{cancelAnimationFrame(raf);clearTimeout(clickReset);observer?.disconnect();window.removeEventListener('resize',measure);rail.removeEventListener('pointerdown',pointerDown);rail.removeEventListener('pointermove',pointerMove);rail.removeEventListener('pointerup',pointerEnd);rail.removeEventListener('pointercancel',pointerEnd);rail.removeEventListener('pointerenter',enter);rail.removeEventListener('pointerleave',leave);rail.removeEventListener('click',captureClick,true);rail.removeEventListener('focusin',focusIn);rail.removeEventListener('focusout',focusOut);};
+  });
+  showcaseCleanup=()=>{cleanups.forEach(cleanup=>cleanup());showcaseCleanup=null;};
 }
 
 /* ---------------- state ---------------- */
@@ -639,9 +707,27 @@ function heroArtSVG(){
   </svg>`;
 }
 
+function marqueeRibbonHTML(items,modifier,label){
+  const content=items.map(item=>`<span>${esc(item)}</span><i aria-hidden="true">&#10022;</i>`).join("");
+  return `<div class="section-marquee ${modifier}" aria-label="${esc(label)}">
+    <div class="section-marquee-track">
+      <div class="section-marquee-group">${content}</div>
+      <div class="section-marquee-group" aria-hidden="true">${content}</div>
+    </div>
+  </div>`;
+}
+function showcaseRailHTML(cards,modifier,label,speed){
+  return `<div class="showcase-rail ${modifier} reveal" data-showcase-rail data-speed="${speed}" aria-label="${esc(label)}">
+    <div class="showcase-track">
+      <div class="showcase-group">${cards}</div>
+      <div class="showcase-group" aria-hidden="true" inert>${cards}</div>
+    </div>
+  </div>`;
+}
+
 function renderHome(){
-  const bestSellers = allProducts().filter(p=>p.recommended).slice(0,8);
-  const brands = allBrands().slice(0,10);
+  const bestSellers = allProducts().filter(p=>p.recommended);
+  const brands = allBrands();
   const homeCatalog=allProducts();
   const initialCatalogCount=Math.min(catalogPageSize(),homeCatalog.length);
   const c = state.content;
@@ -649,9 +735,7 @@ function renderHome(){
   <section class="hero hero-cinematic">
     <div class="wrap hero-grid">
       <div class="hero-copy">
-        <div class="eyebrow hero-kicker">${esc(c.hero.eyebrow)}</div>
         <h1 class="hero-title-art"><img src="images/find-your-signature-scent.png" alt="Find Your Signature Scent" /></h1>
-        <p class="lede">${esc(fillTemplate(c.hero.lede))}</p>
         <div class="hero-actions">
           <a href="#/collection" class="btn btn-cta btn-cta-build">Shop Decants</a>
           <a href="#/build" class="btn btn-cta btn-cta-browse">Build My Collection</a>
@@ -676,28 +760,28 @@ function renderHome(){
     </div>
   </section>
 
+  ${marqueeRibbonHTML(brands.map(brand=>brand.name),'section-marquee-brands','Fragrance brands')}
   <section class="motion-section motion-section-brands">
     <div class="wrap">
       <div class="section-head reveal">
         <h2>${esc(c.brandsSection.heading)}</h2>
         <p>${esc(c.brandsSection.paragraph)}</p>
       </div>
-      <div class="brand-grid stagger">
-        ${brands.map(b=>brandCardHTML(b)).join("")}
-      </div>
+      ${showcaseRailHTML(brands.map(b=>brandCardHTML(b)).join(""),'brand-showcase','Explore fragrance brands',34)}
       <div style="text-align:center;margin-top:48px;">
         <a href="#/brands" class="btn btn-ghost">View All Brands</a>
       </div>
     </div>
   </section>
 
+  ${marqueeRibbonHTML(bestSellers.map(product=>product.name),'section-marquee-products','Best-selling fragrances')}
   <section class="motion-section motion-section-products">
     <div class="wrap">
       <div class="section-head reveal">
         <div class="eyebrow">Loved by the Dynasty</div>
         <h2>Best Sellers</h2>
       </div>
-      <div class="product-grid best-seller-preview stagger">${bestSellers.map(productCardHTML).join("")}</div>
+      ${showcaseRailHTML(bestSellers.map(productCardHTML).join(""),'best-seller-showcase','Explore best sellers',30)}
       <div style="text-align:center;margin-top:32px"><a class="btn btn-ghost" href="#/bestsellers">View All Best Sellers</a></div>
     </div>
   </section>
@@ -1369,6 +1453,7 @@ async function route({restoreY=0}={}){
   closeModal();
   closeCompare();
   const r = parseHash();
+  if(showcaseCleanup)showcaseCleanup();
   if(r.page!=="home"&&bottleCleanup){bottleCleanup();bottleCleanup=null;}
   state.route = r;
   const app = document.getElementById("app");
@@ -1393,7 +1478,7 @@ async function route({restoreY=0}={}){
   track("page_view",{page_title:document.title,page_location:location.href,page_path:`/${r.page}${r.id?`/${r.id}`:""}`});
   postRenderBind(r);
   initReveal(document,true);
-  if(r.page==="home")initHeroBottle();
+  if(r.page==="home"){initHeroBottle();initShowcaseRails();}
   const settleScroll=()=>{
     if(serial!==routeSerial)return;
     const max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
