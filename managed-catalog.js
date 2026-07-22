@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-22T05:34:22.886Z",
+  "updatedAt": "2026-07-22T13:35:08.731Z",
   "brands": [
     {
       "id": "afnan",
@@ -194,7 +194,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Yves Saint Laurent Y Eau de Toilette",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "fruity",
+        "green",
+        "woody",
+        "citrus",
+        "fresh spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "afnan-0004",
@@ -232,7 +242,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft to moderate",
       "inspiredBy": "Maison Francis Kurkdjian Aqua Vitae Forte",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "musky",
+        "aromatic",
+        "woody"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "afnan-0002",
@@ -270,7 +289,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Jean Paul Gaultier Ultra Male",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 5,
+      "projectionScore": 5,
+      "accords": [
+        "vanilla",
+        "amber",
+        "warm",
+        "warm spicy",
+        "fruity"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "afnan-0001",
@@ -350,7 +379,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "fruity",
+        "sweet",
+        "woody",
+        "tropical",
+        "fresh"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "afnan-0005",
@@ -390,7 +429,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Dior Sauvage",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "fresh spicy",
+        "citrus",
+        "aromatic",
+        "lavender",
+        "woody"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "afnan-0006",
@@ -428,7 +477,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Creed Absolu Aventus",
       "recommended": true,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 5,
+      "projectionScore": 5,
+      "accords": [
+        "fruity",
+        "sweet",
+        "white floral",
+        "citrus",
+        "amber"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "afnan-0007",
@@ -500,7 +559,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Bvlgari Tygar",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "citrus",
+        "musky",
+        "woody",
+        "fresh"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "afnan-0009",
@@ -538,7 +606,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Ex Nihilo Blue Talisman",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "fruity",
+        "sweet",
+        "musky",
+        "fresh"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "afnan-0010",
@@ -615,7 +693,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong",
       "inspiredBy": "Parfums de Marly Percival",
       "recommended": true,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "musky",
+        "lavender",
+        "ozonic",
+        "aquatic"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "al-haramain-0140",
@@ -652,7 +739,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Xerjoff Erba Pura",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 5,
+      "projectionScore": 4,
+      "accords": [
+        "sweet",
+        "fruity",
+        "ozonic",
+        "vanilla",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "al-haramain-0141",
@@ -691,7 +788,15 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong",
       "inspiredBy": "Louis Vuitton Imagination",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 5,
+      "projectionScore": 4,
+      "accords": [
+        "citrus",
+        "green",
+        "musky"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "al-wataniah-0142",
@@ -729,7 +834,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Dior Homme Intense",
       "recommended": true,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "iris",
+        "powdery",
+        "woody",
+        "earthy",
+        "violet"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "arabiyat-prestige-0132",
@@ -767,7 +882,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Goldfield & Banks Ingenious Ginger",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "fresh spicy",
+        "vanilla",
+        "powdery",
+        "fresh"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "arabiyat-prestige-0133",
@@ -804,7 +929,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Louis Vuitton Imagination",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "fresh spicy",
+        "amber",
+        "citrus",
+        "fresh",
+        "woody"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "armaf-0152",
@@ -844,7 +979,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong",
       "inspiredBy": "Creed Aventus",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 5,
+      "projectionScore": 5,
+      "accords": [
+        "fruity",
+        "woody",
+        "citrus",
+        "smoky",
+        "leather"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "armaf-0012",
@@ -884,7 +1029,19 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Creed Aventus",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 5,
+      "projectionScore": 5,
+      "accords": [
+        "fruity",
+        "woody",
+        "citrus",
+        "smoky",
+        "leather",
+        "vanilla",
+        "rose"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "armaf-0013",
@@ -928,7 +1085,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Creed Aventus",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 5,
+      "projectionScore": 5,
+      "accords": [
+        "citrus",
+        "musky",
+        "amber",
+        "sweet",
+        "fresh spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "armaf-0011",
@@ -969,7 +1136,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Creed Silver Mountain Water",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "citrus",
+        "musky",
+        "woody",
+        "fresh spicy",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "armaf-0153",
@@ -1012,7 +1189,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong",
       "inspiredBy": "Dior Sauvage",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "amber",
+        "aromatic",
+        "citrus",
+        "fresh spicy",
+        "musky"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "armaf-0014",
@@ -1090,7 +1277,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Lacoste White L.12.12.",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "woody",
+        "aromatic",
+        "citrus",
+        "floral"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "armaf-0017",
@@ -1125,7 +1321,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft to moderate",
       "inspiredBy": "Louis Vuitton Afternoon Swim",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "fresh spicy",
+        "aromatic",
+        "fresh",
+        "green"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "armaf-0016",
@@ -1166,7 +1372,15 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Yves Saint Laurent Y Eau de Parfum",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "aromatic",
+        "fresh spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "asdaaf-0135",
@@ -1202,7 +1416,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "white floral",
+        "musky",
+        "woody",
+        "fresh"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "asdaaf-0136",
@@ -1242,7 +1466,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong",
       "inspiredBy": "Parfums de Marly Delina Exclusif",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "rose",
+        "sweet",
+        "fruity",
+        "musky"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "azzaro-0137",
@@ -1273,7 +1506,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "warm spicy",
+        "sweet",
+        "amber",
+        "woody",
+        "caramel"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "azzaro-0138",
@@ -1304,7 +1547,15 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "vanilla",
+        "woody",
+        "fresh spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "bujairami-0131",
@@ -1342,7 +1593,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Louis Vuitton Imagination",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "citrus",
+        "fresh spicy",
+        "fresh",
+        "amber"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "calvin-klein-0143",
@@ -1408,7 +1668,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       },
       "concentration": "Eau de Toilette",
       "gender": "Men",
-      "description": "Is an Aromatic Fougere fragrance for men. CR7 was launched in 2017. Top notes are Lavender, Cardamom, Bergamot and Artemisia; middle notes are Tobacco, Cinnamon, Cedar and Iris; base notes are Vanilla, Musk, Sandalwood and Amber.",
+      "description": "An energetic aromatic fragrance opening with fresh bergamot, lavender and cardamom, deepening into warm tobacco, cinnamon and powdery iris before settling into smooth vanilla, musk, sandalwood and amber.",
       "topNotes": [
         "Lavender",
         "Cardamom",
@@ -1430,7 +1690,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "powdery",
+        "warm spicy",
+        "woody",
+        "aromatic",
+        "lavender"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0054",
@@ -1466,7 +1736,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Orto Parisi Megamare",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "musky",
+        "citrus",
+        "aquatic",
+        "fresh",
+        "aquatic"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0055",
@@ -1499,7 +1779,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Maison Francis Kurkdjian Grand Soir",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "amber",
+        "vanilla",
+        "warm spicy",
+        "woody"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0059",
@@ -1533,7 +1822,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Maison Francis Kurkdjian Gentle Fluidity Gold",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "vanilla",
+        "fresh spicy",
+        "aromatic",
+        "woody"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0056",
@@ -1567,7 +1865,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Maison Francis Kurkdjian Baccarat Rouge 540",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "amber",
+        "musky",
+        "woody",
+        "powdery",
+        "almond"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0057",
@@ -1602,7 +1910,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Maison Francis Kurkdjian Baccarat Rouge 540 Extrait",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "woody",
+        "almond",
+        "amber",
+        "warm spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0058",
@@ -1637,7 +1954,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Maison Francis Kurkdjian Oud Satin Mood",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "rose",
+        "oud",
+        "amber",
+        "vanilla",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0060",
@@ -1679,7 +2006,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Carolina Herrera Good Girl",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "white floral",
+        "warm spicy",
+        "sweet",
+        "vanilla"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0061",
@@ -1714,7 +2050,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "By Kilian Angels' Share",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "warm spicy",
+        "woody",
+        "vanilla",
+        "cinnamon"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0071",
@@ -1748,7 +2093,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Yves Saint Laurent Y Le Parfum",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "aromatic",
+        "fresh spicy",
+        "fresh",
+        "fruity"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0065",
@@ -1783,7 +2137,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Giorgio Armani Code Absolu",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "vanilla",
+        "sweet",
+        "leather",
+        "citrus",
+        "fresh spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0064",
@@ -1850,7 +2214,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Jean Paul Gaultier Le Male Le Parfum",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "warm spicy",
+        "vanilla",
+        "aromatic",
+        "powdery",
+        "iris"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0070",
@@ -1884,7 +2258,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Paco Rabanne 1 Million",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "warm spicy",
+        "cinnamon",
+        "citrus",
+        "amber",
+        "woody"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0069",
@@ -1919,7 +2303,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Paco Rabanne 1 Million Elixir",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 4,
+      "accords": [
+        "vanilla",
+        "fruity",
+        "rose",
+        "sweet"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0066",
@@ -1958,7 +2351,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Mancera Instant Crush",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "warm spicy",
+        "powdery",
+        "vanilla",
+        "amber",
+        "woody"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0072",
@@ -1992,7 +2395,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Thomas Kosmala No. 4 Après l'Amour",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 4,
+      "accords": [
+        "musky",
+        "amber",
+        "woody",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0067",
@@ -2029,7 +2441,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Giorgio Armani Stronger With You Absolutely",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "vanilla",
+        "woody",
+        "balsamic",
+        "lavender"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0062",
@@ -2064,7 +2485,15 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Giorgio Armani My Way",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "white floral",
+        "tuberose",
+        "citrus"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "fragrance-world-0068",
@@ -2098,7 +2527,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Maison Francis Kurkdjian Gentle Fluidity Silver",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "aromatic",
+        "fresh spicy",
+        "woody",
+        "musky"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "french-avenue-0074",
@@ -2174,7 +2612,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Clive Christian Blonde Amber",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "amber",
+        "vanilla",
+        "warm spicy",
+        "woody"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "french-avenue-0076",
@@ -2213,7 +2660,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Xerjoff Torino 21",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "aromatic",
+        "citus",
+        "green",
+        "fresh spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "french-avenue-0075",
@@ -2285,7 +2741,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Kilian Angels' Share",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "vanilla",
+        "amber",
+        "oud",
+        "sweet",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "french-avenue-0078",
@@ -2319,7 +2785,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Dior Sauvage Elixir",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "warm spicy",
+        "aromatic",
+        "lavender",
+        "fresh spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "french-avenue-0079",
@@ -2357,7 +2832,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Parfums de Marly Althaïr",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "sweet",
+        "wam spicy",
+        "vanilla",
+        "cinnamon"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "french-avenue-0080",
@@ -2394,7 +2878,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft to moderate",
       "inspiredBy": "Louis Vuitton Pacific Chill",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "fresh spicy",
+        "vanilla",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "french-avenue-0081",
@@ -2465,7 +2958,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Kilian Black Phantom",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "warm spicy",
+        "woody",
+        "sweet",
+        "coffee",
+        "rum"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "french-avenue-0083",
@@ -2547,7 +3050,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Stéphane Humbert Lucas God of Fire",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "tropical",
+        "fruity",
+        "sweet",
+        "citrus",
+        "fresh"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "giorgio-armani-0134",
@@ -2582,7 +3095,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "vanilla",
+        "sweet",
+        "amber",
+        "cinnamon",
+        "warm spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "jpg-0018",
@@ -2613,7 +3136,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "warm spicy",
+        "amber",
+        "aromatic",
+        "fruity"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "jpg-0019",
@@ -2647,7 +3179,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "warm spicy",
+        "vanilla",
+        "lavender",
+        "iris",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "jpg-0020",
@@ -2687,7 +3229,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "vanilla",
+        "fruity",
+        "aromatic",
+        "sweet"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "jovan-managed-musk-for-women",
@@ -2766,7 +3317,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       },
       "concentration": "Cologne",
       "gender": "Men",
-      "description": "A clean, long-lasting fragrance. Citruses are combined with clove, peppermint and thyme, and complimented by geranium, melon, and green apple. A unique, sea-like fresh perfume.",
+      "description": "A clean fragrance. Citruses are combined with clove, peppermint and thyme, and complimented by geranium, melon, and green apple. A unique, sea-like fresh perfume.",
       "topNotes": [
         "Granny Smith Apple",
         "Mint",
@@ -2785,7 +3336,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "musky",
+        "warm spicy",
+        "powdery",
+        "aromatic",
+        "fresh spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "khadlaj-0049",
@@ -2819,7 +3380,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Prada Paradigme",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "fresh spicy",
+        "vanilla",
+        "aromatic",
+        "citrus",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "khadlaj-0047",
@@ -2857,7 +3428,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Jean Paul Gaultier Le Beau Le Parfum",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "sweet",
+        "woody",
+        "coconut",
+        "amber",
+        "vanilla"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "khadlaj-0048",
@@ -2928,7 +3509,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft to moderate",
       "inspiredBy": "Yves Saint Laurent Libre Vanille Couture",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "vanilla",
+        "tuberose",
+        "sweet",
+        "powdery",
+        "white floral"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "khadlaj-0051",
@@ -2964,7 +3555,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft to moderate",
       "inspiredBy": "Dior Rouge Trafalgar",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "fruity",
+        "citrus",
+        "sweet",
+        "patchouli",
+        "musky"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "khadlaj-managed-shiyaaka-sky",
@@ -3037,8 +3638,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "longevity": "Long (7–10 hours)",
       "projection": "Moderate to strong",
       "inspiredBy": "Louis Vuitton Météore",
-      "recommended": false,
-      "outOfStock": false
+      "recommended": true,
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "fresh",
+        "warm spicy",
+        "aromatic"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "khadlaj-0053",
@@ -3110,7 +3720,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Maison Margiela By the Fireplace",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "woody",
+        "vanilla",
+        "sweet",
+        "oud",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0033",
@@ -3148,7 +3768,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Burberry Goddess",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "vanilla",
+        "sweet",
+        "lavender",
+        "fresh spicy",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0032",
@@ -3185,7 +3815,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Ex Nihilo Blue Talisman",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "citrus",
+        "fruity",
+        "fresh spicy",
+        "sweet",
+        "musky"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0027",
@@ -3224,7 +3864,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Dior Sauvage Elixir",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "amber",
+        "fresh spicy",
+        "woody",
+        "vanilla"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0030",
@@ -3261,7 +3910,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Azzaro The Most Wanted Intense EDP X Valentino Born in Roma Intense",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "vanilla",
+        "cacao",
+        "sweet",
+        "lavender",
+        "fresh spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0028",
@@ -3296,7 +3955,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Boss Bottled Absolu",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "amber",
+        "woody",
+        "tobacco",
+        "vanilla",
+        "sweet"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0029",
@@ -3331,7 +4000,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "vanilla",
+        "iris",
+        "powdery",
+        "lavender",
+        "violet"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0034",
@@ -3369,7 +4048,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "sweet",
+        "warm spicy",
+        "fruity",
+        "vanilla",
+        "woody"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0035",
@@ -3444,7 +4133,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Yves Saint Laurent Y Eau de Parfum",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "aromatic",
+        "fresh spicy",
+        "woody",
+        "fruity"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0037",
@@ -3481,7 +4179,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Carolina Herrera Very Good Girl",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "sweet",
+        "floral",
+        "musky",
+        "fresh"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0038",
@@ -3522,7 +4230,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "By Kilian Angels' Share",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "sweet",
+        "warm spicy",
+        "vanilla",
+        "amber",
+        "cinnamon"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0039",
@@ -3561,7 +4279,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "warm spicy",
+        "sweet",
+        "vanilla",
+        "cinnamon",
+        "coffee"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0040",
@@ -3674,9 +4402,18 @@ globalThis.DECANT_MANAGED_CATALOG = {
       ],
       "longevity": "Long (7–10 hours)",
       "projection": "Moderate to strong",
-      "inspiredBy": "BDK Gris Charnel",
+      "inspiredBy": "BDK Parfums Gris Charnel",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "woody",
+        "warm spicy",
+        "vanilla",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0043",
@@ -3716,7 +4453,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Paco Rabanne Invictus Aqua",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "aromatic",
+        "aquatic",
+        "fresh"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0044",
@@ -3751,7 +4497,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Jean Paul Gaultier Le Beau Paradise Garden",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "aromatic",
+        "fruity",
+        "sweet",
+        "green",
+        "fresh"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0045",
@@ -3784,7 +4540,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Nishane Ani",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "woody",
+        "amber",
+        "fresh spicy",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0046",
@@ -3820,7 +4585,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Creed Aventus",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "fruity",
+        "sweet",
+        "tropical",
+        "fresh",
+        "musky"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0025",
@@ -3892,7 +4667,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Kayali Yum Boujee Marshmallow 81",
       "recommended": true,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "vanilla",
+        "caramel",
+        "white floral",
+        "sweet",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0023",
@@ -3928,7 +4713,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "sweet",
+        "vanilla",
+        "powdery",
+        "musky"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0026",
@@ -3965,7 +4759,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft to moderate",
       "inspiredBy": "Rabanne Fame",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "tropical",
+        "sweet",
+        "white floral",
+        "vanilla",
+        "fruity"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "maison-alhambra-0085",
@@ -4000,7 +4804,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Maison Francis Kurkdjian Baccarat Rouge 540 Extrait",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "woody",
+        "warm spicy",
+        "amber",
+        "almond"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "maison-alhambra-0086",
@@ -4035,7 +4848,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Jean Paul Gaultier Scandal Pour Homme",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "caramel",
+        "aromatic",
+        "sweet",
+        "citrus",
+        "vanilla"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "maison-alhambra-0088",
@@ -4069,7 +4892,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Parfums de Marly Valaya",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "musky",
+        "powdery",
+        "white floral"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "maison-alhambra-0087",
@@ -4110,7 +4942,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Parfums de Marly Delina",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "rose",
+        "floral",
+        "fruity",
+        "musky",
+        "fresh"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "maison-alhambra-0089",
@@ -4144,7 +4986,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Parfums de Marly Palatine",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "woody",
+        "powdery",
+        "floral",
+        "sweet",
+        "fresh"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "maison-alhambra-0090",
@@ -4182,7 +5034,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Jean Paul Gaultier Le Beau Le Parfum",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "coconut",
+        "vanilla",
+        "sweet",
+        "citrus",
+        "aromatic"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "maison-alhambra-0091",
@@ -4220,7 +5082,15 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Louis Vuitton L'Immensité",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "fresh spicy",
+        "aromatic",
+        "citrus"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "maison-alhambra-0092",
@@ -4260,7 +5130,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Giorgio Armani Acqua di Giò Profondo",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "aromatic",
+        "aquatic",
+        "citrus",
+        "fresh"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "maison-alhambra-0093",
@@ -4295,7 +5174,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Giorgio Armani Acqua di Giò Profumo",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "fresh spicy",
+        "aromatic",
+        "citrus",
+        "lavender",
+        "woody"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "maison-alhambra-0094",
@@ -4333,7 +5222,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Versace Eros Eau de Toilette",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 4,
+      "accords": [
+        "aromatic",
+        "vanilla",
+        "green",
+        "amber",
+        "fresh spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "maison-alhambra-0095",
@@ -4374,7 +5273,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Versace Eros Flame",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "vanilla",
+        "woody",
+        "fresh spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "maison-alhambra-0096",
@@ -4412,7 +5320,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Yves Saint Laurent Y Eau de Parfum",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "fresh spicy",
+        "aromatic",
+        "woody",
+        "fruity",
+        "fresh"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "maison-asrar-0119",
@@ -4449,7 +5367,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Ex Nihilo Blue Talisman",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "white floral",
+        "citrus",
+        "fruity",
+        "sweet"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "maison-asrar-0120",
@@ -4519,7 +5446,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "woody",
+        "citrus",
+        "aromatic",
+        "amber",
+        "musky"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "nautica-0121",
@@ -4555,7 +5492,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft to moderate",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "green",
+        "fruity",
+        "floral",
+        "fresh",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "paris-corner-0123",
@@ -4590,7 +5537,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "By Kilian Angels' Share",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "woody",
+        "warm spicy",
+        "sweet",
+        "vanilla",
+        "cinnamon"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "paris-corner-0124",
@@ -4636,7 +5593,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Kayali Yum Pistachio Gelato 33",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "sweet",
+        "vanilla",
+        "woody",
+        "nutty",
+        "aromatic"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "paris-corner-0125",
@@ -4671,7 +5638,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Yves Saint Laurent Babycat",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "fresh spicy",
+        "vanilla",
+        "warm spicy",
+        "amber",
+        "aromatic"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "paris-corner-0126",
@@ -4705,7 +5682,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Giardini di Toscana Bianco Latte",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "vanilla",
+        "sweet",
+        "caramel",
+        "lactonic",
+        "honey"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "paris-corner-0127",
@@ -4739,7 +5726,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft to moderate",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "fruity",
+        "white floral",
+        "fresh spicy",
+        "aromatic"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "paris-corner-0128",
@@ -4778,7 +5775,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft to moderate",
       "inspiredBy": "Byredo Bal d'Afrique",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "aromatic",
+        "woody",
+        "white floral"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rasasi-0100",
@@ -4815,7 +5821,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Nishane Hacivat",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "woody",
+        "citrus",
+        "mossy",
+        "earthy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rasasi-0154",
@@ -4890,7 +5905,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Parfums de Marly Delina Exclusif",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "rose",
+        "fruity",
+        "vanilla",
+        "amber",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rasasi-0097",
@@ -5079,7 +6104,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Jean Paul Gaultier Le Beau Le Parfum",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "sweet",
+        "amber",
+        "fruity",
+        "citrus",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rayhaan-0110",
@@ -5149,7 +6184,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Dior Homme Cologne",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "fresh",
+        "woody",
+        "aromatic",
+        "white floral"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rayhaan-0111",
@@ -5224,7 +6269,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft to moderate",
       "inspiredBy": "Creed Green Irish Tweed",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "aromatic",
+        "citrus",
+        "fresh spicy",
+        "green"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rayhaan-0106",
@@ -5264,7 +6318,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Creed Aventus",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "woody",
+        "aromatic",
+        "citrus",
+        "fresh spicy",
+        "mossy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rayhaan-0107",
@@ -5302,9 +6366,18 @@ globalThis.DECANT_MANAGED_CATALOG = {
       ],
       "longevity": "Light to moderate (4–6 hours)",
       "projection": "Soft to moderate",
-      "inspiredBy": "Gucci Guilty Elixir",
+      "inspiredBy": "Yves Saint Laurent Kouros",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 5,
+      "projectionScore": 4,
+      "accords": [
+        "musky",
+        "animalic",
+        "aromatic",
+        "warm spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rayhaan-0115",
@@ -5338,7 +6411,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Dries Van Noten Santal Greenery",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "green",
+        "woody",
+        "fruity",
+        "aquatic"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rayhaan-0112",
@@ -5376,8 +6459,52 @@ globalThis.DECANT_MANAGED_CATALOG = {
       ],
       "longevity": "Light to moderate (4–6 hours)",
       "projection": "Soft to moderate",
-      "inspiredBy": "Chupa Chups Strawberry & Cream Lollipop",
+      "inspiredBy": "Julliette Has A Gun Miami Shake",
       "recommended": false,
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "sweet",
+        "fruity",
+        "vanilla",
+        "lactonic",
+        "coconut"
+      ],
+      "similarProductIds": []
+    },
+    {
+      "id": "rayhaan-managed-lion",
+      "brandId": "rayhaan",
+      "brand": "Rayhaan",
+      "name": "Lion",
+      "image": "images/products/rayhaan/lion.png",
+      "image2": "images/products/rayhaan/lion-decant.png",
+      "prices": {
+        "1ml": 55,
+        "2ml": 105,
+        "3ml": 155,
+        "5ml": 265
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Unisex",
+      "description": "A bold, addictive blend of juicy pear, cooling mint and aromatic lavender, warmed by cinnamon and clary sage before settling into smooth vanilla, amber and cedarwood.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": "Jean Paul Gaultier Ultra Male",
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "aromatic",
+        "vanilla",
+        "lavender",
+        "fresh spicy"
+      ],
+      "similarProductIds": [],
+      "recommended": true,
       "outOfStock": false
     },
     {
@@ -5395,7 +6522,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       },
       "concentration": "Eau de Parfum",
       "gender": "Men",
-      "description": "A nocturnal, deeply resinous oud elixir for evening wear.",
+      "description": "A nocturnal, deeply resinous elixir for evening wear.",
       "topNotes": [
         "Spices",
         "Bergamot"
@@ -5413,7 +6540,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Chanel Bleu de Chanel L'Exclusif",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "aromatic",
+        "citrus",
+        "fresh spicy",
+        "woody"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rayhaan-0108",
@@ -5449,7 +6585,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Dior Homme Parfum",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "iris",
+        "woody",
+        "powdery",
+        "leather",
+        "violet"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rayhaan-0103",
@@ -5483,7 +6629,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "fresh",
+        "aromatic",
+        "fresh spicy",
+        "woody"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rayhaan-0104",
@@ -5515,9 +6671,18 @@ globalThis.DECANT_MANAGED_CATALOG = {
       ],
       "longevity": "Moderate (5–8 hours)",
       "projection": "Moderate",
-      "inspiredBy": "Paco Rabanne Invictus Aqua 2016",
+      "inspiredBy": "Paco Rabanne Invictus",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "aromatic",
+        "fresh spicy",
+        "lavender"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rayhaan-0151",
@@ -5558,7 +6723,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Louis Vuitton Pacific Chill",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "green",
+        "aromatic",
+        "fresh spicy",
+        "fruity"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rayhaan-0113",
@@ -5611,7 +6786,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Amouage Outlands",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "amber",
+        "warm spicy",
+        "aromatic",
+        "balsamic",
+        "vanilla"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rayhaan-0116",
@@ -5645,7 +6830,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Guerlain Tonka Sarrapia Extrait 75",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "vanilla",
+        "sweet",
+        "warm spicy",
+        "almond",
+        "balsamic"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "riiffs-0118",
@@ -5685,7 +6880,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong",
       "inspiredBy": "Roja Dove Oceania",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 5,
+      "projectionScore": 5,
+      "accords": [
+        "fresh",
+        "citrus",
+        "green",
+        "fresh spicy",
+        "aromatic"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "riiffs-0117",
@@ -5722,7 +6927,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Montale Arabians Tonka",
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 5,
+      "projectionScore": 5,
+      "accords": [
+        "sweet",
+        "vanilla",
+        "amber",
+        "rose",
+        "warm spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "tubbees-0144",
@@ -5757,7 +6972,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "fruity",
+        "sweet",
+        "warm spicy",
+        "citrus",
+        "tropical"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "tubbees-0145",
@@ -5796,7 +7021,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "sweet",
+        "chocolate",
+        "nutty",
+        "vanilla",
+        "warm spicy"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "tubbees-0146",
@@ -5830,7 +7065,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft to moderate",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "lactonic",
+        "sweet",
+        "vanilla",
+        "chocolate",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "tubbees-0147",
@@ -5863,7 +7108,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "sweet",
+        "caramel",
+        "musky",
+        "powdery",
+        "vanilla"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "tubbees-0148",
@@ -5899,7 +7154,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "sweet",
+        "vanilla",
+        "fruity",
+        "lactonic",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "tubbees-0149",
@@ -5936,7 +7201,16 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft to moderate",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "vanilla",
+        "sweet",
+        "powdery",
+        "fruity"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "versace-0022",
@@ -5977,7 +7251,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "amber",
+        "citrus",
+        "fresh spicy",
+        "musky",
+        "aquatic"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "versace-0021",
@@ -6018,7 +7302,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "citrus",
+        "aromatic",
+        "green",
+        "vanilla",
+        "woody"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "viktor-rolf-0129",
@@ -6053,7 +7347,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "vanilla",
+        "tobacco",
+        "warm spicy",
+        "sweet",
+        "cinnamon"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "yves-saint-laurent-0130",
@@ -6089,7 +7393,112 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "aromatic",
+        "fresh spicy",
+        "woody",
+        "fruity",
+        "fresh"
+      ],
+      "similarProductIds": []
     }
-  ]
+  ],
+  "bundles": [
+    {
+      "id": "beginner-collection",
+      "name": "Beginner Collection",
+      "description": "Four approachable signatures spanning fresh, warm, polished, and evening-ready profiles.",
+      "price": 399,
+      "size": "2ml",
+      "productIds": [
+        "afnan-0002",
+        "lattafa-0038",
+        "versace-0021",
+        "rasasi-0098"
+      ],
+      "active": true
+    },
+    {
+      "id": "office-rotation",
+      "name": "Office Rotation",
+      "description": "Clean, composed fragrances chosen to stay polished from first meeting to clock-out.",
+      "price": 389,
+      "size": "2ml",
+      "productIds": [
+        "lattafa-0036",
+        "afnan-0008",
+        "armaf-0012",
+        "maison-alhambra-0096"
+      ],
+      "active": true
+    },
+    {
+      "id": "date-night-selection",
+      "name": "Date Night Selection",
+      "description": "A confident rotation of warm, magnetic scents made for evenings and close encounters.",
+      "price": 419,
+      "size": "2ml",
+      "productIds": [
+        "afnan-0002",
+        "french-avenue-0079",
+        "versace-0021",
+        "lattafa-0038"
+      ],
+      "active": true
+    },
+    {
+      "id": "fresh-summer-set",
+      "name": "Fresh Summer Set",
+      "description": "Bright, cooling fragrances selected for warm commutes, weekends, and tropical weather.",
+      "price": 389,
+      "size": "2ml",
+      "productIds": [
+        "rasasi-0098",
+        "afnan-0008",
+        "lattafa-0043",
+        "armaf-0012"
+      ],
+      "active": true
+    },
+    {
+      "id": "middle-eastern-starter-kit",
+      "name": "Middle Eastern Starter Kit",
+      "description": "Four modern Middle Eastern favorites that show the range of the region's perfumery.",
+      "price": 389,
+      "size": "2ml",
+      "productIds": [
+        "lattafa-0038",
+        "afnan-0002",
+        "afnan-0008",
+        "lattafa-0027"
+      ],
+      "active": true
+    },
+    {
+      "id": "personalized-four",
+      "name": "Your Four-Scent Edit",
+      "description": "Choose any four available fragrances and build your own personalized 2ml discovery set.",
+      "price": 399,
+      "size": "2ml",
+      "productIds": [],
+      "customizable": true,
+      "selectionCount": 4,
+      "active": true
+    }
+  ],
+  "settings": {
+    "paymentImages": [
+      "images/partners/payment/gcash.png",
+      "images/partners/payment/maya.png",
+      "images/partners/payment/maribank.png"
+    ],
+    "logisticsImages": [
+      "images/partners/logistics/jnt.png",
+      "images/partners/logistics/lala.png"
+    ],
+    "analyticsMeasurementId": ""
+  }
 };
