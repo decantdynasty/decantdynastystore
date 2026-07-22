@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-22T13:38:16.717Z",
+  "updatedAt": "2026-07-22T13:43:42.386Z",
   "brands": [
     {
       "id": "afnan",
@@ -7475,17 +7475,6 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "afnan-0008",
         "lattafa-0027"
       ],
-      "active": true
-    },
-    {
-      "id": "personalized-four",
-      "name": "Your Four-Scent Edit",
-      "description": "Choose any four available fragrances and build your own personalized 2ml discovery set.",
-      "price": 399,
-      "size": "2ml",
-      "productIds": [],
-      "customizable": true,
-      "selectionCount": 4,
       "active": true
     }
   ],
