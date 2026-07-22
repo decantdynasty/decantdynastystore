@@ -42,6 +42,8 @@
             <svg viewBox="0 0 24 24"><path d="M4 20V8l8-5 8 5v12M4 10l8 5 8-5M12 15v6"/></svg>
             Brands <span id="sideBrandCount">0</span>
           </button>
+          <button class="side-link" data-section="bundles"><svg viewBox="0 0 24 24"><path d="M4 8h16v12H4zM3 8l3-5h12l3 5M12 3v17"/></svg>Bundles <span id="sideBundleCount">0</span></button>
+          <button class="side-link" data-section="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1A7 7 0 0 0 15 6l-.3-2.6h-4L10.4 6A7 7 0 0 0 9 7.1l-2.4-1-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.4-1A7 7 0 0 0 10.4 18l.3 2.6h4L15 18a7 7 0 0 0 1.5-1.1l2.4 1 2-3.4-2-1.5a7 7 0 0 0 .1-1z"/></svg>Settings</button>
         </nav>
 
         <div class="inventory-card">
@@ -86,6 +88,19 @@
             <label class="manager-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="brandSearch" type="search" placeholder="Search brands" autocomplete="off" /></label>
           </div>
           <div class="brand-manager-grid" id="brandGrid"></div>
+        </section>
+        <section id="bundlesSection" hidden>
+          <div class="manager-heading"><div><span class="eyebrow">Discovery sets</span><h1>Bundles</h1><p>Create and price curated or customer-built decant sets.</p></div><button class="button button-primary" id="addBundle">+ Add Bundle</button></div>
+          <div class="brand-manager-grid" id="bundleGrid"></div>
+        </section>
+        <section id="settingsSection" hidden>
+          <div class="manager-heading"><div><span class="eyebrow">Storefront tools</span><h1>Settings</h1><p>Connect analytics and manage the footer partner artwork.</p></div></div>
+          <div class="form-section" style="max-width:720px">
+            <label class="field"><span>Google Analytics measurement ID <small>Optional · free GA4 property, format G-XXXXXXXXXX</small></span><input id="analyticsMeasurementId" placeholder="G-XXXXXXXXXX" /></label>
+            <div class="image-field"><div class="image-preview" id="siteMediaPreview"><span>No artwork</span></div><div><b>Payment &amp; logistics artwork</b><p id="siteMediaPath">images/payment-logistics.png</p><label class="button button-ghost file-button">Choose PNG<input id="siteMediaInput" type="file" accept="image/png,.png" /></label></div></div>
+            <button class="button button-primary" id="saveSettings">Save Settings</button>
+          </div>
+          <div class="inventory-card" style="max-width:720px;margin-top:20px"><span>Tracked business events</span><p style="font-size:11px;line-height:1.7;color:var(--muted)">Searches and no-result searches · product views · cart abandonment · quiz completion · Messenger checkout clicks · voucher usage · product comparisons. Connect GA4 above for aggregated customer reporting.</p></div>
         </section>
       </main>
     </div>
@@ -140,8 +155,25 @@
             <label class="field"><span>Longevity</span><input name="longevity" placeholder="Long (7–10 hours)" required /></label>
             <label class="field"><span>Projection</span><input name="projection" placeholder="Moderate to strong" required /></label>
           </div>
+          <div class="field-grid two">
+            <label class="field"><span>Longevity meter <small>1–5</small></span><input name="longevityScore" type="number" min="1" max="5" step="1" /></label>
+            <label class="field"><span>Projection meter <small>1–5</small></span><input name="projectionScore" type="number" min="1" max="5" step="1" /></label>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="section-label"><span>05</span>Wear guidance</div>
+          <label class="field"><span>Best for <small>Separate with commas</small></span><input name="bestFor" placeholder="Office, Dates, Everyday wear" /></label>
+          <label class="field"><span>Weather <small>Separate with commas</small></span><input name="weather" placeholder="Warm weather, Cool evenings" /></label>
+          <div class="field-grid two"><label class="field"><span>Day / night suitability</span><input name="dayNight" placeholder="Day to evening" /></label><label class="field"><span>Scent families <small>Separate with commas</small></span><input name="scentFamilies" placeholder="Fresh, Woody, Citrus" /></label></div>
+          <label class="field"><span>Similar fragrances <small>Product IDs, separated with commas</small></span><input name="similarProductIds" placeholder="afnan-0002, rasasi-0098" /></label>
         </div>
         <div class="editor-actions"><button class="button button-danger" id="deleteProduct" type="button">Delete</button><span></span><button class="button button-ghost" id="cancelProduct" type="button">Cancel</button><button class="button button-primary" type="submit">Save Product</button></div>
+      </form>
+
+      <form id="bundleForm" class="editor-form" hidden novalidate>
+        <div class="form-section"><div class="section-label"><span>01</span>Set identity</div><div class="field-grid two"><label class="field"><span>Bundle name</span><input name="name" required /></label><label class="field"><span>Bundle ID</span><input name="id" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" /></label></div><label class="field"><span>Description</span><textarea name="description" rows="4" required></textarea></label></div>
+        <div class="form-section"><div class="section-label"><span>02</span>Set configuration</div><div class="field-grid two"><label class="field"><span>Set price</span><div class="currency"><i>₱</i><input name="price" type="number" min="0" required /></div></label><label class="field"><span>Decant size</span><select name="size"><option>1ml</option><option selected>2ml</option><option>3ml</option><option>5ml</option></select></label></div><label class="field"><span>Included fragrances <small>Ctrl/Cmd-click to select several</small></span><select name="productIds" multiple size="12"></select></label><div class="switch-row"><label><input name="customizable" type="checkbox"/><span></span>Customer chooses fragrances</label><label><input name="active" type="checkbox" checked/><span></span>Visible on storefront</label></div><label class="field" style="margin-top:14px"><span>Required selections <small>For customizable sets</small></span><input name="selectionCount" type="number" min="1" max="12" value="4" /></label></div>
+        <div class="editor-actions"><button class="button button-danger" id="deleteBundle" type="button">Delete</button><span></span><button class="button button-ghost" id="cancelBundle" type="button">Cancel</button><button class="button button-primary" type="submit">Save Bundle</button></div>
       </form>
 
       <form id="brandForm" class="editor-form" hidden novalidate>
@@ -174,6 +206,7 @@
   <script src="data.js?v=20260720-11"></script>
   <script src="catalog-research.js?v=20260720-8"></script>
   <script src="managed-catalog.js?v=20260721-1"></script>
-  <script src="catalog-manager.js?v=20260721-3"></script>
+  <script src="catalog-extras.js?v=20260722-1"></script>
+  <script src="catalog-manager.js?v=20260722-1"></script>
 </body>
 </html>

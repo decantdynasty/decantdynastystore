@@ -16,17 +16,18 @@ const noteList=value=>String(value||"").split(/[,\n]/).map(note=>note.trim()).fi
 const DRAFT_KEY="dd:catalog-manager:draft:v1";
 const managed=globalThis.DECANT_MANAGED_CATALOG;
 const source=managed?.version===1&&Array.isArray(managed.brands)&&Array.isArray(managed.products)?managed:{brands:BRANDS,products:PRODUCTS};
-const state={brands:clone(source.brands),products:clone(source.products),section:"products",editingProductId:null,editingBrandId:null,productFile:null,brandFile:null,rootHandle:null,pendingAssets:new Map(),dirty:false,restored:false};
+const state={brands:clone(source.brands),products:clone(source.products),bundles:clone(Array.isArray(source.bundles)?source.bundles:globalThis.DECANT_DEFAULT_BUNDLES||[]),settings:{...(globalThis.DECANT_DEFAULT_SETTINGS||{}),...(source.settings||{})},section:"products",editingProductId:null,editingBrandId:null,editingBundleId:null,productFile:null,brandFile:null,siteMediaFile:null,rootHandle:null,pendingAssets:new Map(),dirty:false,restored:false};
 
 try{
   const draft=JSON.parse(localStorage.getItem(DRAFT_KEY)||"null");
   if(draft?.version===1&&Array.isArray(draft.brands)&&Array.isArray(draft.products)){
-    state.brands=draft.brands;state.products=draft.products;state.dirty=true;state.restored=true;
+    state.brands=draft.brands;state.products=draft.products;state.bundles=clone(Array.isArray(draft.bundles)?draft.bundles:state.bundles);state.settings={...state.settings,...(draft.settings||{})};state.dirty=true;state.restored=true;
   }
 }catch(error){console.warn("Catalog draft could not be restored",error);}
 
 const productForm=$("#productForm");
 const brandForm=$("#brandForm");
+const bundleForm=$("#bundleForm");
 const editorPanel=$("#editorPanel");
 const editorScrim=$("#editorScrim");
 const productImageInput=$("#productImageInput");
@@ -44,12 +45,13 @@ function setSaveState(){
 }
 function persistDraft(){
   state.dirty=true;
-  localStorage.setItem(DRAFT_KEY,JSON.stringify({version:1,updatedAt:new Date().toISOString(),brands:state.brands,products:state.products}));
+  localStorage.setItem(DRAFT_KEY,JSON.stringify({version:1,updatedAt:new Date().toISOString(),brands:state.brands,products:state.products,bundles:state.bundles,settings:state.settings}));
   setSaveState();renderSummary();
 }
 function clearDraft(){state.dirty=false;localStorage.removeItem(DRAFT_KEY);setSaveState();}
 function brandById(id){return state.brands.find(brand=>brand.id===id)||null;}
 function productById(id){return state.products.find(product=>product.id===id)||null;}
+function bundleById(id){return state.bundles.find(bundle=>bundle.id===id)||null;}
 function sortedBrands(){return [...state.brands].sort((a,b)=>a.name.localeCompare(b.name));}
 function sortedProducts(){return [...state.products].sort((a,b)=>a.brand.localeCompare(b.brand)||a.name.localeCompare(b.name));}
 function nextProductId(brandId,name){
@@ -64,6 +66,7 @@ function setPreview(element,path,file,contain=false){
 function renderSummary(){
   const total=state.products.length,out=state.products.filter(product=>product.outOfStock).length,available=total-out;
   $("#sideProductCount").textContent=total;$("#sideBrandCount").textContent=state.brands.length;
+  $("#sideBundleCount").textContent=state.bundles.length;
   $("#inventoryAvailable").textContent=`${available} available`;
   $("#inventoryStockText").textContent=`${out} product${out===1?"":"s"} out of stock`;
   $("#inventoryBar").style.width=`${total?available/total*100:0}%`;
@@ -72,6 +75,7 @@ function renderBrandOptions(){
   const options=sortedBrands().map(brand=>`<option value="${esc(brand.id)}">${esc(brand.name)}</option>`).join("");
   $("#brandFilter").innerHTML=`<option value="">All brands</option>${options}`;
   productForm.elements.brandId.innerHTML=options;
+  bundleForm.elements.productIds.innerHTML=sortedProducts().map(product=>`<option value="${esc(product.id)}">${esc(product.brand)} — ${esc(product.name)}</option>`).join("");
 }
 function productThumb(product){
   return `<div class="product-thumb"><img src="${esc(product.image)}" alt="" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span hidden>PNG</span></div>`;
@@ -102,18 +106,26 @@ function renderBrands(){
     return `<button class="brand-manager-card" data-brand-id="${esc(brand.id)}"><span class="brand-manager-logo"><img src="${esc(brand.logo)}" alt="" loading="lazy"></span><span><b>${esc(brand.name)}</b><small>${count} fragrance${count===1?'':'s'} · ${esc(brand.id)}</small></span><i>↗</i></button>`;
   }).join(""):`<div class="table-empty">No brands match this search.</div>`;
 }
-function renderAll(){renderSummary();renderBrandOptions();renderProducts();renderBrands();setSaveState();}
+function renderBundles(){
+  $("#bundleGrid").innerHTML=state.bundles.length?state.bundles.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(bundle=>`<button class="brand-manager-card" data-bundle-id="${esc(bundle.id)}"><span class="brand-manager-logo" style="display:grid;place-items:center;color:var(--gold);font-weight:800">${bundle.customizable?'YOU':(bundle.productIds||[]).length}</span><span><b>${esc(bundle.name)}</b><small>₱${Number(bundle.price||0).toLocaleString()} · ${esc(bundle.size||'2ml')} · ${bundle.active===false?'Hidden':'Live'}</small></span><i>↗</i></button>`).join(""):`<div class="table-empty">No discovery sets yet.</div>`;
+}
+function renderSettings(){
+  $("#analyticsMeasurementId").value=state.settings.analyticsMeasurementId||"";
+  $("#siteMediaPath").textContent=state.settings.paymentLogisticsImage||"images/payment-logistics.png";
+  setPreview($("#siteMediaPreview"),state.settings.paymentLogisticsImage||"images/payment-logistics.png",null,true);
+}
+function renderAll(){renderSummary();renderBrandOptions();renderProducts();renderBrands();renderBundles();renderSettings();setSaveState();}
 
 function showSection(section){
   state.section=section;
-  $("#productsSection").hidden=section!=="products";$("#brandsSection").hidden=section!=="brands";
+  $("#productsSection").hidden=section!=="products";$("#brandsSection").hidden=section!=="brands";$("#bundlesSection").hidden=section!=="bundles";$("#settingsSection").hidden=section!=="settings";
   $$("[data-section]").forEach(button=>button.classList.toggle("active",button.dataset.section===section));
 }
 function openEditor(type,title,kicker){
   $("#editorTitle").textContent=title;$("#editorKicker").textContent=kicker;
-  productForm.hidden=type!=="product";brandForm.hidden=type!=="brand";
+  productForm.hidden=type!=="product";brandForm.hidden=type!=="brand";bundleForm.hidden=type!=="bundle";
   editorPanel.classList.add("open");editorScrim.classList.add("open");editorPanel.setAttribute("aria-hidden","false");
-  setTimeout(()=>$("input:not([type=hidden])",type==="product"?productForm:brandForm)?.focus(),180);
+  setTimeout(()=>$("input:not([type=hidden])",type==="product"?productForm:type==="brand"?brandForm:bundleForm)?.focus(),180);
 }
 function closeEditor(){
   editorPanel.classList.remove("open");editorScrim.classList.remove("open");editorPanel.setAttribute("aria-hidden","true");
@@ -128,6 +140,8 @@ function fillProductForm(product){
   fields.inspiredBy.value=product?.inspiredBy||"";fields.description.value=product?.description||"";
   fields.topNotes.value=(product?.topNotes||[]).join(", ");fields.heartNotes.value=(product?.heartNotes||[]).join(", ");fields.baseNotes.value=(product?.baseNotes||[]).join(", ");
   fields.longevity.value=product?.longevity||"Moderate (5–8 hours)";fields.projection.value=product?.projection||"Moderate";
+  fields.longevityScore.value=product?.longevityScore||3;fields.projectionScore.value=product?.projectionScore||3;
+  fields.bestFor.value=(product?.bestFor||[]).join(", ");fields.weather.value=(product?.weather||[]).join(", ");fields.dayNight.value=product?.dayNight||"";fields.scentFamilies.value=(product?.scentFamilies||[]).join(", ");fields.similarProductIds.value=(product?.similarProductIds||[]).join(", ");
   const path=product?.image||suggestedProductPath();$("#productImagePath").textContent=path;setPreview($("#productImagePreview"),path,null);
   $("#deleteProduct").hidden=!product;
 }
@@ -159,6 +173,8 @@ function saveProduct(event){
       concentration:fields.concentration.value.trim(),gender:fields.gender.value,description:fields.description.value.trim(),
       topNotes:noteList(fields.topNotes.value),heartNotes:noteList(fields.heartNotes.value),baseNotes:noteList(fields.baseNotes.value),
       longevity:fields.longevity.value.trim(),projection:fields.projection.value.trim(),inspiredBy:fields.inspiredBy.value.trim()||null,
+      longevityScore:Number(fields.longevityScore.value)||3,projectionScore:Number(fields.projectionScore.value)||3,
+      bestFor:noteList(fields.bestFor.value),weather:noteList(fields.weather.value),dayNight:fields.dayNight.value.trim(),scentFamilies:noteList(fields.scentFamilies.value),similarProductIds:noteList(fields.similarProductIds.value).filter(otherId=>otherId!==id),
       recommended:fields.recommended.checked,outOfStock:fields.outOfStock.checked
     };
     if(existing)state.products[state.products.indexOf(existing)]=product;else state.products.push(product);
@@ -208,12 +224,31 @@ function deleteBrand(){
   state.brands=state.brands.filter(item=>item.id!==brand.id);persistDraft();renderAll();closeEditor();toast(`${brand.name} deleted`);
 }
 
+function fillBundleForm(bundle){
+  const fields=bundleForm.elements;fields.name.value=bundle?.name||"";fields.id.value=bundle?.id||"";fields.id.disabled=!!bundle;fields.description.value=bundle?.description||"";fields.price.value=bundle?.price??"";fields.size.value=bundle?.size||"2ml";fields.customizable.checked=!!bundle?.customizable;fields.active.checked=bundle?.active!==false;fields.selectionCount.value=bundle?.selectionCount||4;
+  const chosen=new Set(bundle?.productIds||[]);[...fields.productIds.options].forEach(option=>option.selected=chosen.has(option.value));$("#deleteBundle").hidden=!bundle;
+}
+function editBundle(id=null){state.editingBundleId=id;const bundle=id?bundleById(id):null;fillBundleForm(bundle);openEditor("bundle",bundle?bundle.name:"Add bundle",bundle?"Bundle editor":"New discovery set");}
+function saveBundle(event){
+  event.preventDefault();if(!validateEditorForm(bundleForm))return;
+  const fields=bundleForm.elements,existing=state.editingBundleId?bundleById(state.editingBundleId):null,id=existing?.id||managerSlug(fields.id.value||fields.name.value),name=fields.name.value.trim();
+  if(!id||(!existing&&bundleById(id))){toast("Choose a unique bundle ID");return;}
+  const bundle={...(existing||{}),id,name,description:fields.description.value.trim(),price:Number(fields.price.value),size:fields.size.value,productIds:[...fields.productIds.selectedOptions].map(option=>option.value),customizable:fields.customizable.checked,selectionCount:Number(fields.selectionCount.value)||4,active:fields.active.checked};
+  if(!bundle.customizable&&!bundle.productIds.length){toast("Choose at least one fragrance for this set");return;}
+  if(existing)state.bundles[state.bundles.indexOf(existing)]=bundle;else state.bundles.push(bundle);persistDraft();renderAll();closeEditor();toast(`${bundle.name} saved. Click Save to Storefront when ready.`);
+}
+function deleteBundle(){const bundle=bundleById(state.editingBundleId);if(!bundle)return;if(!confirm(`Delete ${bundle.name}?`))return;state.bundles=state.bundles.filter(item=>item.id!==bundle.id);persistDraft();renderAll();closeEditor();toast(`${bundle.name} deleted`);}
+function saveSettings(){
+  const measurementId=$("#analyticsMeasurementId").value.trim().toUpperCase();if(measurementId&&!/^G-[A-Z0-9]+$/.test(measurementId)){toast("Use a GA4 ID beginning with G-");return;}
+  state.settings.analyticsMeasurementId=measurementId;state.settings.paymentLogisticsImage="images/payment-logistics.png";if(state.siteMediaFile)state.pendingAssets.set(state.settings.paymentLogisticsImage,state.siteMediaFile);persistDraft();toast("Storefront settings saved to your draft");
+}
+
 function validatePng(file){return file&&(/\.png$/i.test(file.name)||file.type==="image/png");}
 function catalogPayload(){
   const brands=sortedBrands().map(brand=>({id:brand.id,name:brand.name,logo:brand.logo}));
   const brandMap=new Map(brands.map(brand=>[brand.id,brand.name]));
   const products=sortedProducts().filter(product=>brandMap.has(product.brandId)).map(product=>({...product,brand:brandMap.get(product.brandId),prices:Object.fromEntries(Object.entries(product.prices).map(([size,price])=>[size,Number(price)]))}));
-  return{version:1,updatedAt:new Date().toISOString(),brands,products};
+  return{version:1,updatedAt:new Date().toISOString(),brands,products,bundles:clone(state.bundles),settings:{...state.settings}};
 }
 function validateCatalog(payload){
   const brandIds=new Set(),productIds=new Set();
@@ -223,6 +258,14 @@ function validateCatalog(payload){
     if(!brandIds.has(product.brandId))return`${product.name} has no valid brand`;
     if(!["1ml","2ml","3ml","5ml"].every(size=>Number.isFinite(product.prices[size])&&product.prices[size]>=0))return`${product.name} has invalid prices`;
     productIds.add(product.id);
+  }
+  const bundleIds=new Set();
+  for(const bundle of payload.bundles||[]){
+    if(!bundle.id||!bundle.name||bundleIds.has(bundle.id))return`Invalid or duplicate bundle: ${bundle.name||bundle.id}`;
+    if(!Number.isFinite(Number(bundle.price))||Number(bundle.price)<0)return`${bundle.name} has an invalid price`;
+    if(!bundle.customizable&&!(bundle.productIds||[]).length)return`${bundle.name} needs at least one fragrance`;
+    if((bundle.productIds||[]).some(id=>!productIds.has(id)))return`${bundle.name} includes a missing fragrance`;
+    bundleIds.add(bundle.id);
   }
   return"";
 }
@@ -267,14 +310,17 @@ $$('[data-section]').forEach(button=>button.onclick=()=>showSection(button.datas
 $("#productSearch").oninput=renderProducts;$("#brandFilter").onchange=renderProducts;$("#stockFilter").onchange=renderProducts;$("#brandSearch").oninput=renderBrands;
 $("#productTable").onclick=event=>{const row=event.target.closest("[data-product-id]");if(row)editProduct(row.dataset.productId);};
 $("#brandGrid").onclick=event=>{const card=event.target.closest("[data-brand-id]");if(card)editBrand(card.dataset.brandId);};
-$("#addProduct").onclick=()=>editProduct();$("#addBrand").onclick=()=>editBrand();
-$("#closeEditor").onclick=closeEditor;editorScrim.onclick=closeEditor;$("#cancelProduct").onclick=closeEditor;$("#cancelBrand").onclick=closeEditor;
-productForm.onsubmit=saveProduct;brandForm.onsubmit=saveBrand;$("#deleteProduct").onclick=deleteProduct;$("#deleteBrand").onclick=deleteBrand;
+$("#bundleGrid").onclick=event=>{const card=event.target.closest("[data-bundle-id]");if(card)editBundle(card.dataset.bundleId);};
+$("#addProduct").onclick=()=>editProduct();$("#addBrand").onclick=()=>editBrand();$("#addBundle").onclick=()=>editBundle();
+$("#closeEditor").onclick=closeEditor;editorScrim.onclick=closeEditor;$("#cancelProduct").onclick=closeEditor;$("#cancelBrand").onclick=closeEditor;$("#cancelBundle").onclick=closeEditor;
+productForm.onsubmit=saveProduct;brandForm.onsubmit=saveBrand;bundleForm.onsubmit=saveBundle;$("#deleteProduct").onclick=deleteProduct;$("#deleteBrand").onclick=deleteBrand;$("#deleteBundle").onclick=deleteBundle;
 productForm.elements.name.oninput=()=>{if(!state.editingProductId&&!state.productFile)$("#productImagePath").textContent=suggestedProductPath();};
 productForm.elements.brandId.onchange=()=>{if(!state.editingProductId&&!state.productFile)$("#productImagePath").textContent=suggestedProductPath();};
 brandForm.elements.name.oninput=()=>{if(!state.editingBrandId){brandForm.elements.id.value=managerSlug(brandForm.elements.name.value);$("#brandImagePath").textContent=`images/brands/${managerSlug(brandForm.elements.name.value)||"brand-name"}.png`;}};
 productImageInput.onchange=()=>{const file=productImageInput.files[0];if(!file)return;if(!validatePng(file)){productImageInput.value="";toast("Product photos must be PNG files");return;}state.productFile=file;$("#productImagePath").textContent=suggestedProductPath();setPreview($("#productImagePreview"),"",file);};
 brandImageInput.onchange=()=>{const file=brandImageInput.files[0];if(!file)return;if(!validatePng(file)){brandImageInput.value="";toast("Brand logos must be PNG files");return;}state.brandFile=file;const id=state.editingBrandId||managerSlug(brandForm.elements.id.value||brandForm.elements.name.value);$("#brandImagePath").textContent=`images/brands/${id||"brand-name"}.png`;setPreview($("#brandImagePreview"),"",file,true);};
+$("#siteMediaInput").onchange=()=>{const file=$("#siteMediaInput").files[0];if(!file)return;if(!validatePng(file)){toast("Payment and logistics artwork must be a PNG file");return;}state.siteMediaFile=file;setPreview($("#siteMediaPreview"),"",file,true);};
+$("#saveSettings").onclick=saveSettings;
 $("#connectFolder").onclick=connectFolder;$("#publishCatalog").onclick=saveToStorefront;
 $("#downloadCatalog").onclick=()=>{download("managed-catalog.js",catalogSource());toast("Catalog file downloaded — your draft remains until it is installed");};
 const exportBackup=()=>download(`decant-dynasty-catalog-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify(catalogPayload(),null,2),"application/json");
@@ -284,7 +330,7 @@ $("#importBackup").onchange=async event=>{
   try{
     const payload=JSON.parse(await file.text());const error=validateCatalog(payload);if(error)throw new Error(error);
     if(!confirm(`Import ${payload.products.length} products and ${payload.brands.length} brands? This replaces the current draft.`))return;
-    state.brands=clone(payload.brands);state.products=clone(payload.products);state.pendingAssets.clear();persistDraft();renderAll();toast("Catalog backup imported into your draft");
+    state.brands=clone(payload.brands);state.products=clone(payload.products);state.bundles=clone(Array.isArray(payload.bundles)?payload.bundles:state.bundles);state.settings={...state.settings,...(payload.settings||{})};state.pendingAssets.clear();persistDraft();renderAll();toast("Catalog backup imported into your draft");
   }catch(error){toast(`Backup could not be imported: ${error.message}`);}finally{event.target.value="";}
 };
 $$('[data-close-dialog]').forEach(button=>button.onclick=()=>$("#exportDialog").close());

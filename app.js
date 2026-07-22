@@ -25,6 +25,11 @@ function applyManagedCatalog(){
 }
 applyManagedCatalog();
 
+const SITE_SETTINGS={...(globalThis.DECANT_DEFAULT_SETTINGS||{}),...(globalThis.DECANT_MANAGED_CATALOG?.settings||{})};
+const BUNDLES=(Array.isArray(globalThis.DECANT_MANAGED_CATALOG?.bundles)?globalThis.DECANT_MANAGED_CATALOG.bundles:globalThis.DECANT_DEFAULT_BUNDLES||[]).filter(bundle=>bundle&&bundle.id&&bundle.name&&bundle.active!==false);
+const PAGE_SIZE=24;
+const track=(name,params={})=>globalThis.DDAnalytics?.track(name,params);
+
 /* ---------------- device-local preferences ---------------- */
 function localGet(key){ try{return localStorage.getItem(key);}catch(e){return null;} }
 function localSet(key,value){ try{localStorage.setItem(key,value);}catch(e){} }
@@ -54,8 +59,9 @@ function initHeroBottle(){
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(34,container.clientWidth/Math.max(container.clientHeight,1),.1,100);
   camera.position.set(0,.05,8.8);
-  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));renderer.setSize(container.clientWidth,container.clientHeight);
+  const mobileRenderer=window.innerWidth<720;
+  const renderer=new THREE.WebGLRenderer({antialias:!mobileRenderer,alpha:true,powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,mobileRenderer?1.25:2));renderer.setSize(container.clientWidth,container.clientHeight);
   renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   container.querySelector('canvas')?.remove();container.prepend(renderer.domElement);
   scene.add(new THREE.HemisphereLight(0xfffaf0,0x10131a,1.65));
@@ -103,7 +109,7 @@ function initHeroBottle(){
     featurePoints.sticker.set(radius*.94,-size.y*.12,0);
     featurePoints.glass.set(radius*.92,-size.y*.24,0);
     container.classList.add('model-ready');
-  },undefined,()=>{container.classList.add('model-error');showToast('The 3D bottle could not be loaded.');});
+  },undefined,()=>{container.classList.add('model-error');toast('The 3D bottle could not be loaded.');});
   let dragging=false,lastX=0,lastY=0,velocityX=0,velocityY=.004,raf=0;
   let userRotationX=group.rotation.x,userRotationY=group.rotation.y;
   let scrollTarget=0,scrollCurrent=0,heroStart=0,heroRange=Math.max(window.innerHeight,1);
@@ -140,6 +146,8 @@ const state = {
   compare: [],      // productId[] (maximum 3)
   recentSearches: [],
   voucherCode: "",
+  checkoutStarted: false,
+  abandonmentTracked: false,
   content: null,
   route: {page:"home"},
 };
@@ -225,6 +233,59 @@ function getProduct(id){
 }
 function allProducts(){ return PRODUCTS.map(p=>getProduct(p.id)).sort((a,b)=>a.brand.localeCompare(b.brand)||a.name.localeCompare(b.name)); }
 function productsByBrand(brandId){ return PRODUCTS.map(p=>getProduct(p.id)).filter(p=>p.brandId===brandId).sort((a,b)=>a.name.localeCompare(b.name)); }
+function getBundle(id){return BUNDLES.find(bundle=>bundle.id===id)||null;}
+function productMinimum(p){return Math.min(...Object.values(p.prices).map(Number));}
+function performanceScore(value,fallback=3){
+  if(Number.isFinite(Number(value)))return Math.max(1,Math.min(5,Number(value)));
+  const text=String(value||"").toLowerCase();
+  if(/beast|very strong|very long|12\+|10–12|10-12/.test(text))return 5;
+  if(/strong|long|8–|8-|7–|7-/.test(text))return 4;
+  if(/soft|intimate|light|short/.test(text))return 2;
+  return fallback;
+}
+function inferredFamilies(p){
+  if(Array.isArray(p.scentFamilies)&&p.scentFamilies.length)return p.scentFamilies;
+  const notes=[...(p.topNotes||[]),...(p.heartNotes||[]),...(p.baseNotes||[])].join(" ").toLowerCase();
+  const matches=[];
+  [["Fresh",/citrus|bergamot|lemon|marine|aquatic|ozonic|mint/],["Woody",/wood|cedar|sandal|vetiver|oud/],["Sweet",/vanilla|caramel|praline|honey|tonka|marshmallow/],["Spicy",/pepper|cinnamon|cardamom|ginger|spice/],["Floral",/rose|jasmine|lavender|iris|flower|tuberose/],["Fruity",/apple|pear|berry|peach|mango|pineapple|plum/],["Amber",/amber|benzoin|resin|labdanum/],["Musky",/musk|ambroxan/]].forEach(([label,re])=>{if(re.test(notes))matches.push(label);});
+  return matches.slice(0,4).length?matches.slice(0,4):["Balanced"];
+}
+function productProfile(p){
+  const families=inferredFamilies(p);
+  const fresh=families.some(x=>["Fresh","Fruity","Aquatic"].includes(x));
+  return {
+    bestFor:Array.isArray(p.bestFor)&&p.bestFor.length?p.bestFor:[fresh?"Daily wear":"Evenings",p.gender==="Unisex"?"Shared rotation":"Signature scent"],
+    weather:Array.isArray(p.weather)&&p.weather.length?p.weather:[fresh?"Warm weather":"Cool weather","Air-conditioned spaces"],
+    dayNight:p.dayNight|| (fresh?"Day to evening":"Evening & night"),
+    families,
+    longevityScore:performanceScore(p.longevityScore??p.longevity),
+    projectionScore:performanceScore(p.projectionScore??p.projection)
+  };
+}
+function similarProducts(p){
+  const explicit=(p.similarProductIds||[]).map(getProduct).filter(Boolean).filter(x=>x.id!==p.id);
+  if(explicit.length)return explicit.slice(0,4);
+  const families=new Set(inferredFamilies(p));
+  return allProducts().filter(x=>x.id!==p.id).map(x=>({p:x,score:(x.brandId===p.brandId?2:0)+inferredFamilies(x).filter(f=>families.has(f)).length+(x.gender===p.gender?1:0)})).sort((a,b)=>b.score-a.score).slice(0,4).map(x=>x.p);
+}
+function backButtonHTML(fallback="#/collection"){return `<button class="page-back" data-back data-fallback="${esc(fallback)}" type="button" aria-label="Go back">← Back</button>`;}
+function pagerHTML(total,page=1,pageSize=PAGE_SIZE){
+  const pages=Math.max(1,Math.ceil(total/pageSize));if(pages<=1)return "";
+  const visible=[...new Set([1,page-1,page,page+1,pages].filter(n=>n>=1&&n<=pages))];
+  return `<nav class="catalog-pager" aria-label="Product pages"><button data-page="${page-1}" ${page===1?"disabled":""}>←</button>${visible.map((n,i)=>`${i&&n-visible[i-1]>1?`<span class="catalog-pager-label">…</span>`:""}<button data-page="${n}" class="${n===page?'active':''}" aria-current="${n===page?'page':'false'}">${n}</button>`).join("")}<button data-page="${page+1}" ${page===pages?"disabled":""}>→</button></nav>`;
+}
+function updateSEO(route){
+  const product=route.page==="product"?getProduct(route.id):null;
+  const title=product?`${product.brand} ${product.name} Decant | Decant Dynasty`:route.page==="bestsellers"?"Best-Selling Fragrance Decants | Decant Dynasty":route.page==="bundles"?"Fragrance Discovery Sets | Decant Dynasty":"Decant Dynasty — Find Your Signature Scent";
+  const description=product?`${product.description} Available in 1ml to 5ml authentic decants.`:"Authentic fragrance decants, poured fresh in Valenzuela City and delivered nationwide.";
+  document.title=title;
+  document.querySelector('meta[name="description"]')?.setAttribute("content",description);
+  document.querySelector('meta[property="og:title"]')?.setAttribute("content",title);
+  document.querySelector('meta[property="og:description"]')?.setAttribute("content",description);
+  document.querySelector('meta[property="og:image"]')?.setAttribute("content",product?.image||"images/logo.png");
+  let schema=document.getElementById("dynamicProductSchema");if(schema) schema.remove();
+  if(product){schema=document.createElement("script");schema.id="dynamicProductSchema";schema.type="application/ld+json";schema.textContent=JSON.stringify({"@context":"https://schema.org","@type":"Product",name:`${product.brand} ${product.name} Decant`,description:product.description,image:product.image,brand:{"@type":"Brand",name:product.brand},offers:Object.entries(product.prices).map(([size,price])=>({"@type":"Offer",priceCurrency:"PHP",price,availability:product.outOfStock?"https://schema.org/OutOfStock":"https://schema.org/InStock",name:size}))});document.head.append(schema);}
+}
 
 function imgTag(src, alt, cls, fallbackText){
   const safeAlt = esc(alt);
@@ -269,9 +330,19 @@ function addToCart(productId, size, qty){
   if(existing) existing.qty += qty;
   else state.cart.push({productId, size, qty});
   persistCart(); updateBadges(); renderCartPanel(); toast("Added to your bag");
+  track("add_to_cart",{item_id:product.id,item_name:`${product.brand} ${product.name}`,size,quantity:qty});
   return true;
 }
-function removeFromCart(idx){ state.cart.splice(idx,1); persistCart(); updateBadges(); renderCartPanel(); }
+function addBundleToCart(bundleId,selections=[]){
+  const bundle=getBundle(bundleId);if(!bundle){toast("That discovery set could not be found");return false;}
+  const chosen=bundle.customizable?selections:bundle.productIds;
+  if(bundle.customizable&&chosen.length!==Number(bundle.selectionCount||4)){toast(`Choose ${bundle.selectionCount||4} fragrances first`);return false;}
+  if(chosen.some(id=>getProduct(id)?.outOfStock)){toast("One of the selected fragrances is out of stock");return false;}
+  const key=[...chosen].sort().join("|");const existing=state.cart.find(line=>line.bundleId===bundle.id&&[...(line.selections||[])].sort().join("|")===key);
+  if(existing)existing.qty+=1;else state.cart.push({bundleId:bundle.id,selections:[...chosen],qty:1});
+  persistCart();updateBadges();renderCartPanel();toast("Discovery set added to your bag");track("add_to_cart",{item_id:bundle.id,item_name:bundle.name,item_category:"bundle"});return true;
+}
+function removeFromCart(idx){ const removed=state.cart[idx];state.cart.splice(idx,1); persistCart(); updateBadges(); renderCartPanel();track("remove_from_cart",{item_id:removed?.productId||removed?.bundleId||"unknown"}); }
 function changeQty(idx, delta){
   const item = state.cart[idx];
   if(!item) return;
@@ -295,6 +366,7 @@ function changeCartSize(idx, nextSize){
 }
 function cartTotal(){
   return state.cart.reduce((sum,c)=>{
+    if(c.bundleId){const bundle=getBundle(c.bundleId);return sum+(bundle?Number(bundle.price||0)*c.qty:0);}
     const p = getProduct(c.productId); if(!p) return sum;
     return sum + (p.prices[c.size]||0)*c.qty;
   },0);
@@ -317,6 +389,7 @@ function toggleCompare(productId){
   }
   persistCompare();renderCompareTray();syncCompareControls();
   toast(index>-1?`${product.name} removed from comparison`:`${product.name} ready to compare`);
+  if(index===-1&&state.compare.length>1)track("compare_products",{item_ids:[...state.compare]});
 }
 function syncCompareControls(root=document){
   root.querySelectorAll("[data-compare-toggle]").forEach(button=>{
@@ -339,6 +412,13 @@ function buildOrderMessage(){
   const ref = genRef();
   let lines = [`Hi Decant Dynasty! I'd like to order:`, ``];
   state.cart.forEach(c=>{
+    if(c.bundleId){
+      const bundle=getBundle(c.bundleId);if(!bundle)return;
+      const selected=(c.selections||[]).map(getProduct).filter(Boolean).map(p=>`${p.brand} ${p.name}`).join(", ");
+      lines.push(`• ${bundle.name} — ${bundle.size||"2ml"} x${c.qty} — ${peso(Number(bundle.price||0)*c.qty)}`);
+      if(selected)lines.push(`  Scents: ${selected}`);
+      return;
+    }
     const p = getProduct(c.productId);
     if(!p) return;
     lines.push(`• ${p.brand} ${p.name} — ${c.size} x${c.qty} — ${peso((p.prices[c.size]||0)*c.qty)}`);
@@ -357,10 +437,12 @@ function buildOrderMessage(){
 }
 function openCheckout(){
   if(state.cart.length===0){ toast("Your bag is empty"); return; }
-  const unavailable = state.cart.map(c=>getProduct(c.productId)).filter(p=>p&&p.outOfStock);
+  const unavailable = state.cart.flatMap(c=>c.bundleId?(c.selections||[]).map(getProduct):[getProduct(c.productId)]).filter(p=>p&&p.outOfStock);
   if(unavailable.length){ toast("Remove out-of-stock items before checkout"); return; }
   const {text} = buildOrderMessage();
+  state.checkoutStarted=true;
   navigator.clipboard?.writeText(text).catch(()=>{});
+  track("begin_checkout",{value:checkoutTotal(),currency:"PHP",items:state.cart.length});
   showCheckoutModal(text);
 }
 function showCheckoutModal(text){
@@ -390,7 +472,7 @@ function showCheckoutModal(text){
         <p>Please note: we do not accept Cash On Delivery (COD), and the shipping fee is shouldered by the buyer.</p>
       </div>
       <div style="display:flex;gap:12px;margin-top:22px;flex-wrap:wrap;">
-        <a class="btn btn-primary" href="https://m.me/decantdynasty" target="_blank" rel="noopener">Open Messenger</a>
+        <a class="btn btn-primary" href="https://m.me/decantdynasty" target="_blank" rel="noopener" data-messenger-checkout>Open Messenger</a>
         <button class="btn btn-ghost" id="copyAgainBtn">Copy Message Again</button>
       </div>
     </div>`;
@@ -398,6 +480,7 @@ function showCheckoutModal(text){
   document.getElementById("copyAgainBtn").onclick = ()=>{
     navigator.clipboard?.writeText(text); toast("Copied to clipboard");
   };
+  modal.querySelector("[data-messenger-checkout]").onclick=()=>track("purchase_intent",{value:checkoutTotal(),currency:"PHP",channel:"messenger"});
 }
 
 /* ---------------- scroll reveal ---------------- */
@@ -485,10 +568,10 @@ function heroArtSVG(){
 }
 
 function renderHome(){
-  const arrivals = PRODUCTS.slice(-8).reverse().slice(0,4).map(p=>getProduct(p.id));
+  const bestSellers = allProducts().filter(p=>p.recommended).slice(0,4);
   const brands = allBrands().slice(0,8);
   const homeCatalog=allProducts();
-  const initialCatalogCount=Math.min(36,homeCatalog.length);
+  const initialCatalogCount=Math.min(PAGE_SIZE,homeCatalog.length);
   const c = state.content;
   return `
   <section class="hero">
@@ -535,10 +618,19 @@ function renderHome(){
   <section class="motion-section motion-section-products">
     <div class="wrap">
       <div class="section-head reveal">
-        <div class="eyebrow">Just poured</div>
-        <h2>New Arrivals</h2>
+        <div class="eyebrow">Loved by the Dynasty</div>
+        <h2>Best Sellers</h2>
       </div>
-      <div class="product-grid stagger">${arrivals.map(productCardHTML).join("")}</div>
+      <div class="product-grid stagger">${bestSellers.map(productCardHTML).join("")}</div>
+      <div style="text-align:center;margin-top:32px"><a class="btn btn-ghost" href="#/bestsellers">View All Best Sellers</a></div>
+    </div>
+  </section>
+
+  <section class="motion-section">
+    <div class="wrap">
+      <div class="section-head reveal"><div class="eyebrow">Curated discovery</div><h2>Fragrance Sets</h2><p>Purpose-built 2ml rotations for exploring more, with less guesswork.</p></div>
+      <div class="bundle-grid stagger">${BUNDLES.slice(0,3).map(bundleCardHTML).join("")}</div>
+      <div style="text-align:center;margin-top:32px"><a class="btn btn-ghost" href="#/bundles">View All Sets</a></div>
     </div>
   </section>
 
@@ -562,8 +654,8 @@ function renderHome(){
         <h2>The Full Collection</h2>
         <p>Explore every authentic decant currently available from Decant Dynasty.</p>
       </div>
-      <div class="product-grid stagger" id="homeFullGrid" data-rendered="${initialCatalogCount}">${homeCatalog.slice(0,initialCatalogCount).map(productCardHTML).join("")}</div>
-      ${initialCatalogCount<homeCatalog.length?`<div class="catalog-loading" id="homeCatalogLoading" aria-live="polite"><i></i><span>Preparing the complete collection</span></div>`:""}
+      <div class="product-grid stagger" id="homeFullGrid">${homeCatalog.slice(0,initialCatalogCount).map(productCardHTML).join("")}</div>
+      <div id="homeCatalogPager">${pagerHTML(homeCatalog.length,1)}</div>
     </div>
   </section>
   `;
@@ -650,6 +742,28 @@ function productCardHTML(p){
     </div>
   </div>`;
 }
+function bundleCardHTML(bundle){
+  const products=(bundle.productIds||[]).map(getProduct).filter(Boolean).slice(0,4);
+  return `<a class="bundle-card" href="#/bundle/${esc(bundle.id)}">
+    <small>${bundle.customizable?"Make it yours":`${esc(bundle.size||"2ml")} discovery set`}</small>
+    <h3>${esc(bundle.name)}</h3><p>${esc(bundle.description)}</p>
+    <div class="bundle-bottles">${products.length?products.map(p=>`<img src="${esc(p.image)}" alt="" loading="lazy" onerror="this.hidden=true"/>`).join(""):`<span class="ph">4</span>`}</div>
+    <div class="bundle-foot"><b>${peso(bundle.price)}</b><span class="btn btn-ghost btn-sm">Explore</span></div>
+  </a>`;
+}
+function renderBestSellers(){
+  const products=allProducts().filter(product=>product.recommended);
+  return `<div class="page-header wrap">${backButtonHTML("#/")}<div class="breadcrumb"><a href="#/">Home</a> / Best Sellers</div><h1>Best Sellers</h1><p>The fragrances customers return to most, gathered in one easy-to-browse edit.</p></div><section style="padding-top:0"><div class="wrap"><div class="catalog-tools"><div class="catalog-result-count">${products.length} best sellers</div><label class="catalog-sort"><span>Sort price</span><select id="bestSellerSort"><option value="featured">Featured</option><option value="low">Price: Low to High</option><option value="high">Price: High to Low</option></select></label></div><div class="product-grid stagger" id="bestSellerGrid">${products.slice(0,PAGE_SIZE).map(productCardHTML).join("")}</div><div id="bestSellerPager">${pagerHTML(products.length,1)}</div></div></section>`;
+}
+function renderBundles(){
+  return `<div class="page-header wrap">${backButtonHTML("#/")}<div class="breadcrumb"><a href="#/">Home</a> / Discovery Sets</div><h1>Curated Fragrance Sets</h1><p>Purpose-built collections for the way you live, work, travel, and discover scent.</p></div><section style="padding-top:0"><div class="wrap"><div class="bundle-grid stagger">${BUNDLES.map(bundleCardHTML).join("")}</div></div></section>`;
+}
+function renderBundleDetail(bundleId){
+  const bundle=getBundle(bundleId);if(!bundle)return `<div class="center-empty">Discovery set not found. <a href="#/bundles">Back to sets</a></div>`;
+  const products=(bundle.productIds||[]).map(getProduct).filter(Boolean);
+  const selectionCount=Number(bundle.selectionCount||4);
+  return `<div class="page-header wrap">${backButtonHTML("#/bundles")}<div class="breadcrumb"><a href="#/">Home</a> / <a href="#/bundles">Discovery Sets</a> / ${esc(bundle.name)}</div><h1>${esc(bundle.name)}</h1><p>${esc(bundle.description)}</p></div><section style="padding-top:0"><div class="wrap"><div class="performance-panel"><div><span class="eyebrow">Set format</span><h3>${bundle.customizable?`Choose any ${selectionCount} fragrances`:`${products.length} × ${esc(bundle.size||"2ml")} decants`}</h3></div><div style="text-align:right"><span class="eyebrow">Set price</span><h3>${peso(bundle.price)}</h3></div></div>${bundle.customizable?`<div class="bundle-selection-status" id="bundleSelectionStatus">Choose ${selectionCount} fragrances · 0 selected</div><div class="bundle-picker" id="bundlePicker">${allProducts().filter(p=>!p.outOfStock).map(p=>`<button class="bundle-choice" data-bundle-choice="${p.id}" type="button"><img src="${esc(p.image)}" alt="" loading="lazy"/><b>${esc(p.brand)}<br>${esc(p.name)}</b></button>`).join("")}</div>`:`<div class="product-grid stagger">${products.map(productCardHTML).join("")}</div>`}<div style="margin-top:26px"><button class="btn btn-primary" id="bundleAdd" ${products.some(p=>p.outOfStock)?"disabled":""}>${products.some(p=>p.outOfStock)?"Set currently unavailable":"Add Set to Bag"}</button></div></div></section>`;
+}
 
 /* ================================================================
    RENDER: BRANDS INDEX
@@ -657,6 +771,7 @@ function productCardHTML(p){
 function renderBrandsIndex(){
   return `
   <div class="page-header wrap">
+    ${backButtonHTML("#/")}
     <div class="breadcrumb"><a href="#/">Home</a> / Brands</div>
     <h1>All Brands</h1>
     <p>${BRANDS.length} houses, ${PRODUCTS.length} fragrances and counting — new arrivals added regularly.</p>
@@ -677,6 +792,7 @@ function renderBrandDetail(brandId){
   const products = productsByBrand(brandId);
   return `
   <div class="page-header wrap">
+    ${backButtonHTML("#/brands")}
     <div class="breadcrumb"><a href="#/">Home</a> / <a href="#/brands">Brands</a> / ${esc(brand.name)}</div>
     <div class="brand-header">
       <div class="logo">${brand.logo ? imgTag(brand.logo, brand.name, "", brand.name[0]) : brand.name[0]}</div>
@@ -696,7 +812,8 @@ function renderBrandDetail(brandId){
           <button class="chip" data-filter-gender="Unisex">Unisex</button>
         </div>
       </div>
-      <div class="product-grid stagger" id="brandProductGrid">${products.map(productCardHTML).join("")}</div>
+      <div class="catalog-tools"><div class="catalog-result-count" id="brandResultCount">${products.length} fragrances</div><label class="catalog-sort"><span>Sort price</span><select id="brandSort"><option value="featured">Alphabetical</option><option value="low">Price: Low to High</option><option value="high">Price: High to Low</option></select></label></div>
+      <div class="product-grid stagger" id="brandProductGrid">${products.slice(0,PAGE_SIZE).map(productCardHTML).join("")}</div><div id="brandProductPager">${pagerHTML(products.length,1)}</div>
     </div>
   </section>`;
 }
@@ -709,6 +826,7 @@ function renderCollection(){
   const brandOptions = allBrands();
   return `
   <div class="page-header wrap">
+    ${backButtonHTML("#/")}
     <div class="breadcrumb"><a href="#/">Home</a> / Collection</div>
     <h1>The Full Collection</h1>
     <p>${products.length} fragrances across ${BRANDS.length} houses — filter by gender or brand to find your next decant.</p>
@@ -744,7 +862,8 @@ function renderCollection(){
           </div>
         </div>
       </div>
-      <div class="product-grid stagger" id="collectionGrid">${products.map(productCardHTML).join("")}</div>
+      <div class="catalog-tools"><div class="catalog-result-count" id="collectionResultCount">${products.length} fragrances</div><label class="catalog-sort"><span>Sort price</span><select id="collectionSort"><option value="featured">Brand &amp; name</option><option value="low">Price: Low to High</option><option value="high">Price: High to Low</option></select></label></div>
+      <div class="product-grid stagger" id="collectionGrid">${products.slice(0,PAGE_SIZE).map(productCardHTML).join("")}</div><div id="collectionPager">${pagerHTML(products.length,1)}</div>
     </div>
   </section>`;
 }
@@ -766,9 +885,12 @@ function renderProductDetail(productId){
   if(!p) return `<div class="center-empty">Fragrance not found. <a href="#/collection">Back to collection</a></div>`;
   const firstSize = Object.keys(p.prices)[0];
   const hasImage2 = !!p.image2;
+  const profile=productProfile(p);
+  const similar=similarProducts(p);
   return `
   <div class="wrap pd-grid" id="pdWrap" data-pid="${p.id}" data-size="${firstSize}">
     <div>
+      ${backButtonHTML("#/collection")}
       <div class="pd-media">${imgTag(p.image, `${p.brand} ${p.name}`, "", `${p.brand} — ${p.name}`)}${stockStampHTML(p)}</div>
       ${hasImage2 ? `<div class="pd-media pd-media-2"><img src="${esc(p.image2)}" alt="${esc(`${p.brand} ${p.name} decant bottle`)}" loading="lazy" onerror="this.parentElement.remove()" /></div>` : ""}
     </div>
@@ -785,21 +907,30 @@ function renderProductDetail(productId){
       </div>
       <p class="pd-desc">${esc(p.description)}</p>
       ${notesPyramid(p)}
+      <div class="family-viz" aria-label="Scent families">${profile.families.map(family=>`<span>${esc(family)}</span>`).join("")}</div>
+      <div class="profile-grid">
+        <div class="profile-card"><span>Best for</span><b>${esc(profile.bestFor.join(" · "))}</b></div>
+        <div class="profile-card"><span>Weather</span><b>${esc(profile.weather.join(" · "))}</b></div>
+        <div class="profile-card"><span>Wear time</span><b>${esc(profile.dayNight)}</b></div>
+      </div>
+      <div class="performance-panel"><div class="performance-meter" style="--score:${profile.longevityScore}"><span><b>Longevity</b><b>${profile.longevityScore}/5</b></span><i></i></div><div class="performance-meter" style="--score:${profile.projectionScore}"><span><b>Projection</b><b>${profile.projectionScore}/5</b></span><i></i></div></div>
       <div class="eyebrow" style="margin-bottom:12px;">Choose Size</div>
       <div class="size-select" id="sizeSelectWrap">${sizeSelectHTML(p, firstSize)}</div>
       <div class="pd-actions">
         <button class="btn btn-primary" id="pdAddToCart" ${p.outOfStock?'disabled aria-disabled="true"':''}>${p.outOfStock?'Out of Stock':'Add to Bag'}</button>
         <button class="btn btn-ghost" id="pdWishBtn" data-wish-toggle="${p.id}">${state.wishlist.includes(p.id) ? "♥ In Wishlist" : "♡ Add to Wishlist"}</button>
         <button class="btn btn-ghost compare-detail-toggle ${state.compare.includes(p.id)?'active':''}" data-compare-toggle="${p.id}" aria-pressed="${state.compare.includes(p.id)}">${state.compare.includes(p.id)?'Remove from Compare':'Add to Compare'}</button>
+        ${p.outOfStock?`<button class="btn btn-ghost restock-button" id="restockNotify">Notify Me on Messenger</button>`:""}
       </div>
     </div>
   </div>
   <section>
     <div class="wrap">
-      <div class="section-head reveal"><div class="eyebrow">You may also like</div><h2>More from ${esc(p.brand)}</h2></div>
-      <div class="product-grid stagger">${productsByBrand(p.brandId).filter(x=>x.id!==p.id).slice(0,4).map(productCardHTML).join("")}</div>
+      <div class="section-head reveal similar-heading"><div><div class="eyebrow">You may also like</div><h2>Similar Fragrances</h2></div><p>Matched by scent family, wear style, and character.</p></div>
+      <div class="product-grid stagger">${similar.map(productCardHTML).join("")}</div>
     </div>
   </section>
+  <div class="mobile-pd-bar"><span>${esc(p.name)}<b id="mobilePdPrice">${peso(p.prices[firstSize])}</b></span><button class="btn btn-primary" id="mobilePdAdd" ${p.outOfStock?'disabled':''}>${p.outOfStock?'Out of Stock':'Add to Bag'}</button></div>
   `;
 }
 
@@ -939,6 +1070,7 @@ function pickForAnswers(){
 function renderBuild(){
   return `
   <div class="page-header wrap">
+    ${backButtonHTML("#/")}
     <div class="breadcrumb"><a href="#/">Home</a> / Build My Collection</div>
     <h1>Build My Collection</h1>
     <p>Answer a few quick questions, and we'll recommend a personalized fragrance collection based on your style, lifestyle, and budget.</p>
@@ -954,6 +1086,7 @@ function renderQuizStep(){
   if(!card) return;
   if(quizStep >= QUIZ.length){
     const picks = pickForAnswers();
+    if(!quizAnswers._tracked){track("quiz_complete",{result_ids:picks.map(p=>p.id)});quizAnswers._tracked=true;}
     playSound('result');
     card.innerHTML = `
       <span class="tag">Your Curated Wardrobe</span>
@@ -990,6 +1123,7 @@ function renderAbout(){
   <div class="simple-page">
     <div class="wrap">
       <div class="about-hero reveal">
+        ${backButtonHTML("#/")}
         <div class="eyebrow" style="justify-content:center;">Our Story</div>
         <h1 class="story-title">${esc(a.heading)}</h1>
         <p class="story-copy">
@@ -1007,6 +1141,7 @@ function renderContact(){
   <div class="simple-page">
     <div class="wrap narrow">
       <div class="section-head reveal" style="text-align:left;margin-bottom:36px;">
+        ${backButtonHTML("#/")}
         <div class="eyebrow">${esc(c.eyebrow)}</div>
         <h2>${esc(c.heading)}</h2>
         <p>${esc(c.paragraph)}</p>
@@ -1059,6 +1194,11 @@ function renderCartPanel(){
     return;
   }
   body.innerHTML = state.cart.map((c,idx)=>{
+    if(c.bundleId){
+      const bundle=getBundle(c.bundleId);if(!bundle)return "";
+      const selected=(c.selections||[]).map(getProduct).filter(Boolean);
+      return `<div class="cart-item"><a class="cart-product-thumb" href="#/bundle/${esc(bundle.id)}" data-cart-product aria-label="View ${esc(bundle.name)}"><div class="ph">SET</div></a><div class="cart-item-content"><a class="ci-name" href="#/bundle/${esc(bundle.id)}" data-cart-product>${esc(bundle.name)}</a><div class="ci-meta">${esc(bundle.size||"2ml")} each · ${selected.length||bundle.productIds.length} fragrances</div><div class="ci-meta">${selected.map(p=>esc(p.name)).join(" · ")}</div><div class="cart-size-row"><span>Discovery set</span><span class="cart-line-total">${peso(Number(bundle.price||0)*c.qty)}</span></div><div class="qty-row"><button data-qty-minus="${idx}" aria-label="Decrease quantity">−</button><span>${c.qty}</span><button data-qty-plus="${idx}" aria-label="Increase quantity">+</button><button class="remove-x" data-cart-remove="${idx}">Remove</button></div></div></div>`;
+    }
     const p = getProduct(c.productId); if(!p) return "";
     const sizes = Object.keys(p.prices).sort((a,b)=>parseFloat(a)-parseFloat(b));
     return `<div class="cart-item">
@@ -1087,7 +1227,7 @@ function renderCartPanel(){
     </div>`;
   }).join("");
   const subtotal=cartTotal(),discount=voucherDiscount();
-  const hasUnavailable=state.cart.some(c=>getProduct(c.productId)?.outOfStock);
+  const hasUnavailable=state.cart.some(c=>c.bundleId?(c.selections||[]).some(id=>getProduct(id)?.outOfStock):getProduct(c.productId)?.outOfStock);
   const voucherMessage=state.voucherCode?(discount?`<div class="voucher-feedback success">DD50 applied — you saved ${peso(discount)}.</div>`:state.voucherCode==="DD50"?`<div class="voucher-feedback">Spend ${peso(Math.max(0,599-subtotal))} more to unlock DD50.</div>`:`<div class="voucher-feedback error">That voucher code isn't valid.</div>`):"";
   foot.innerHTML = `
     <div class="voucher-entry">
@@ -1106,7 +1246,7 @@ function renderCartPanel(){
   body.querySelectorAll("[data-cart-size]").forEach(select=>select.onchange=()=>changeCartSize(+select.dataset.cartSize,select.value));
   body.querySelectorAll("[data-cart-remove]").forEach(b=>b.onclick=()=>removeFromCart(+b.dataset.cartRemove));
   body.querySelectorAll("[data-cart-product]").forEach(link=>link.onclick=()=>closeAllPanels());
-  document.getElementById("applyVoucherBtn").onclick=()=>{state.voucherCode=document.getElementById("voucherInput").value.trim().toUpperCase();renderCartPanel();if(voucherDiscount())toast("DD50 applied — ₱50 off");};
+  document.getElementById("applyVoucherBtn").onclick=()=>{state.voucherCode=document.getElementById("voucherInput").value.trim().toUpperCase();const applied=voucherDiscount();renderCartPanel();if(applied){toast("DD50 applied — ₱50 off");track("voucher_used",{coupon:"DD50",discount:50});}};
   document.getElementById("voucherInput").onkeydown=e=>{if(e.key==="Enter")document.getElementById("applyVoucherBtn").click();};
   document.getElementById("checkoutBtn").onclick = openCheckout;
 }
@@ -1132,7 +1272,7 @@ function navigateTo(targetHash){
   transitionRoute({restoreY:0});
 }
 function transitionRoute(options){
-  if(motionMedia.matches||typeof document.startViewTransition!=="function")return route(options);
+  if(motionMedia.matches||window.innerWidth<800||typeof document.startViewTransition!=="function")return route(options);
   const transition=document.startViewTransition(()=>route(options));
   transition.finished.catch(()=>{});
   return transition;
@@ -1143,7 +1283,8 @@ function parseHash(){
   if(parts.length===0) return {page:"home"};
   if(parts[0]==="brand" && parts[1]) return {page:"brand", id:parts[1]};
   if(parts[0]==="product" && parts[1]) return {page:"product", id:parts[1]};
-  if(["collection","brands","build","about","contact"].includes(parts[0])) return {page:parts[0]};
+  if(parts[0]==="bundle" && parts[1]) return {page:"bundle", id:parts[1]};
+  if(["collection","brands","bestsellers","bundles","build","about","contact"].includes(parts[0])) return {page:parts[0]};
   return {page:"home"};
 }
 async function route({restoreY=0}={}){
@@ -1163,16 +1304,20 @@ async function route({restoreY=0}={}){
   else if(r.page==="brand") html = renderBrandDetail(r.id);
   else if(r.page==="product") html = renderProductDetail(r.id);
   else if(r.page==="collection") html = renderCollection();
+  else if(r.page==="bestsellers") html = renderBestSellers();
+  else if(r.page==="bundles") html = renderBundles();
+  else if(r.page==="bundle") html = renderBundleDetail(r.id);
   else if(r.page==="build") html = renderBuild();
   else if(r.page==="about") html = renderAbout();
   else if(r.page==="contact") html = renderContact();
   else html = renderHome();
 
   app.innerHTML = html;
-  if(r.page==="home"&&Number(restoreY)>0)appendHomeCatalog(true,false);
+  updateSEO(r);
+  track("page_view",{page_title:document.title,page_location:location.href,page_path:`/${r.page}${r.id?`/${r.id}`:""}`});
   postRenderBind(r);
   initReveal(document,true);
-  if(r.page==="home"){initHeroBottle();if(Number(restoreY)<=0)scheduleHomeCatalogBatch();}
+  if(r.page==="home")initHeroBottle();
   const settleScroll=()=>{
     if(serial!==routeSerial)return;
     const max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
@@ -1207,6 +1352,27 @@ function bindQuickviewButton(el){
 function bindCompareButton(el){
   el.onclick=(e)=>{e.stopPropagation();toggleCompare(el.dataset.compareToggle);};
 }
+function sortedCatalogItems(items,sortValue){
+  const list=[...items];
+  if(sortValue==="low")list.sort((a,b)=>productMinimum(a)-productMinimum(b)||a.name.localeCompare(b.name));
+  else if(sortValue==="high")list.sort((a,b)=>productMinimum(b)-productMinimum(a)||a.name.localeCompare(b.name));
+  return list;
+}
+function paintProductPage(grid,pagerHost,items,page=1){
+  const pages=Math.max(1,Math.ceil(items.length/PAGE_SIZE));page=Math.max(1,Math.min(page,pages));
+  grid.classList.remove("in","motion-settled");
+  grid.innerHTML=items.length?items.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE).map(productCardHTML).join(""):`<div class="center-empty" style="grid-column:1/-1">No fragrances match those filters yet.</div>`;
+  if(pagerHost)pagerHost.innerHTML=pagerHTML(items.length,page);
+  grid.querySelectorAll("[data-go]").forEach(bindCardNav);grid.querySelectorAll("[data-wish-toggle]").forEach(bindWishButton);grid.querySelectorAll("[data-quickview]").forEach(bindQuickviewButton);grid.querySelectorAll("[data-compare-toggle]").forEach(bindCompareButton);initReveal(grid);
+  return page;
+}
+function bindSimplePager(gridId,pagerId,getItems,sortId=null){
+  const grid=document.getElementById(gridId),pager=document.getElementById(pagerId),sort=sortId?document.getElementById(sortId):null;if(!grid||!pager)return;
+  let page=1;
+  const paint=()=>{const items=sortedCatalogItems(getItems(),sort?.value);page=paintProductPage(grid,pager,items,page);};
+  pager.onclick=e=>{const button=e.target.closest("[data-page]");if(!button||button.disabled)return;page=Number(button.dataset.page)||1;paint();grid.scrollIntoView({behavior:"smooth",block:"start"});};
+  if(sort)sort.onchange=()=>{page=1;paint();};
+}
 
 function postRenderBind(r){
   document.querySelectorAll("[data-go]").forEach(bindCardNav);
@@ -1215,30 +1381,38 @@ function postRenderBind(r){
   document.querySelectorAll("[data-compare-toggle]").forEach(bindCompareButton);
   initBrandInteractions(document);
 
+  document.querySelectorAll("[data-back]").forEach(button=>button.onclick=()=>{if(history.length>1)history.back();else navigateTo(button.dataset.fallback||"#/");});
+  if(r.page==="home")bindSimplePager("homeFullGrid","homeCatalogPager",()=>allProducts());
+  if(r.page==="bestsellers")bindSimplePager("bestSellerGrid","bestSellerPager",()=>allProducts().filter(product=>product.recommended),"bestSellerSort");
+
   if(r.page==="product"){
     const wrap = document.getElementById("pdWrap");
     wrap.querySelectorAll("[data-size-opt]").forEach(btn=>{
-      btn.onclick = ()=>{ wrap.querySelectorAll("[data-size-opt]").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); wrap.dataset.size = btn.dataset.sizeOpt; };
+      btn.onclick = ()=>{ wrap.querySelectorAll("[data-size-opt]").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); wrap.dataset.size = btn.dataset.sizeOpt;document.getElementById("mobilePdPrice").textContent=peso(getProduct(wrap.dataset.pid).prices[wrap.dataset.size]); };
     });
     document.getElementById("pdAddToCart").onclick = ()=>{ addToCart(wrap.dataset.pid, wrap.dataset.size, 1); };
+    document.getElementById("mobilePdAdd").onclick=()=>addToCart(wrap.dataset.pid,wrap.dataset.size,1);
+    document.getElementById("restockNotify")?.addEventListener("click",()=>{const product=getProduct(wrap.dataset.pid),message=`Hi Decant Dynasty! Please notify me when ${product.brand} ${product.name} is back in stock.`;navigator.clipboard?.writeText(message).catch(()=>{});track("restock_request",{item_id:product.id});toast("Restock request copied — paste it in Messenger");window.open("https://m.me/decantdynasty","_blank","noopener");});
+    const viewed=getProduct(r.id);track("view_item",{item_id:viewed.id,item_name:`${viewed.brand} ${viewed.name}`,value:productMinimum(viewed),currency:"PHP"});
+  }
+  if(r.page==="bundle"){
+    const bundle=getBundle(r.id),selected=[];
+    document.querySelectorAll("[data-bundle-choice]").forEach(choice=>choice.onclick=()=>{const id=choice.dataset.bundleChoice,index=selected.indexOf(id),limit=Number(bundle.selectionCount||4);if(index>-1)selected.splice(index,1);else if(selected.length<limit)selected.push(id);else{toast(`Choose up to ${limit} fragrances`);return;}choice.classList.toggle("active",selected.includes(id));document.getElementById("bundleSelectionStatus").textContent=`Choose ${limit} fragrances · ${selected.length} selected`;});
+    document.getElementById("bundleAdd").onclick=()=>addBundleToCart(bundle.id,selected);
   }
   if(r.page==="brand"){
     const grid = document.getElementById("brandProductGrid");
+    const pager=document.getElementById("brandProductPager"),sort=document.getElementById("brandSort"),count=document.getElementById("brandResultCount");
+    let gender="all",page=1;
+    const apply=()=>{let items=productsByBrand(r.id).filter(p=>gender==="all"||p.gender===gender);items=sortedCatalogItems(items,sort.value);count.textContent=`${items.length} fragrance${items.length===1?'':'s'}`;page=paintProductPage(grid,pager,items,page);};
     document.querySelectorAll("[data-filter-gender]").forEach(chip=>{
       chip.onclick = ()=>{
         document.querySelectorAll("[data-filter-gender]").forEach(c=>c.classList.remove("active"));
         chip.classList.add("active");
-        const g = chip.dataset.filterGender;
-        const items = productsByBrand(r.id).filter(p=> g==="all" || p.gender===g);
-        grid.classList.remove('in','motion-settled');
-        grid.innerHTML = items.map(productCardHTML).join("");
-        grid.querySelectorAll("[data-go]").forEach(bindCardNav);
-        grid.querySelectorAll("[data-wish-toggle]").forEach(bindWishButton);
-        grid.querySelectorAll("[data-quickview]").forEach(bindQuickviewButton);
-        grid.querySelectorAll("[data-compare-toggle]").forEach(bindCompareButton);
-        initReveal(grid);
+        gender=chip.dataset.filterGender;page=1;apply();
       };
     });
+    sort.onchange=()=>{page=1;apply();};pager.onclick=e=>{const button=e.target.closest("[data-page]");if(!button||button.disabled)return;page=Number(button.dataset.page);apply();grid.scrollIntoView({behavior:"smooth",block:"start"});};
   }
   if(r.page==="collection"){
     const grid = document.getElementById("collectionGrid");
@@ -1249,19 +1423,14 @@ function postRenderBind(r){
     const pickerScrim = picker.querySelector(".brand-picker-scrim");
     const pickerEmpty = picker.querySelector(".brand-picker-empty");
     const pickerOptions = [...picker.querySelectorAll("[data-brand-option]")];
-    let curGender = "all", curBrand="all";
+    const pager=document.getElementById("collectionPager"),sort=document.getElementById("collectionSort"),count=document.getElementById("collectionResultCount");
+    let curGender = "all", curBrand="all",page=1;
     function apply(){
-      const items = allProducts().filter(p=>(curGender==="all"||p.gender===curGender)&&(curBrand==="all"||p.brandId===curBrand));
-      grid.classList.remove('in','motion-settled');
-      grid.innerHTML = items.length ? items.map(productCardHTML).join("") : `<div class="center-empty" style="grid-column:1/-1;">No fragrances match those filters yet.</div>`;
-      grid.querySelectorAll("[data-go]").forEach(bindCardNav);
-      grid.querySelectorAll("[data-wish-toggle]").forEach(bindWishButton);
-      grid.querySelectorAll("[data-quickview]").forEach(bindQuickviewButton);
-      grid.querySelectorAll("[data-compare-toggle]").forEach(bindCompareButton);
-      initReveal(grid);
+      const items = sortedCatalogItems(allProducts().filter(p=>(curGender==="all"||p.gender===curGender)&&(curBrand==="all"||p.brandId===curBrand)),sort.value);
+      count.textContent=`${items.length} fragrance${items.length===1?'':'s'}`;page=paintProductPage(grid,pager,items,page);
     }
     document.querySelectorAll("[data-cf-gender]").forEach(chip=>{
-      chip.onclick = ()=>{ document.querySelectorAll("[data-cf-gender]").forEach(c=>c.classList.remove("active")); chip.classList.add("active"); curGender=chip.dataset.cfGender; apply(); };
+      chip.onclick = ()=>{ document.querySelectorAll("[data-cf-gender]").forEach(c=>c.classList.remove("active")); chip.classList.add("active"); curGender=chip.dataset.cfGender;page=1; apply(); };
     });
     function setPickerOpen(open){
       picker.classList.toggle("is-open",open);
@@ -1283,6 +1452,7 @@ function postRenderBind(r){
       pickerValue.textContent=option.dataset.brandName;
       pickerOptions.forEach(item=>item.setAttribute("aria-selected",String(item===option)));
       setPickerOpen(false);
+      page=1;
       apply();
       pickerButton.focus();
     }
@@ -1308,6 +1478,7 @@ function postRenderBind(r){
       }
     };
     pickerOptions.forEach(option=>option.onclick=()=>chooseBrand(option));
+    sort.onchange=()=>{page=1;apply();};pager.onclick=e=>{const button=e.target.closest("[data-page]");if(!button||button.disabled)return;page=Number(button.dataset.page);apply();grid.scrollIntoView({behavior:"smooth",block:"start"});};
   }
   if(r.page==="build"){ quizStep=0; quizAnswers={}; renderQuizStep(); }
   if(r.page==="contact"){
@@ -1327,10 +1498,10 @@ function closeAllPanels(){
 }
 function initLoadingScreen(){
   const loader=document.getElementById("loadingScreen");if(!loader)return;
-  const started=performance.now();let hidden=false;
-  const hide=()=>{if(hidden)return;hidden=true;const delay=Math.max(0,1050-(performance.now()-started));setTimeout(()=>{loader.classList.add("is-hidden");setTimeout(()=>loader.remove(),750);},delay);};
+  let hidden=false;
+  const hide=()=>{if(hidden)return;hidden=true;requestAnimationFrame(()=>{loader.classList.add("is-hidden");setTimeout(()=>loader.remove(),window.innerWidth<640?320:520);});};
   if(document.readyState==="complete")hide();else window.addEventListener("load",hide,{once:true});
-  setTimeout(hide,2600);
+  setTimeout(hide,1200);
 }
 function initVoucherPromo(){
   const backdrop=document.getElementById("promoBackdrop"),modal=document.getElementById("promoModal");if(!backdrop||!modal)return;
@@ -1390,7 +1561,8 @@ function initGlobalUI(){
     popover.innerHTML=matches.length?matches.map(p=>`<div class="search-result" role="option" tabindex="0" data-go-search="${p.id}" data-query="${esc(raw)}">${imgTag(p.image,p.name,'',p.name)}<div><div class="sr-name">${esc(p.name)}</div><div class="sr-brand">${esc(p.brand)}</div></div></div>`).join(''):`<div style="color:var(--ink-soft);font-size:13.5px;padding:20px;">No matches yet — try a house or fragrance name.</div>`;
     popover.querySelectorAll('[data-go-search]').forEach(el=>{const go=()=>{remember(el.dataset.query);navigateTo('#/product/'+el.dataset.goSearch);popover.classList.remove('open');playSound('search');};el.onclick=go;el.onkeydown=e=>{if(e.key==='Enter')go();};});
   };
-  document.getElementById('searchBtn').onclick=()=>{input.focus();renderSearch();};input.addEventListener('focus',renderSearch);input.addEventListener('input',renderSearch);
+  let searchTrackTimer=0;
+  document.getElementById('searchBtn').onclick=()=>{input.focus();renderSearch();};input.addEventListener('focus',renderSearch);input.addEventListener('input',()=>{renderSearch();clearTimeout(searchTrackTimer);const term=input.value.trim();if(term.length>1)searchTrackTimer=setTimeout(()=>{const results=allProducts().filter(p=>p.name.toLowerCase().includes(term.toLowerCase())||p.brand.toLowerCase().includes(term.toLowerCase()));track('search',{search_term:term,result_count:results.length});if(!results.length)track('search_no_results',{search_term:term});},650);});
   clear.onclick=()=>{input.value='';input.focus();renderSearch();};document.addEventListener('click',e=>{if(!e.target.closest('#searchBox')&&!e.target.closest('#searchBtn')){popover.classList.remove('open');input.setAttribute('aria-expanded','false');}});
   document.addEventListener('click',e=>{const control=e.target.closest('button,.btn,a');if(control&&!['themeBtn','searchBtn','soundToggle'].includes(control.id))playSound('click');});
   document.addEventListener('click',e=>{
@@ -1436,6 +1608,7 @@ function initGlobalUI(){
     clearTimeout(scrollSaveTimer);scrollSaveTimer=0;
     transitionRoute({restoreY:Number(e.state?.scrollY)||0});
   });
+  window.addEventListener("pagehide",()=>{if(state.cart.length&&!state.checkoutStarted&&!state.abandonmentTracked){state.abandonmentTracked=true;track("cart_abandonment",{value:cartTotal(),currency:"PHP",items:state.cart.length});}});
 }
 
 /* ---------------- boot ---------------- */

@@ -7,6 +7,7 @@ This is a responsive, framework-free fragrance storefront. Open `index.html` dir
 - Product photos: `images/products/<brand-id>/<product-slug>.png`
 - Optional decant photos: `images/products/<brand-id>/<product-slug>-decant.png`
 - Brand logos: `images/brands/<brand-id>.png`
+- Payment and logistics artwork: `images/payment-logistics.png`
 - Future 3D models: `models/` (optimized `.glb` preferred)
 - UI sounds: `sounds/` (`click.mp3`, `toggle.mp3`, `search.mp3`, `result.mp3`)
 
@@ -15,8 +16,9 @@ This is a responsive, framework-free fragrance storefront. Open `index.html` dir
 ### Private Catalog Manager (recommended)
 
 The storefront now includes a local-only owner dashboard for editing products,
-brands, prices, photos, inventory, scent notes, performance, descriptions and
-“Inspired by” information without editing JavaScript by hand.
+brands, prices, photos, inventory, scent notes, performance, wear guidance,
+similar fragrances, curated bundles, analytics configuration, and “Inspired by”
+information without editing JavaScript by hand.
 
 1. Double-click `start-catalog-manager.bat` and keep its terminal window open.
 2. The browser opens `http://127.0.0.1:8765/catalog-manager.html`.
@@ -28,6 +30,13 @@ brands, prices, photos, inventory, scent notes, performance, descriptions and
    selected PNGs into their correct image folders.
 6. Preview the storefront locally. The changes become public only after the
    changed files are committed and pushed to GitHub.
+
+The **Settings** tab accepts an optional free Google Analytics 4 measurement ID
+and the combined payment/logistics PNG used in the footer. The **Bundles** tab
+controls fixed discovery sets and customer-built sets. Product editors include
+the storefront's occasion, weather, day/night, scent-family, performance-meter,
+similar-fragrance, and restock-notification fields. Customer reviews are not
+part of the catalog schema.
 
 The launcher uses Windows PowerShell and does not require Python, Node.js or a
 server installation. It starts listening before opening the browser, avoiding
@@ -76,4 +85,6 @@ Every product already has a researched price band in the `PRICE_OVERRIDES` secti
 
 The exact 1ml, 2ml, 3ml and 5ml amounts for each tier are in `PRICE_TIERS` immediately above that list. You can edit those four amounts once to update every product using the tier. For a one-off custom price, replace that product's tier with `PH(99, 179, 249, 379)`; the values are 1ml, 2ml, 3ml and 5ml in that order.
 
-The current interactive hero bottle is generated in Three.js and does not require a model file. Missing sound files fail silently, and the footer provides a persistent mute control.
+The interactive hero loads `models/decant.gltf` and its companion
+`models/scene.bin` through Three.js. Missing sound files fail silently, and the
+footer provides a persistent mute control.
