@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-22T13:48:06.878Z",
+  "updatedAt": "2026-07-22T14:27:13.676Z",
   "brands": [
     {
       "id": "afnan",
@@ -6901,9 +6901,9 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "image2": "images/products/riiffs/momento-decant.png",
       "prices": {
         "1ml": 69,
-        "2ml": 135,
-        "3ml": 199,
-        "5ml": 335
+        "2ml": 139,
+        "3ml": 205,
+        "5ml": 355
       },
       "concentration": "Eau de Parfum",
       "gender": "Unisex",
