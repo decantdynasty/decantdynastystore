@@ -313,7 +313,7 @@ function defaultContent(){
     },
     buildBand: {
       eyebrow: "A private consultation",
-      heading: "Build My Collection",
+      heading: "Find Your Scent",
       paragraph: "Answer a few quick questions, and we'll recommend a personalized fragrance collection based on your style, lifestyle, and budget.",
     },
     brandsSection: {
@@ -333,7 +333,7 @@ function defaultContent(){
     },
     testimonials: [
       {photo:null, name:"Marga, Quezon City", rating:5, text:"Finally a way to try Khamrah and Hawas without buying two full bottles I might not even like. Shipping was quick too."},
-      {photo:null, name:"Jerome, Cebu", rating:5, text:"The Build My Collection questionnaire actually understood what I wanted. Got matched with three scents I now wear on rotation."},
+      {photo:null, name:"Jerome, Cebu", rating:5, text:"The Find Your Scent consultation actually understood what I wanted. I found three scents I now wear on rotation."},
       {photo:null, name:"Angeli, Davao", rating:5, text:"Decants arrived carefully packed, labeled clearly, and smelled exactly like the reviews said. My go-to for discovering new houses."},
     ],
     about: {
@@ -724,12 +724,17 @@ function showcaseRailHTML(cards,modifier,label,speed){
     </div>
   </div>`;
 }
+function homeReviews(){
+  const reviews=Array.isArray(SITE_SETTINGS.reviews)?SITE_SETTINGS.reviews:state.content.testimonials;
+  return reviews.filter(review=>review&&review.name&&review.text);
+}
 
 function renderHome(){
   const bestSellers = allProducts().filter(p=>p.recommended);
   const brands = allBrands();
   const homeCatalog=allProducts();
   const initialCatalogCount=Math.min(catalogPageSize(),homeCatalog.length);
+  const reviews=homeReviews();
   const c = state.content;
   return `
   <section class="hero hero-cinematic">
@@ -738,7 +743,7 @@ function renderHome(){
         <h1 class="hero-title-art"><img src="images/find-your-signature-scent.png" alt="Find Your Signature Scent" /></h1>
         <div class="hero-actions">
           <a href="#/collection" class="btn btn-cta btn-cta-build">Shop Decants</a>
-          <a href="#/build" class="btn btn-cta btn-cta-browse">Build My Collection</a>
+          <a href="#/build" class="btn btn-cta btn-cta-browse">Find Your Scent</a>
         </div>
       </div>
       <div class="hero-art-track">
@@ -821,6 +826,18 @@ function renderHome(){
       <div id="homeCatalogPager">${pagerHTML(homeCatalog.length,1)}</div>
     </div>
   </section>
+
+  ${reviews.length?`<div class="section-divider" aria-hidden="true"></div>
+  <section class="motion-section home-reviews">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">From the Dynasty</div>
+        <h2>Notes From Our Community</h2>
+        <p>Real words from fragrance enthusiasts discovering scents one decant at a time.</p>
+      </div>
+      <div class="testi-grid stagger">${reviews.map(testiCard).join("")}</div>
+    </div>
+  </section>`:""}
   `;
 }
 function appendHomeCatalog(immediate=false,bindAdded=true){
@@ -848,15 +865,18 @@ function whyCard(path, title, body){
   return `<div class="why-card"><div class="why-icon"><svg viewBox="0 0 24 24"><path d="${path}"/></svg></div><h3>${esc(title)}</h3><p>${esc(body)}</p></div>`;
 }
 function testiCard(t){
-  const stars = "★".repeat(Math.max(0,Math.min(5,t.rating||5))) + "☆".repeat(5-Math.max(0,Math.min(5,t.rating||5)));
-  return `<div class="testi-card">
-    <div class="testi-stars">${stars}</div>
-    <p>"${esc(t.text)}"</p>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div class="testi-avatar">${t.photo ? `<img src="${esc(t.photo)}" alt="${esc(t.name)}"/>` : `<span>${esc((t.name||"?")[0])}</span>`}</div>
-      <div class="testi-name">${esc(t.name)}</div>
-    </div>
-  </div>`;
+  const initial=esc((t.name||"?").trim()[0]||"?");
+  const avatar=t.photo
+    ? `<img src="${esc(t.photo)}" alt="${esc(t.name)}" loading="lazy" decoding="async" onerror="this.hidden=true;this.nextElementSibling.hidden=false"/><span hidden>${initial}</span>`
+    : `<span>${initial}</span>`;
+  return `<article class="testi-card">
+    <span class="testi-quote" aria-hidden="true">“</span>
+    <blockquote>${esc(t.text)}</blockquote>
+    <footer>
+      <div class="testi-avatar">${avatar}</div>
+      <div><div class="testi-name">${esc(t.name)}</div><small>Customer note</small></div>
+    </footer>
+  </article>`;
 }
 
 /* ================================================================
@@ -1175,64 +1195,85 @@ function removeComparedProduct(productId){
 }
 
 /* ================================================================
-   RENDER: BUILD MY COLLECTION (consultation quiz)
+   RENDER: FIND YOUR SCENT (personal fragrance consultation)
    ================================================================ */
+const QUIZ_ACCORD_GROUPS = Object.freeze({
+  "Fresh":["fresh","aquatic","ozonic","green"],
+  "Clean & Musky":["musky","soapy","powdery","aldehydic"],
+  "Citrus":["citrus"],
+  "Woody":["woody","earthy","patchouli","mossy"],
+  "Aromatic":["aromatic","herbal","lavender","conifer"],
+  "Sweet":["sweet","vanilla","honey"],
+  "Gourmand":["gourmand","caramel","coffee","cacao","chocolate","lactonic","nutty"],
+  "Floral":["floral","white floral","yellow floral","rose","tuberose","iris","violet"],
+  "Fruity":["fruity","tropical","coconut"],
+  "Warm Spicy":["warm spicy","fresh spicy","cinnamon","soft spicy"],
+  "Amber & Resinous":["amber","balsamic","oud","smoky"],
+  "Leather & Tobacco":["leather","tobacco","smoky","boozy"]
+});
 const QUIZ = [
-  {key:"lifestyle", q:"What does most of your week look like?", opts:["Office & meetings","Creative & casual","Active & outdoorsy","Nights out & social"]},
-  {key:"climate", q:"What climate do you wear scent in most?", opts:["Hot & humid","Warm, occasional rain","Cool evenings","It varies a lot"]},
-  {key:"personality", q:"Which word feels most like you?", opts:["Confident","Romantic","Understated","Adventurous"]},
-  {key:"character", q:"What should your scent communicate first?", opts:["Fresh & effortless","Warm & magnetic","Elegant & polished","Bold & unexpected"]},
-  {key:"gender", q:"Which fragrance profile should we prioritize?", opts:["Masculine","Feminine","Unisex","Surprise me"]},
-  {key:"budget", q:"What's a comfortable decant budget to start?", opts:["Under ₱300","₱300–₱700","₱700–₱1,500","No limit — I want the full experience"]},
+  {key:"gender",q:"Who are we finding a scent for?",hint:"Choose the profile you would like us to prioritize.",opts:["For Him","For Her","Unisex"]},
+  {key:"accords",q:"Which main accords draw you in?",hint:"Choose up to three. Your strongest accord matches carry the most weight.",multi:true,max:3,opts:Object.keys(QUIZ_ACCORD_GROUPS)},
+  {key:"lifestyle",q:"What does most of your week look like?",opts:["Office & meetings","Creative & casual","Active & outdoorsy","Nights out & social"]},
+  {key:"climate",q:"What climate do you wear scent in most?",opts:["Hot & humid","Warm, occasional rain","Cool evenings","It varies a lot"]},
+  {key:"personality",q:"Which word feels most like you?",opts:["Confident","Romantic","Understated","Adventurous"]},
+  {key:"intensity",q:"How much presence should your scent have?",opts:["Close to the skin","Balanced and noticeable","Strong and expressive","No preference"]},
+  {key:"budget",q:"What's a comfortable budget for four 2ml decants?",opts:["Under ₱300","₱300–₱700","₱700–₱1,500","No limit"]},
 ];
 let quizAnswers = {};
 let quizStep = 0;
 function pickForAnswers(){
-  const groups={
-    fresh:["bergamot","grapefruit","marine","aquatic","citrus","mint","lavender","apple","pear","musk","cedar"],
-    warm:["vanilla","amber","tonka","cinnamon","tobacco","coffee","caramel","cognac","oud","sandalwood"],
-    floral:["rose","jasmine","peony","orange blossom","lily","iris","violet"],
-    bold:["oud","leather","saffron","incense","patchouli","pepper","cognac","tobacco"]
-  };
-  const wanted={"Fresh & effortless":"fresh","Warm & magnetic":"warm","Elegant & polished":"floral","Bold & unexpected":"bold"}[quizAnswers.character];
-  const wantedGender={Masculine:"Men",Feminine:"Women",Unisex:"Unisex"}[quizAnswers.gender];
-  const budgetCap={"Under ₱300":300,"₱300–₱700":700,"₱700–₱1,500":1500,"No limit — I want the full experience":Infinity}[quizAnswers.budget]||Infinity;
+  const chosenAccords=Array.isArray(quizAnswers.accords)?quizAnswers.accords:[];
+  const wantedGender={"For Him":"Men","For Her":"Women","Unisex":"Unisex"}[quizAnswers.gender];
+  const budgetPerDecant={"Under ₱300":75,"₱300–₱700":175,"₱700–₱1,500":375,"No limit":Infinity}[quizAnswers.budget]||Infinity;
+  const hasAny=(accords,names)=>accords.some(accord=>names.includes(accord));
+  const rankPoints=[16,13,10,7,5];
   const scored=allProducts().filter(p=>!p.outOfStock).map(p=>{
-    const text=[p.description,...p.topNotes,...p.heartNotes,...p.baseNotes,p.longevity,p.projection].join(' ').toLowerCase();
+    const accords=productAccords(p),profile=productProfile(p);
     let score=0;const reasons=[];
-    if(wanted){const hits=groups[wanted].filter(n=>text.includes(n)).length;score+=hits*3.2;if(hits)reasons.push(`${wanted} scent profile`);}
-    if(wantedGender){if(p.gender===wantedGender){score+=7;reasons.push(`${wantedGender.toLowerCase()} profile`);}else if(p.gender==='Unisex')score+=3;else score-=3;}
-    if(quizAnswers.gender==='Surprise me'&&p.gender==='Unisex')score+=2;
-    if(quizAnswers.climate==='Hot & humid'){score+=groups.fresh.filter(n=>text.includes(n)).length*2.4;if(/strong|long/.test(text))score-=1;}
-    if(quizAnswers.climate==='Cool evenings'){score+=groups.warm.filter(n=>text.includes(n)).length*2.4;if(/long|strong/.test(text))score+=2;}
-    if(quizAnswers.climate==='Warm, occasional rain')score+=(groups.fresh.concat(groups.warm)).filter(n=>text.includes(n)).length*1.1;
-    if(quizAnswers.lifestyle==='Office & meetings'){if(/moderate|soft/.test(text))score+=4;if(/strong/.test(text))score-=1;}
-    if(quizAnswers.lifestyle==='Active & outdoorsy')score+=groups.fresh.filter(n=>text.includes(n)).length*1.8;
-    if(quizAnswers.lifestyle==='Nights out & social'){if(/strong|long/.test(text))score+=5;score+=groups.warm.filter(n=>text.includes(n)).length*1.4;}
-    if(quizAnswers.lifestyle==='Creative & casual'&&p.gender==='Unisex')score+=4;
-    if(quizAnswers.personality==='Confident'&&/strong|leather|oud|pepper/.test(text))score+=5;
-    if(quizAnswers.personality==='Romantic')score+=groups.floral.concat(groups.warm).filter(n=>text.includes(n)).length*1.5;
-    if(quizAnswers.personality==='Understated'&&/moderate|musk|cedar|lavender/.test(text))score+=4;
-    if(quizAnswers.personality==='Adventurous'&&/oud|saffron|cognac|leather|unusual|distinctive/.test(text))score+=5;
-    const entry=Math.min(...Object.values(p.prices));if(entry<=budgetCap)score+=5;else score-=Math.min(8,(entry-budgetCap)/75);
-    if(p.recommended)score+=1.25;
-    const reason=reasons.slice(0,2).join(' · ')||`${quizAnswers.personality.toLowerCase()} energy · ${quizAnswers.lifestyle.toLowerCase()}`;
+    if(wantedGender){
+      if(p.gender===wantedGender){score+=15;reasons.push(quizAnswers.gender.toLowerCase());}
+      else if(p.gender==="Unisex"&&wantedGender!=="Unisex")score+=7;
+      else score-=9;
+    }
+    chosenAccords.forEach(label=>{
+      const family=QUIZ_ACCORD_GROUPS[label]||[],rank=accords.findIndex(accord=>family.includes(accord));
+      if(rank>=0){score+=rankPoints[rank]||4;if(reasons.length<2)reasons.push(`${label.toLowerCase()} accord`);}else score-=1.25;
+    });
+    if(quizAnswers.climate==="Hot & humid"){if(hasAny(accords,["fresh","citrus","aquatic","ozonic","green"]))score+=7;if(profile.projectionScore<=4)score+=1;}
+    if(quizAnswers.climate==="Cool evenings"){if(hasAny(accords,["amber","warm spicy","sweet","gourmand","vanilla","woody","tobacco"]))score+=7;if(profile.longevityScore>=4)score+=3;}
+    if(quizAnswers.climate==="Warm, occasional rain"&&hasAny(accords,["aromatic","woody","fresh spicy","fresh","musky"]))score+=5;
+    if(quizAnswers.climate==="It varies a lot"){if(p.gender==="Unisex")score+=3;if(hasAny(accords,["aromatic","woody","musky"]))score+=2;}
+    if(quizAnswers.lifestyle==="Office & meetings"){score+=Math.max(0,5-Math.abs(profile.projectionScore-3)*2);if(hasAny(accords,["musky","soapy","woody","aromatic"]))score+=3;}
+    if(quizAnswers.lifestyle==="Active & outdoorsy"&&hasAny(accords,["fresh","citrus","aquatic","green","aromatic"]))score+=7;
+    if(quizAnswers.lifestyle==="Nights out & social"){if(profile.projectionScore>=4)score+=5;if(profile.longevityScore>=4)score+=4;if(hasAny(accords,["amber","warm spicy","sweet","leather","tobacco","oud"]))score+=3;}
+    if(quizAnswers.lifestyle==="Creative & casual"){if(p.gender==="Unisex")score+=3;if(hasAny(accords,["green","fruity","gourmand","ozonic","boozy"]))score+=3;}
+    if(quizAnswers.personality==="Confident"&&hasAny(accords,["woody","leather","oud","amber","warm spicy"]))score+=6;
+    if(quizAnswers.personality==="Romantic"&&hasAny(accords,["floral","white floral","rose","sweet","fruity","vanilla"]))score+=6;
+    if(quizAnswers.personality==="Understated"){if(hasAny(accords,["musky","soapy","powdery","woody","aromatic"]))score+=6;if(profile.projectionScore<=3)score+=3;}
+    if(quizAnswers.personality==="Adventurous"&&hasAny(accords,["oud","smoky","leather","boozy","tropical","gourmand"]))score+=7;
+    const intensityTarget={"Close to the skin":2,"Balanced and noticeable":3,"Strong and expressive":4.5}[quizAnswers.intensity];
+    if(intensityTarget)score+=Math.max(-2,7-Math.abs(profile.projectionScore-intensityTarget)*3);
+    const samplePrice=Number(p.prices["2ml"]??Math.min(...Object.values(p.prices)));if(samplePrice<=budgetPerDecant)score+=6;else score-=Math.min(10,(samplePrice-budgetPerDecant)/18);
+    if(p.recommended)score+=.75;
+    const reason=reasons.slice(0,2).join(" · ")||`${quizAnswers.personality.toLowerCase()} character · ${quizAnswers.lifestyle.toLowerCase()}`;
     return {...p,matchReason:reason,matchScore:score};
-  }).sort((a,b)=>b.matchScore-a.matchScore);
+  }).sort((a,b)=>b.matchScore-a.matchScore||a.name.localeCompare(b.name));
   const chosen=[],brands=new Set();
-  for(const p of scored){if(!brands.has(p.brandId)||chosen.length>=3){chosen.push(p);brands.add(p.brandId);}if(chosen.length===4)break;}
+  for(const p of scored){if(!brands.has(p.brandId)){chosen.push(p);brands.add(p.brandId);}if(chosen.length===4)break;}
+  if(chosen.length<4)for(const p of scored){if(!chosen.some(item=>item.id===p.id))chosen.push(p);if(chosen.length===4)break;}
   return chosen;
 }
 function renderBuild(){
   return `
   <div class="page-header wrap">
     ${backButtonHTML("#/")}
-    <div class="breadcrumb"><a href="#/">Home</a> / Build My Collection</div>
-    <h1>Build My Collection</h1>
-    <p>Answer a few quick questions, and we'll recommend a personalized fragrance collection based on your style, lifestyle, and budget.</p>
+    <div class="breadcrumb"><a href="#/">Home</a> / Find Your Scent</div>
+    <h1>Find Your Scent</h1>
+    <p>Tell us who the fragrance is for, the accords you enjoy, and how you plan to wear it. We'll match you with four distinct decants from the collection.</p>
   </div>
   <section style="padding-top:0;">
-    <div class="wrap" style="max-width:640px;">
+    <div class="wrap" style="max-width:720px;">
       <div class="collection-card" style="background:var(--card);border:1px solid var(--line);color:var(--ink);" id="quizCard"></div>
     </div>
   </section>`;
@@ -1242,13 +1283,14 @@ function renderQuizStep(){
   if(!card) return;
   if(quizStep >= QUIZ.length){
     const picks = pickForAnswers();
-    if(!quizAnswers._tracked){track("quiz_complete",{result_ids:picks.map(p=>p.id)});quizAnswers._tracked=true;}
+    if(!quizAnswers._tracked){track("quiz_complete",{result_ids:picks.map(p=>p.id),gender:quizAnswers.gender,accords:(quizAnswers.accords||[]).join(",")});quizAnswers._tracked=true;}
     playSound('result');
     card.innerHTML = `
-      <span class="tag">Your Curated Wardrobe</span>
-      <h3 class="quiz-q">A collection matched to how you live</h3>
-      <p style="color:var(--ink-soft);font-size:14px;margin-bottom:22px;">Based on your answers, here's where we'd start — each available as a decant so you can try before you commit.</p>
-      <div class="product-grid" style="grid-template-columns:repeat(2,1fr);">${picks.map(productCardHTML).join("")}</div>
+      <span class="tag">Your Scent Matches</span>
+      <h3 class="quiz-q">Four fragrances selected for you</h3>
+      <div class="quiz-summary"><span>${esc(quizAnswers.gender)}</span>${(quizAnswers.accords||[]).map(accord=>`<span>${esc(accord)}</span>`).join("")}</div>
+      <p class="quiz-result-copy">Your strongest accord preferences, profile, lifestyle, climate, desired presence, and budget all shaped these recommendations.</p>
+      <div class="product-grid quiz-results">${picks.map(productCardHTML).join("")}</div>
       <div style="margin-top:24px;"><button class="btn btn-ghost btn-sm" id="quizRestart">Start Over</button></div>
     `;
     card.querySelectorAll("[data-go]").forEach(bindCardNav);
@@ -1260,14 +1302,30 @@ function renderQuizStep(){
     return;
   }
   const step = QUIZ[quizStep];
+  const selected=new Set(step.multi&&Array.isArray(quizAnswers[step.key])?quizAnswers[step.key]:[]);
+  const options=step.opts.map(option=>{
+    const accord=step.key==="accords"?globalThis.DECANT_ACCORDS?.meta((QUIZ_ACCORD_GROUPS[option]||[])[0]):null;
+    return `<button class="quiz-opt ${selected.has(option)?"selected":""}" data-answer="${esc(option)}" ${step.multi?`aria-pressed="${selected.has(option)}"`:""}>${accord?`<i class="quiz-accord-dot" style="--quiz-accord:${accord.color}"></i>`:""}<span>${esc(option)}</span></button>`;
+  }).join("");
   card.innerHTML = `
     <div class="quiz-progress">${QUIZ.map((_,i)=>`<span><i style="width:${i<quizStep?100:(i===quizStep?50:0)}%"></i></span>`).join("")}</div>
+    <div class="quiz-step-label">Step ${quizStep+1} of ${QUIZ.length}</div>
     <div class="quiz-q">${esc(step.q)}</div>
-    <div class="quiz-opts">${step.opts.map(o=>`<button class="quiz-opt" data-answer="${esc(o)}">${esc(o)}</button>`).join("")}</div>
+    ${step.hint?`<p class="quiz-hint">${esc(step.hint)}</p>`:""}
+    <div class="quiz-opts ${step.multi?"quiz-opts-accords":""}">${options}</div>
+    <div class="quiz-nav">${quizStep?`<button class="btn btn-ghost btn-sm" id="quizPrevious">Previous</button>`:`<span></span>`}${step.multi?`<button class="btn btn-primary btn-sm" id="quizContinue" ${selected.size?"":"disabled"}>Continue <span class="quiz-selection-count">${selected.size}/${step.max}</span></button>`:""}</div>
   `;
-  card.querySelectorAll("[data-answer]").forEach(btn=>{
-    btn.onclick = ()=>{ quizAnswers[step.key]=btn.dataset.answer; quizStep++; renderQuizStep(); };
-  });
+  document.getElementById("quizPrevious")?.addEventListener("click",()=>{quizStep=Math.max(0,quizStep-1);renderQuizStep();});
+  if(step.multi){
+    const continueButton=document.getElementById("quizContinue");
+    card.querySelectorAll("[data-answer]").forEach(btn=>btn.onclick=()=>{
+      const value=btn.dataset.answer;
+      if(selected.has(value))selected.delete(value);else if(selected.size<step.max)selected.add(value);else{toast(`Choose up to ${step.max} accords`);return;}
+      quizAnswers[step.key]=[...selected];btn.classList.toggle("selected",selected.has(value));btn.setAttribute("aria-pressed",String(selected.has(value)));
+      continueButton.disabled=!selected.size;continueButton.querySelector(".quiz-selection-count").textContent=`${selected.size}/${step.max}`;
+    });
+    continueButton.onclick=()=>{if(!selected.size)return;quizAnswers[step.key]=[...selected];quizStep++;renderQuizStep();};
+  }else card.querySelectorAll("[data-answer]").forEach(btn=>btn.onclick=()=>{quizAnswers[step.key]=btn.dataset.answer;quizStep++;renderQuizStep();});
 }
 
 /* ================================================================

@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow,noarchive" />
   <title>Catalog Manager — Decant Dynasty</title>
   <link rel="icon" href="images/logo.png" type="image/png" />
-  <link rel="stylesheet" href="catalog-manager.css?v=20260722-1" />
+  <link rel="stylesheet" href="catalog-manager.css?v=20260723-1" />
 </head>
 <body>
   <div class="public-lock" id="publicLock" hidden>
@@ -43,6 +43,7 @@
             Brands <span id="sideBrandCount">0</span>
           </button>
           <button class="side-link" data-section="bundles"><svg viewBox="0 0 24 24"><path d="M4 8h16v12H4zM3 8l3-5h12l3 5M12 3v17"/></svg>Bundles <span id="sideBundleCount">0</span></button>
+          <button class="side-link" data-section="reviews"><svg viewBox="0 0 24 24"><path d="M5 5h14v10H9l-4 4V5zM9 9h6M9 12h4"/></svg>Reviews <span id="sideReviewCount">0</span></button>
           <button class="side-link" data-section="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1A7 7 0 0 0 15 6l-.3-2.6h-4L10.4 6A7 7 0 0 0 9 7.1l-2.4-1-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.4-1A7 7 0 0 0 10.4 18l.3 2.6h4L15 18a7 7 0 0 0 1.5-1.1l2.4 1 2-3.4-2-1.5a7 7 0 0 0 .1-1z"/></svg>Settings</button>
         </nav>
 
@@ -92,6 +93,10 @@
         <section id="bundlesSection" hidden>
           <div class="manager-heading"><div><span class="eyebrow">Discovery sets</span><h1>Bundles</h1><p>Create and price curated or customer-built decant sets.</p></div><button class="button button-primary" id="addBundle">+ Add Bundle</button></div>
           <div class="brand-manager-grid" id="bundleGrid"></div>
+        </section>
+        <section id="reviewsSection" hidden>
+          <div class="manager-heading"><div><span class="eyebrow">Community notes</span><h1>Reviews</h1><p>Manage the customer stories shown at the bottom of the homepage.</p></div><button class="button button-primary" id="addReview">+ Add Review</button></div>
+          <div class="brand-manager-grid review-manager-grid" id="reviewGrid"></div>
         </section>
         <section id="settingsSection" hidden>
           <div class="manager-heading"><div><span class="eyebrow">Storefront tools</span><h1>Settings</h1><p>Connect analytics and manage the footer partner artwork.</p></div></div>
@@ -165,6 +170,23 @@
         <div class="editor-actions"><button class="button button-danger" id="deleteBundle" type="button">Delete</button><span></span><button class="button button-ghost" id="cancelBundle" type="button">Cancel</button><button class="button button-primary" type="submit">Save Bundle</button></div>
       </form>
 
+      <form id="reviewForm" class="editor-form" hidden novalidate>
+        <input type="hidden" name="id" />
+        <div class="form-section">
+          <div class="section-label"><span>01</span>Customer story</div>
+          <label class="field"><span>Name <small>You may include a city, e.g. Marga, Quezon City</small></span><input name="name" required /></label>
+          <label class="field"><span>Review</span><textarea name="text" rows="6" maxlength="600" required></textarea></label>
+        </div>
+        <div class="form-section">
+          <div class="section-label"><span>02</span>Customer photo</div>
+          <div class="image-field review-image-field">
+            <div class="image-preview" id="reviewImagePreview"><span>Optional</span></div>
+            <div><b>Profile photo</b><p id="reviewImagePath">No photo selected.</p><label class="button button-ghost file-button">Choose photo<input id="reviewImageInput" type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" /></label><button class="button button-ghost remove-review-photo" id="removeReviewImage" type="button">Remove photo</button></div>
+          </div>
+        </div>
+        <div class="editor-actions"><button class="button button-danger" id="deleteReview" type="button">Delete</button><span></span><button class="button button-ghost" id="cancelReview" type="button">Cancel</button><button class="button button-primary" type="submit">Save Review</button></div>
+      </form>
+
       <form id="brandForm" class="editor-form" hidden novalidate>
         <input type="hidden" name="originalId" />
         <div class="form-section">
@@ -195,9 +217,9 @@
   <script src="data.js?v=20260720-11"></script>
   <script src="catalog-research.js?v=20260720-8"></script>
   <script src="managed-catalog.js?v=20260721-1"></script>
-  <script src="catalog-extras.js?v=20260722-2"></script>
+  <script src="catalog-extras.js?v=20260723-1"></script>
   <script src="catalog-profiles.js?v=20260722-1"></script>
   <script src="catalog-accords.js?v=20260722-2"></script>
-  <script src="catalog-manager.js?v=20260722-3"></script>
+  <script src="catalog-manager.js?v=20260723-1"></script>
 </body>
 </html>

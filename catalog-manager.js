@@ -16,16 +16,18 @@ const noteList=value=>String(value||"").split(/[,\n]/).map(note=>note.trim()).fi
 const DRAFT_KEY="dd:catalog-manager:draft:v1";
 const managed=globalThis.DECANT_MANAGED_CATALOG;
 const source=managed?.version===1&&Array.isArray(managed.brands)&&Array.isArray(managed.products)?managed:{brands:BRANDS,products:PRODUCTS};
-const state={brands:clone(source.brands),products:clone(source.products),bundles:clone(Array.isArray(source.bundles)?source.bundles:globalThis.DECANT_DEFAULT_BUNDLES||[]),settings:{...(globalThis.DECANT_DEFAULT_SETTINGS||{}),...(source.settings||{})},section:"products",editingProductId:null,editingBrandId:null,editingBundleId:null,productFile:null,brandFile:null,rootHandle:null,pendingAssets:new Map(),partnerPreviewUrls:new Map(),dirty:false,restored:false};
-function normalizePartnerSettings(){
+const state={brands:clone(source.brands),products:clone(source.products),bundles:clone(Array.isArray(source.bundles)?source.bundles:globalThis.DECANT_DEFAULT_BUNDLES||[]),settings:{...(globalThis.DECANT_DEFAULT_SETTINGS||{}),...(source.settings||{})},section:"products",editingProductId:null,editingBrandId:null,editingBundleId:null,editingReviewId:null,productFile:null,brandFile:null,reviewFile:null,reviewPhotoRemoved:false,rootHandle:null,pendingAssets:new Map(),partnerPreviewUrls:new Map(),dirty:false,restored:false};
+function normalizeSettings(){
   const combined=state.settings.paymentLogisticsImage||"";
   if(!Array.isArray(state.settings.paymentImages))state.settings.paymentImages=state.settings.paymentImage?[state.settings.paymentImage]:(combined?[combined]:[]);
   if(!Array.isArray(state.settings.logisticsImages))state.settings.logisticsImages=state.settings.logisticsImage?[state.settings.logisticsImage]:(combined?[combined]:[]);
   state.settings.paymentImages=[...new Set(state.settings.paymentImages.map(value=>String(value||"").trim()).filter(Boolean))];
   state.settings.logisticsImages=[...new Set(state.settings.logisticsImages.map(value=>String(value||"").trim()).filter(Boolean))];
+  if(!Array.isArray(state.settings.reviews))state.settings.reviews=clone(globalThis.DECANT_DEFAULT_SETTINGS?.reviews||[]);
+  state.settings.reviews=state.settings.reviews.filter(review=>review&&review.name&&review.text).map((review,index)=>({id:String(review.id||managerSlug(review.name)||`review-${index+1}`),name:String(review.name).trim(),text:String(review.text).trim(),photo:String(review.photo||"").trim()}));
   delete state.settings.paymentImage;delete state.settings.logisticsImage;delete state.settings.paymentLogisticsImage;
 }
-normalizePartnerSettings();
+normalizeSettings();
 
 try{
   const draft=JSON.parse(localStorage.getItem(DRAFT_KEY)||"null");
@@ -33,15 +35,17 @@ try{
     state.brands=draft.brands;state.products=draft.products;state.bundles=clone(Array.isArray(draft.bundles)?draft.bundles:state.bundles);state.settings={...state.settings,...(draft.settings||{})};state.dirty=true;state.restored=true;
   }
 }catch(error){console.warn("Catalog draft could not be restored",error);}
-normalizePartnerSettings();
+normalizeSettings();
 
 const productForm=$("#productForm");
 const brandForm=$("#brandForm");
 const bundleForm=$("#bundleForm");
+const reviewForm=$("#reviewForm");
 const editorPanel=$("#editorPanel");
 const editorScrim=$("#editorScrim");
 const productImageInput=$("#productImageInput");
 const brandImageInput=$("#brandImageInput");
+const reviewImageInput=$("#reviewImageInput");
 let toastTimer=0;
 
 function toast(message){
@@ -61,6 +65,7 @@ function clearDraft(){state.dirty=false;localStorage.removeItem(DRAFT_KEY);setSa
 function brandById(id){return state.brands.find(brand=>brand.id===id)||null;}
 function productById(id){return state.products.find(product=>product.id===id)||null;}
 function bundleById(id){return state.bundles.find(bundle=>bundle.id===id)||null;}
+function reviewById(id){return (state.settings.reviews||[]).find(review=>review.id===id)||null;}
 function sortedBrands(){return [...state.brands].sort((a,b)=>a.name.localeCompare(b.name));}
 function sortedProducts(){return [...state.products].sort((a,b)=>a.brand.localeCompare(b.brand)||a.name.localeCompare(b.name));}
 function nextProductId(brandId,name){
@@ -76,6 +81,7 @@ function renderSummary(){
   const total=state.products.length,out=state.products.filter(product=>product.outOfStock).length,available=total-out;
   $("#sideProductCount").textContent=total;$("#sideBrandCount").textContent=state.brands.length;
   $("#sideBundleCount").textContent=state.bundles.length;
+  $("#sideReviewCount").textContent=(state.settings.reviews||[]).length;
   $("#inventoryAvailable").textContent=`${available} available`;
   $("#inventoryStockText").textContent=`${out} product${out===1?"":"s"} out of stock`;
   $("#inventoryBar").style.width=`${total?available/total*100:0}%`;
@@ -118,6 +124,14 @@ function renderBrands(){
 function renderBundles(){
   $("#bundleGrid").innerHTML=state.bundles.length?state.bundles.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(bundle=>`<button class="brand-manager-card" data-bundle-id="${esc(bundle.id)}"><span class="brand-manager-logo" style="display:grid;place-items:center;color:var(--gold);font-weight:800">${bundle.customizable?'YOU':(bundle.productIds||[]).length}</span><span><b>${esc(bundle.name)}</b><small>₱${Number(bundle.price||0).toLocaleString()} · ${esc(bundle.size||'2ml')} · ${bundle.active===false?'Hidden':'Live'}</small></span><i>↗</i></button>`).join(""):`<div class="table-empty">No discovery sets yet.</div>`;
 }
+function renderReviews(){
+  const reviews=state.settings.reviews||[];
+  $("#reviewGrid").innerHTML=reviews.length?reviews.map(review=>{
+    const initial=esc((review.name||"?").trim()[0]||"?");
+    const avatar=review.photo?`<img src="${esc(partnerPreviewSource(review.photo))}" alt="" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span hidden>${initial}</span>`:`<span>${initial}</span>`;
+    return `<button class="brand-manager-card review-manager-card" data-review-id="${esc(review.id)}"><span class="brand-manager-logo review-manager-avatar">${avatar}</span><span><b>${esc(review.name)}</b><small>${esc(review.text)}</small></span><i>↗</i></button>`;
+  }).join(""):`<div class="table-empty">No homepage reviews yet. Add one when you have a customer story to share.</div>`;
+}
 function renderSettings(){
   $("#analyticsMeasurementId").value=state.settings.analyticsMeasurementId||"";
   renderPartnerImages("payment");
@@ -152,22 +166,23 @@ function removePartnerImage(type,path){
   if(state.partnerPreviewUrls.has(path)){URL.revokeObjectURL(state.partnerPreviewUrls.get(path));state.partnerPreviewUrls.delete(path);}
   persistDraft();renderSettings();
 }
-function renderAll(){renderSummary();renderBrandOptions();renderProducts();renderBrands();renderBundles();renderSettings();setSaveState();}
+function renderAll(){renderSummary();renderBrandOptions();renderProducts();renderBrands();renderBundles();renderReviews();renderSettings();setSaveState();}
 
 function showSection(section){
   state.section=section;
-  $("#productsSection").hidden=section!=="products";$("#brandsSection").hidden=section!=="brands";$("#bundlesSection").hidden=section!=="bundles";$("#settingsSection").hidden=section!=="settings";
+  $("#productsSection").hidden=section!=="products";$("#brandsSection").hidden=section!=="brands";$("#bundlesSection").hidden=section!=="bundles";$("#reviewsSection").hidden=section!=="reviews";$("#settingsSection").hidden=section!=="settings";
   $$("[data-section]").forEach(button=>button.classList.toggle("active",button.dataset.section===section));
 }
+function editorFormFor(type){return type==="product"?productForm:type==="brand"?brandForm:type==="bundle"?bundleForm:reviewForm;}
 function openEditor(type,title,kicker){
   $("#editorTitle").textContent=title;$("#editorKicker").textContent=kicker;
-  productForm.hidden=type!=="product";brandForm.hidden=type!=="brand";bundleForm.hidden=type!=="bundle";
+  productForm.hidden=type!=="product";brandForm.hidden=type!=="brand";bundleForm.hidden=type!=="bundle";reviewForm.hidden=type!=="review";
   editorPanel.classList.add("open");editorScrim.classList.add("open");editorPanel.setAttribute("aria-hidden","false");
-  setTimeout(()=>$("input:not([type=hidden])",type==="product"?productForm:type==="brand"?brandForm:bundleForm)?.focus(),180);
+  setTimeout(()=>$("input:not([type=hidden])",editorFormFor(type))?.focus(),180);
 }
 function closeEditor(){
   editorPanel.classList.remove("open");editorScrim.classList.remove("open");editorPanel.setAttribute("aria-hidden","true");
-  state.productFile=null;state.brandFile=null;
+  state.productFile=null;state.brandFile=null;state.reviewFile=null;state.reviewPhotoRemoved=false;
 }
 function fillProductForm(product){
   const fields=productForm.elements;
@@ -276,13 +291,50 @@ function saveBundle(event){
   if(existing)state.bundles[state.bundles.indexOf(existing)]=bundle;else state.bundles.push(bundle);persistDraft();renderAll();closeEditor();toast(`${bundle.name} saved. Click Save to Storefront when ready.`);
 }
 function deleteBundle(){const bundle=bundleById(state.editingBundleId);if(!bundle)return;if(!confirm(`Delete ${bundle.name}?`))return;state.bundles=state.bundles.filter(item=>item.id!==bundle.id);persistDraft();renderAll();closeEditor();toast(`${bundle.name} deleted`);}
+
+function nextReviewId(name){
+  const base=managerSlug(name)||"customer-review";let id=base,index=2;
+  while(reviewById(id))id=`${base}-${index++}`;
+  return id;
+}
+function reviewImageExtension(file){
+  const named=/\.(png|jpe?g|webp)$/i.exec(file?.name||"")?.[1]?.toLowerCase();
+  if(named)return named==="jpeg"?"jpg":named;
+  return file?.type==="image/png"?"png":file?.type==="image/webp"?"webp":"jpg";
+}
+function suggestedReviewPath(id,file=state.reviewFile){return `images/reviews/${id}.${reviewImageExtension(file)}`;}
+function fillReviewForm(review){
+  const fields=reviewForm.elements;fields.id.value=review?.id||"";fields.name.value=review?.name||"";fields.text.value=review?.text||"";
+  const path=review?.photo||"";$("#reviewImagePath").textContent=path||"No photo selected.";setPreview($("#reviewImagePreview"),path,null);$("#deleteReview").hidden=!review;$("#removeReviewImage").hidden=!path;
+}
+function editReview(id=null){
+  state.editingReviewId=id;state.reviewFile=null;state.reviewPhotoRemoved=false;const review=id?reviewById(id):null;
+  fillReviewForm(review);openEditor("review",review?review.name:"Add review",review?"Homepage review editor":"New customer story");
+}
+function saveReview(event){
+  event.preventDefault();if(!validateEditorForm(reviewForm))return;
+  const fields=reviewForm.elements,existing=state.editingReviewId?reviewById(state.editingReviewId):null,name=fields.name.value.trim(),id=existing?.id||nextReviewId(name);
+  const photo=state.reviewFile?suggestedReviewPath(id):state.reviewPhotoRemoved?"":existing?.photo||"";
+  const review={id,name,text:fields.text.value.trim(),photo};
+  if(existing)state.settings.reviews[state.settings.reviews.indexOf(existing)]=review;else state.settings.reviews.push(review);
+  if(state.reviewFile)state.pendingAssets.set(photo,state.reviewFile);
+  persistDraft();renderAll();closeEditor();toast(`${review.name}'s review saved. Click Save to Storefront when ready.`);
+}
+function deleteReview(){
+  const review=reviewById(state.editingReviewId);if(!review)return;if(!confirm(`Delete ${review.name}'s review?`))return;
+  state.settings.reviews=state.settings.reviews.filter(item=>item.id!==review.id);persistDraft();renderAll();closeEditor();toast(`${review.name}'s review deleted`);
+}
+function removeReviewImage(){
+  state.reviewFile=null;state.reviewPhotoRemoved=true;reviewImageInput.value="";$("#reviewImagePath").textContent="No photo selected.";setPreview($("#reviewImagePreview"),"",null);$("#removeReviewImage").hidden=true;
+}
 function saveSettings(){
   const measurementId=$("#analyticsMeasurementId").value.trim().toUpperCase();if(measurementId&&!/^G-[A-Z0-9]+$/.test(measurementId)){toast("Use a GA4 ID beginning with G-");return;}
   state.settings.analyticsMeasurementId=measurementId;
-  normalizePartnerSettings();persistDraft();renderSettings();toast("Storefront settings saved to your draft");
+  normalizeSettings();persistDraft();renderSettings();toast("Storefront settings saved to your draft");
 }
 
 function validatePng(file){return file&&(/\.png$/i.test(file.name)||file.type==="image/png");}
+function validateReviewImage(file){return file&&(/\.(png|jpe?g|webp)$/i.test(file.name)||["image/png","image/jpeg","image/webp"].includes(file.type));}
 function catalogPayload(){
   const brands=sortedBrands().map(brand=>({id:brand.id,name:brand.name,logo:brand.logo}));
   const brandMap=new Map(brands.map(brand=>[brand.id,brand.name]));
@@ -306,6 +358,11 @@ function validateCatalog(payload){
     if(!bundle.customizable&&!(bundle.productIds||[]).length)return`${bundle.name} needs at least one fragrance`;
     if((bundle.productIds||[]).some(id=>!productIds.has(id)))return`${bundle.name} includes a missing fragrance`;
     bundleIds.add(bundle.id);
+  }
+  const reviewIds=new Set();
+  for(const review of payload.settings?.reviews||[]){
+    if(!review.id||!review.name||!review.text||reviewIds.has(review.id))return`Invalid or duplicate review: ${review.name||review.id||"Unnamed review"}`;
+    reviewIds.add(review.id);
   }
   return"";
 }
@@ -351,14 +408,18 @@ $("#productSearch").oninput=renderProducts;$("#brandFilter").onchange=renderProd
 $("#productTable").onclick=event=>{const row=event.target.closest("[data-product-id]");if(row)editProduct(row.dataset.productId);};
 $("#brandGrid").onclick=event=>{const card=event.target.closest("[data-brand-id]");if(card)editBrand(card.dataset.brandId);};
 $("#bundleGrid").onclick=event=>{const card=event.target.closest("[data-bundle-id]");if(card)editBundle(card.dataset.bundleId);};
-$("#addProduct").onclick=()=>editProduct();$("#addBrand").onclick=()=>editBrand();$("#addBundle").onclick=()=>editBundle();
-$("#closeEditor").onclick=closeEditor;editorScrim.onclick=closeEditor;$("#cancelProduct").onclick=closeEditor;$("#cancelBrand").onclick=closeEditor;$("#cancelBundle").onclick=closeEditor;
-productForm.onsubmit=saveProduct;brandForm.onsubmit=saveBrand;bundleForm.onsubmit=saveBundle;$("#deleteProduct").onclick=deleteProduct;$("#deleteBrand").onclick=deleteBrand;$("#deleteBundle").onclick=deleteBundle;
+$("#reviewGrid").onclick=event=>{const card=event.target.closest("[data-review-id]");if(card)editReview(card.dataset.reviewId);};
+$("#addProduct").onclick=()=>editProduct();$("#addBrand").onclick=()=>editBrand();$("#addBundle").onclick=()=>editBundle();$("#addReview").onclick=()=>editReview();
+$("#closeEditor").onclick=closeEditor;editorScrim.onclick=closeEditor;$("#cancelProduct").onclick=closeEditor;$("#cancelBrand").onclick=closeEditor;$("#cancelBundle").onclick=closeEditor;$("#cancelReview").onclick=closeEditor;
+productForm.onsubmit=saveProduct;brandForm.onsubmit=saveBrand;bundleForm.onsubmit=saveBundle;reviewForm.onsubmit=saveReview;$("#deleteProduct").onclick=deleteProduct;$("#deleteBrand").onclick=deleteBrand;$("#deleteBundle").onclick=deleteBundle;$("#deleteReview").onclick=deleteReview;
 productForm.elements.name.oninput=()=>{if(!state.editingProductId&&!state.productFile)$("#productImagePath").textContent=suggestedProductPath();};
 productForm.elements.brandId.onchange=()=>{if(!state.editingProductId&&!state.productFile)$("#productImagePath").textContent=suggestedProductPath();};
 brandForm.elements.name.oninput=()=>{if(!state.editingBrandId){brandForm.elements.id.value=managerSlug(brandForm.elements.name.value);$("#brandImagePath").textContent=`images/brands/${managerSlug(brandForm.elements.name.value)||"brand-name"}.png`;}};
 productImageInput.onchange=()=>{const file=productImageInput.files[0];if(!file)return;if(!validatePng(file)){productImageInput.value="";toast("Product photos must be PNG files");return;}state.productFile=file;$("#productImagePath").textContent=suggestedProductPath();setPreview($("#productImagePreview"),"",file);};
 brandImageInput.onchange=()=>{const file=brandImageInput.files[0];if(!file)return;if(!validatePng(file)){brandImageInput.value="";toast("Brand logos must be PNG files");return;}state.brandFile=file;const id=state.editingBrandId||managerSlug(brandForm.elements.id.value||brandForm.elements.name.value);$("#brandImagePath").textContent=`images/brands/${id||"brand-name"}.png`;setPreview($("#brandImagePreview"),"",file,true);};
+reviewForm.elements.name.oninput=()=>{if(!state.editingReviewId&&state.reviewFile)$("#reviewImagePath").textContent=suggestedReviewPath(managerSlug(reviewForm.elements.name.value)||"customer-review");};
+reviewImageInput.onchange=()=>{const file=reviewImageInput.files[0];if(!file)return;if(!validateReviewImage(file)){reviewImageInput.value="";toast("Review photos must be PNG, JPG, or WebP files");return;}state.reviewFile=file;state.reviewPhotoRemoved=false;const id=state.editingReviewId||managerSlug(reviewForm.elements.name.value)||"customer-review";$("#reviewImagePath").textContent=suggestedReviewPath(id,file);setPreview($("#reviewImagePreview"),"",file);$("#removeReviewImage").hidden=false;};
+$("#removeReviewImage").onclick=removeReviewImage;
 $("#paymentMediaInput").onchange=event=>{addPartnerImages("payment",event.target.files);event.target.value="";};
 $("#logisticsMediaInput").onchange=event=>{addPartnerImages("logistics",event.target.files);event.target.value="";};
 $("#settingsSection").onclick=event=>{const button=event.target.closest("[data-remove-partner]");if(button)removePartnerImage(button.dataset.removePartner,button.dataset.partnerPath);};
@@ -372,7 +433,7 @@ $("#importBackup").onchange=async event=>{
   try{
     const payload=JSON.parse(await file.text());const error=validateCatalog(payload);if(error)throw new Error(error);
     if(!confirm(`Import ${payload.products.length} products and ${payload.brands.length} brands? This replaces the current draft.`))return;
-    state.brands=clone(payload.brands);state.products=clone(payload.products);state.bundles=clone(Array.isArray(payload.bundles)?payload.bundles:state.bundles);state.settings={...state.settings,...(payload.settings||{})};normalizePartnerSettings();state.pendingAssets.clear();persistDraft();renderAll();toast("Catalog backup imported into your draft");
+    state.brands=clone(payload.brands);state.products=clone(payload.products);state.bundles=clone(Array.isArray(payload.bundles)?payload.bundles:state.bundles);state.settings={...state.settings,...(payload.settings||{})};normalizeSettings();state.pendingAssets.clear();persistDraft();renderAll();toast("Catalog backup imported into your draft");
   }catch(error){toast(`Backup could not be imported: ${error.message}`);}finally{event.target.value="";}
 };
 $$('[data-close-dialog]').forEach(button=>button.onclick=()=>$("#exportDialog").close());

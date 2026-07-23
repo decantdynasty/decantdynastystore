@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-22T14:27:13.676Z",
+  "updatedAt": "2026-07-23T13:56:57.566Z",
   "brands": [
     {
       "id": "afnan",
@@ -2922,7 +2922,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft to moderate",
       "inspiredBy": "Goldfield & Banks Ingenious Ginger",
       "recommended": false,
-      "outOfStock": false
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "fresh spicy",
+        "vanilla",
+        "powdery",
+        "fresh"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "french-avenue-0082",
@@ -3011,7 +3021,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Stéphane Humbert Lucas Pink Boa",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": true,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "fruity",
+        "sweet",
+        "aromatic",
+        "fresh spicy",
+        "woody"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "french-avenue-0084",
@@ -3027,7 +3047,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "5ml": 329
       },
       "concentration": "Eau de Parfum",
-      "gender": "Men",
+      "gender": "Unisex",
       "description": "A fiery tropical fruit fragrance led by mango and ginger, with jasmine, praline and a mossy amberwood finish.",
       "topNotes": [
         "Mango",
@@ -7488,6 +7508,26 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "images/partners/logistics/jnt.png",
       "images/partners/logistics/lala.png"
     ],
-    "analyticsMeasurementId": ""
+    "analyticsMeasurementId": "",
+    "reviews": [
+      {
+        "id": "marga-quezon-city",
+        "name": "Marga, Quezon City",
+        "text": "Finally a way to try Khamrah and Hawas without buying two full bottles I might not even like. Shipping was quick too.",
+        "photo": ""
+      },
+      {
+        "id": "jerome-cebu",
+        "name": "Jerome, Cebu",
+        "text": "The Find Your Scent consultation actually understood what I wanted. I found three scents I now wear on rotation.",
+        "photo": ""
+      },
+      {
+        "id": "angeli-davao",
+        "name": "Angeli, Davao",
+        "text": "Decants arrived carefully packed, labeled clearly, and smelled exactly like the reviews said. My go-to for discovering new houses.",
+        "photo": ""
+      }
+    ]
   }
 };

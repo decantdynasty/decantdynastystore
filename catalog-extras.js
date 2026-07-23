@@ -2,7 +2,27 @@
 globalThis.DECANT_DEFAULT_SETTINGS = {
   paymentImages: [],
   logisticsImages: [],
-  analyticsMeasurementId: ""
+  analyticsMeasurementId: "",
+  reviews: [
+    {
+      id: "marga-quezon-city",
+      name: "Marga, Quezon City",
+      text: "Finally a way to try Khamrah and Hawas without buying two full bottles I might not even like. Shipping was quick too.",
+      photo: ""
+    },
+    {
+      id: "jerome-cebu",
+      name: "Jerome, Cebu",
+      text: "The Find Your Scent consultation actually understood what I wanted. I found three scents I now wear on rotation.",
+      photo: ""
+    },
+    {
+      id: "angeli-davao",
+      name: "Angeli, Davao",
+      text: "Decants arrived carefully packed, labeled clearly, and smelled exactly like the reviews said. My go-to for discovering new houses.",
+      photo: ""
+    }
+  ]
 };
 
 globalThis.DECANT_DEFAULT_BUNDLES = [
