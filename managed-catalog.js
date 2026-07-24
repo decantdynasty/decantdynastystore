@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-24T06:59:37.034Z",
+  "updatedAt": "2026-07-24T07:16:44.185Z",
   "brands": [
     {
       "id": "afnan",
@@ -7512,20 +7512,26 @@ globalThis.DECANT_MANAGED_CATALOG = {
     "reviews": [
       {
         "id": "marga-quezon-city",
-        "name": "Marga, Quezon City",
-        "text": "Finally a way to try Khamrah and Hawas without buying two full bottles I might not even like. Shipping was quick too.",
+        "name": "blackrodz26",
+        "text": "Maganda pagka balot. Siguradong di mababasag kasi bote sya. Very secured talaga items mo. Tungkol sa pabango di ko pa naamoy. Gamitin ko lang naman yan for testing kasi bili ako full bottle kung sakali magustohan ko amoy. Thank you sa seller bilis ang process. Pag place order mo, ipadala agad.",
         "photo": ""
       },
       {
         "id": "jerome-cebu",
-        "name": "Jerome, Cebu",
-        "text": "The Find Your Scent consultation actually understood what I wanted. I found three scents I now wear on rotation.",
+        "name": "kfrfypn3fq",
+        "text": "101% Authentic  I'm not into sweet scent DNA tlga but ung pag sweet nito not cloying and wearable fresh fruity mas trip ko drydown nito mas bumabango sya sa drydown nagiging creamy cons unisex ung amoy nya so baka magustuhan to ng mga jowa nyo hingiin🤣💯 I will order again in this shop bait ng seller and andali kausap kudos mam/sir👌💯",
         "photo": ""
       },
       {
         "id": "angeli-davao",
-        "name": "Angeli, Davao",
-        "text": "Decants arrived carefully packed, labeled clearly, and smelled exactly like the reviews said. My go-to for discovering new houses.",
+        "name": "m3c1szp2tk",
+        "text": "1st time umorder sa shop nato dahil dumaan lang sa feed ko. Di ko inexpect na mabilis darating and the frag itself. Yung packaging sobrang safe, pati yung label, ang ganda hindi lang tinype yung itsura. compared sa ibang shop tapos ung bottle mismo sobrang sealed, walang leak nung nareceive ko. Mauulit ako umorder ulit, thank you sellerrr ❤️❤️",
+        "photo": ""
+      },
+      {
+        "id": "migsyyyyy",
+        "name": "migsyyyyy",
+        "text": "totoo talaga chismis sa mga to! said na naman ako pag nag full bottle HAHAHAHAHA\n\nsalamat Decant Dynasty!",
         "photo": ""
       }
     ]
