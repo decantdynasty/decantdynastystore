@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-25T06:27:30.748Z",
+  "updatedAt": "2026-07-25T07:53:26.835Z",
   "brands": [
     {
       "id": "afnan",
@@ -5633,10 +5633,10 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "image": "images/products/paris-corner/rifaaqat.png",
       "image2": "images/products/paris-corner/rifaaqat-decant.png",
       "prices": {
-        "1ml": 45,
+        "1ml": 55,
         "2ml": 95,
-        "3ml": 145,
-        "5ml": 235
+        "3ml": 155,
+        "5ml": 255
       },
       "concentration": "Eau de Parfum",
       "gender": "Unisex",
@@ -5658,7 +5658,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Yves Saint Laurent Babycat",
       "recommended": false,
-      "outOfStock": false,
+      "outOfStock": true,
       "longevityScore": 4,
       "projectionScore": 4,
       "accords": [
