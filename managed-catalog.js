@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-24T07:16:44.185Z",
+  "updatedAt": "2026-07-25T06:27:30.748Z",
   "brands": [
     {
       "id": "afnan",
@@ -4423,8 +4423,8 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "longevity": "Long (7–10 hours)",
       "projection": "Moderate to strong",
       "inspiredBy": "BDK Parfums Gris Charnel",
-      "recommended": false,
-      "outOfStock": true,
+      "recommended": true,
+      "outOfStock": false,
       "longevityScore": 4,
       "projectionScore": 3,
       "accords": [
