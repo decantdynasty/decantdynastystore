@@ -865,17 +865,17 @@ function whyCard(path, title, body){
   return `<div class="why-card"><div class="why-icon"><svg viewBox="0 0 24 24"><path d="${path}"/></svg></div><h3>${esc(title)}</h3><p>${esc(body)}</p></div>`;
 }
 function testiCard(t){
-  const initial=esc((t.name||"?").trim()[0]||"?");
-  const avatar=t.photo
-    ? `<img src="${esc(t.photo)}" alt="${esc(t.name)}" loading="lazy" decoding="async" onerror="this.hidden=true;this.nextElementSibling.hidden=false"/><span hidden>${initial}</span>`
-    : `<span>${initial}</span>`;
-  return `<article class="testi-card">
-    <span class="testi-quote" aria-hidden="true">“</span>
-    <blockquote>${esc(t.text)}</blockquote>
-    <footer>
-      <div class="testi-avatar">${avatar}</div>
-      <div><div class="testi-name">${esc(t.name)}</div><small>Customer note</small></div>
-    </footer>
+  const photo=t.photo?`<figure class="testi-photo"><img src="${esc(t.photo)}" alt="Photo shared with ${esc(t.name)}'s Decant Dynasty review" loading="lazy" decoding="async" onerror="this.closest('.testi-card').classList.add('no-photo');this.parentElement.remove()"/></figure>`:"";
+  return `<article class="testi-card ${t.photo?"has-photo":"no-photo"}">
+    ${photo}
+    <div class="testi-copy">
+      <span class="testi-quote" aria-hidden="true">“</span>
+      <blockquote>${esc(t.text)}</blockquote>
+      <footer>
+        <div class="testi-name">${esc(t.name)}</div>
+        <small>Customer review</small>
+      </footer>
+    </div>
   </article>`;
 }
 
@@ -1293,6 +1293,7 @@ function renderQuizStep(){
       <div class="product-grid quiz-results">${picks.map(productCardHTML).join("")}</div>
       <div style="margin-top:24px;"><button class="btn btn-ghost btn-sm" id="quizRestart">Start Over</button></div>
     `;
+    card.onclick=null;
     card.querySelectorAll("[data-go]").forEach(bindCardNav);
     card.querySelectorAll("[data-wish-toggle]").forEach(bindWishButton);
     card.querySelectorAll("[data-quickview]").forEach(bindQuickviewButton);
@@ -1318,14 +1319,20 @@ function renderQuizStep(){
   document.getElementById("quizPrevious")?.addEventListener("click",()=>{quizStep=Math.max(0,quizStep-1);renderQuizStep();});
   if(step.multi){
     const continueButton=document.getElementById("quizContinue");
-    card.querySelectorAll("[data-answer]").forEach(btn=>btn.onclick=()=>{
+    card.onclick=event=>{
+      const btn=event.target.closest("[data-answer]");
+      if(!btn||!card.contains(btn))return;
       const value=btn.dataset.answer;
       if(selected.has(value))selected.delete(value);else if(selected.size<step.max)selected.add(value);else{toast(`Choose up to ${step.max} accords`);return;}
       quizAnswers[step.key]=[...selected];btn.classList.toggle("selected",selected.has(value));btn.setAttribute("aria-pressed",String(selected.has(value)));
       continueButton.disabled=!selected.size;continueButton.querySelector(".quiz-selection-count").textContent=`${selected.size}/${step.max}`;
-    });
+    };
     continueButton.onclick=()=>{if(!selected.size)return;quizAnswers[step.key]=[...selected];quizStep++;renderQuizStep();};
-  }else card.querySelectorAll("[data-answer]").forEach(btn=>btn.onclick=()=>{quizAnswers[step.key]=btn.dataset.answer;quizStep++;renderQuizStep();});
+  }else card.onclick=event=>{
+    const btn=event.target.closest("[data-answer]");
+    if(!btn||!card.contains(btn))return;
+    quizAnswers[step.key]=btn.dataset.answer;quizStep++;renderQuizStep();
+  };
 }
 
 /* ================================================================

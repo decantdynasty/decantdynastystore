@@ -127,9 +127,8 @@ function renderBundles(){
 function renderReviews(){
   const reviews=state.settings.reviews||[];
   $("#reviewGrid").innerHTML=reviews.length?reviews.map(review=>{
-    const initial=esc((review.name||"?").trim()[0]||"?");
-    const avatar=review.photo?`<img src="${esc(partnerPreviewSource(review.photo))}" alt="" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span hidden>${initial}</span>`:`<span>${initial}</span>`;
-    return `<button class="brand-manager-card review-manager-card" data-review-id="${esc(review.id)}"><span class="brand-manager-logo review-manager-avatar">${avatar}</span><span><b>${esc(review.name)}</b><small>${esc(review.text)}</small></span><i>↗</i></button>`;
+    const photo=review.photo?`<img src="${esc(partnerPreviewSource(review.photo))}" alt="" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span hidden>No photo</span>`:`<span>No photo</span>`;
+    return `<button class="brand-manager-card review-manager-card" data-review-id="${esc(review.id)}"><span class="brand-manager-logo review-manager-photo">${photo}</span><span><b>${esc(review.name)}</b><small>${esc(review.text)}</small></span><i>↗</i></button>`;
   }).join(""):`<div class="table-empty">No homepage reviews yet. Add one when you have a customer story to share.</div>`;
 }
 function renderSettings(){
