@@ -160,13 +160,13 @@ function initHeroBottle(){
   };
   const syncCinematicMotion=progress=>{
     const mobile=mobileMedia.matches;
-    const focus=smoothstep(mobile?.14:.11,mobile?.58:.51,progress);
-    const departure=smoothstep(mobile?.82:.77,1,progress);
-    const copyExit=smoothstep(mobile?.035:.025,mobile?.32:.27,progress);
-    const annotationIn=smoothstep(mobile?.43:.39,mobile?.61:.55,progress);
-    const annotationOut=smoothstep(mobile?.73:.69,mobile?.88:.85,progress);
-    const viewportTravel=window.innerHeight*(mobile?.11:.19);
-    const entranceTravel=window.innerHeight*(mobile?.42:.36);
+    const focus=smoothstep(mobile?.22:.19,mobile?.70:.66,progress);
+    const departure=smoothstep(mobile?.89:.86,1,progress);
+    const copyExit=smoothstep(mobile?.07:.06,mobile?.39:.35,progress);
+    const annotationIn=smoothstep(mobile?.59:.55,mobile?.76:.72,progress);
+    const annotationOut=smoothstep(mobile?.83:.80,mobile?.94:.92,progress);
+    const viewportTravel=window.innerHeight*(mobile?.10:.16);
+    const entranceTravel=window.innerHeight*(mobile?.48:.43);
     const trackX=centerShift*focus;
     const trackY=(entranceTravel*(1-focus))+(centerShiftY*focus)-(10*focus)-(viewportTravel*departure);
     track.style.transform=`translate3d(${trackX.toFixed(2)}px,${trackY.toFixed(2)}px,0)`;
@@ -200,7 +200,7 @@ function initHeroBottle(){
     if(!dragging){velocityX*=Math.pow(.94,frameScale);velocityY*=Math.pow(.965,frameScale);if(Math.abs(velocityY)<.001&&!reduced)velocityY=.0015;}
     userRotationY+=velocityY*frameScale;
     userRotationX=Math.max(-.35,Math.min(.35,userRotationX+(velocityX*frameScale)));
-    const follow=reduced?1:1-Math.exp(-(mobileMedia.matches?12:9)*delta);
+    const follow=reduced?1:1-Math.exp(-(mobileMedia.matches?8:7)*delta);
     scrollCurrent+=(scrollTarget-scrollCurrent)*follow;
     syncCinematicMotion(scrollCurrent);
     updateGuides();renderer.render(scene,camera);
@@ -740,11 +740,19 @@ function renderHome(){
   <section class="hero hero-cinematic">
     <div class="wrap hero-grid">
       <div class="hero-copy">
+        <div class="hero-stage-halo" aria-hidden="true"></div>
         <h1 class="hero-title-art"><img src="images/find-your-signature-scent.png" alt="Find Your Signature Scent" /></h1>
         <div class="hero-actions">
-          <a href="#/collection" class="btn btn-cta btn-cta-build">Shop Decants</a>
-          <a href="#/build" class="btn btn-cta btn-cta-browse">Find Your Scent</a>
+          <a href="#/collection" class="btn btn-cta btn-cta-build">
+            <span>Shop Decants</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 7l5 5-5 5"/></svg>
+          </a>
+          <a href="#/build" class="btn btn-cta btn-cta-browse">
+            <span>Find Your Scent</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 13.8 9l5.7 1.8-5.7 1.8-1.8 5.9-1.8-5.9-5.7-1.8L10.2 9 12 3.5Z"/></svg>
+          </a>
         </div>
+        <div class="hero-scroll-cue" aria-hidden="true"><i></i></div>
       </div>
       <div class="hero-art-track">
         <div class="hero-art" id="heroBottleContainer" aria-label="Interactive Decant Dynasty atomizer bottle. Drag to rotate.">
