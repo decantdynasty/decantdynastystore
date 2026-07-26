@@ -8,6 +8,32 @@ $storeRoot = [IO.Path]::GetFullPath($PSScriptRoot)
 $rootPrefix = $storeRoot.TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
 $listener = $null
 
+function Test-CatalogManager([int]$candidatePort) {
+  $client = $null
+  $stream = $null
+  try {
+    $client = [Net.Sockets.TcpClient]::new()
+    $connection = $client.ConnectAsync([Net.IPAddress]::Loopback, $candidatePort)
+    if (-not $connection.Wait(600) -or -not $client.Connected) { return $false }
+    $client.ReceiveTimeout = 1200
+    $client.SendTimeout = 1200
+    $stream = $client.GetStream()
+    $request = [Text.Encoding]::ASCII.GetBytes("GET /catalog-manager.html HTTP/1.1`r`nHost: 127.0.0.1`r`nConnection: close`r`n`r`n")
+    $stream.Write($request, 0, $request.Length)
+    if (-not $client.Client.Poll(1200000, [Net.Sockets.SelectMode]::SelectRead)) { return $false }
+    $buffer = [byte[]]::new(16384)
+    $received = $stream.Read($buffer, 0, $buffer.Length)
+    if ($received -le 0) { return $false }
+    $responseText = [Text.Encoding]::UTF8.GetString($buffer, 0, $received)
+    return $responseText -match "HTTP/1.1 200" -and $responseText -match "Catalog Manager"
+  } catch {
+    return $false
+  } finally {
+    if ($stream) { $stream.Dispose() }
+    if ($client) { $client.Dispose() }
+  }
+}
+
 function Get-ContentType([string]$path) {
   switch ([IO.Path]::GetExtension($path).ToLowerInvariant()) {
     ".html" { "text/html; charset=utf-8" }
@@ -38,13 +64,41 @@ function Send-Response($stream, [int]$status, [string]$reason, [byte[]]$body, [s
 }
 
 try {
-  $listener = [Net.Sockets.TcpListener]::new([Net.IPAddress]::Loopback, $Port)
-  $listener.Start()
-  $managerUrl = "http://127.0.0.1:$Port/catalog-manager.html"
+  if (Test-CatalogManager $Port) {
+    $managerUrl = "http://127.0.0.1:$Port/catalog-manager.html"
+    Write-Host ""
+    Write-Host "  Catalog Manager is already running." -ForegroundColor Green
+    Write-Host "  Opening: $managerUrl" -ForegroundColor DarkGray
+    Write-Host ""
+    if (-not $NoBrowser) { Start-Process $managerUrl }
+    exit 0
+  }
+
+  $selectedPort = $null
+  foreach ($candidatePort in $Port..($Port + 20)) {
+    $candidateListener = $null
+    try {
+      $candidateListener = [Net.Sockets.TcpListener]::new([Net.IPAddress]::Loopback, $candidatePort)
+      $candidateListener.Start()
+      $listener = $candidateListener
+      $selectedPort = $candidatePort
+      break
+    } catch {
+      if ($candidateListener) { $candidateListener.Stop() }
+    }
+  }
+  if ($null -eq $selectedPort) {
+    throw "No available local port was found between $Port and $($Port + 20)."
+  }
+
+  $managerUrl = "http://127.0.0.1:$selectedPort/catalog-manager.html"
 
   Write-Host ""
   Write-Host "  DECANT DYNASTY CATALOG MANAGER" -ForegroundColor Yellow
   Write-Host "  Local owner session: $managerUrl" -ForegroundColor DarkGray
+  if ($selectedPort -ne $Port) {
+    Write-Host "  Port $Port was busy, so port $selectedPort is being used instead." -ForegroundColor DarkYellow
+  }
   Write-Host ""
   Write-Host "  Keep this window open while editing." -ForegroundColor White
   Write-Host "  Press Ctrl+C or close this window when finished." -ForegroundColor DarkGray
