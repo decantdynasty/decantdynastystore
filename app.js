@@ -69,7 +69,7 @@ function initHeroPerfume(){
   const smoothstep=(start,end,value)=>{const t=clamp01((value-start)/Math.max(end-start,.0001));return t*t*(3-(2*t));};
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(31,container.clientWidth/Math.max(container.clientHeight,1),.1,100);
-  camera.position.set(0,.12,mobileMedia.matches?8.5:7.6);
+  camera.position.set(0,.12,mobileMedia.matches?9.4:9);
   const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,mobileMedia.matches?1.65:2));
   renderer.setSize(container.clientWidth,container.clientHeight);
@@ -83,6 +83,9 @@ function initHeroPerfume(){
   const fill=new THREE.PointLight(0xffffff,1.25);fill.position.set(0,-1,5);scene.add(fill);
   const group=new THREE.Group();scene.add(group);
   const loader=new THREE.GLTFLoader();
+  const dracoLoader=new THREE.DRACOLoader();
+  dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/draco/');
+  loader.setDRACOLoader(dracoLoader);
   const disposables=[];
   const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
   let modelRoot=null,modelScale=1,raf=0,visible=true,lastFrame=performance.now();
@@ -96,12 +99,28 @@ function initHeroPerfume(){
       if(!node.isMesh)return;
       node.castShadow=false;node.receiveShadow=false;
       const materials=Array.isArray(node.material)?node.material:[node.material];
-      materials.filter(Boolean).forEach(material=>{disposables.push(material);material.needsUpdate=true;});
+      materials.filter(Boolean).forEach(material=>{
+        disposables.push(material);
+        material.side=THREE.FrontSide;
+        material.depthWrite=true;
+        material.depthTest=true;
+        if((material.name||'').toLowerCase().includes('glass')){
+          material.transparent=false;
+          material.opacity=1;
+          material.alphaTest=0;
+          if('transmission' in material)material.transmission=0;
+          if('thickness' in material)material.thickness=0;
+          material.color?.setHex(0xd8ad55);
+          material.metalness=.56;
+          material.roughness=.26;
+        }
+        material.needsUpdate=true;
+      });
       if(node.geometry)disposables.push(node.geometry);
     });
     const initialBox=new THREE.Box3().setFromObject(modelRoot);
     const size=initialBox.getSize(new THREE.Vector3());
-    modelScale=(mobileMedia.matches?5.25:5.75)/Math.max(size.y,size.x,size.z);
+    modelScale=(mobileMedia.matches?4.35:4.55)/Math.max(size.y,size.x,size.z);
     modelRoot.scale.setScalar(modelScale);
     const box=new THREE.Box3().setFromObject(modelRoot),center=box.getCenter(new THREE.Vector3());
     modelRoot.position.sub(center);
@@ -157,7 +176,7 @@ function initHeroPerfume(){
   const onScroll=()=>{scrollTarget=reduced?0:clamp01((window.scrollY-heroStart)/heroRange);};
   const resize=()=>{
     const w=container.clientWidth,h=container.clientHeight;
-    camera.aspect=w/Math.max(h,1);camera.position.z=mobileMedia.matches?8.5:7.6;camera.updateProjectionMatrix();
+    camera.aspect=w/Math.max(h,1);camera.position.z=mobileMedia.matches?9.4:9;camera.updateProjectionMatrix();
     renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,mobileMedia.matches?1.65:2));renderer.setSize(w,h);measure();
   };
   function animate(now=performance.now()){
@@ -194,7 +213,7 @@ function initHeroPerfume(){
     cancelAnimationFrame(raf);resizeObserver?.disconnect();visibilityObserver?.disconnect();
     window.removeEventListener('resize',resize);window.removeEventListener('scroll',onScroll);
     container.removeEventListener('pointerdown',down);container.removeEventListener('pointermove',move);container.removeEventListener('pointerup',up);container.removeEventListener('pointercancel',up);container.removeEventListener('pointerleave',leave);
-    renderer.dispose();disposables.forEach(item=>item?.dispose?.());
+    renderer.dispose();dracoLoader.dispose();disposables.forEach(item=>item?.dispose?.());
   };
 }
 function initHeroBottle(){
