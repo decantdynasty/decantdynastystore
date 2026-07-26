@@ -1751,10 +1751,15 @@ function closeAllPanels(){
 }
 function initLoadingScreen(){
   const loader=document.getElementById("loadingScreen");if(!loader)return;
-  let hidden=false;
-  const hide=()=>{if(hidden)return;hidden=true;requestAnimationFrame(()=>{loader.classList.add("is-hidden");setTimeout(()=>loader.remove(),window.innerWidth<640?320:520);});};
+  const started=performance.now(),minimum=motionMedia.matches?250:window.innerWidth<640?650:800;
+  let hideRequested=false;
+  const hide=()=>{
+    if(hideRequested)return;hideRequested=true;
+    const finish=()=>requestAnimationFrame(()=>{loader.classList.add("is-hidden");setTimeout(()=>loader.remove(),window.innerWidth<640?400:700);});
+    setTimeout(finish,Math.max(0,minimum-(performance.now()-started)));
+  };
   if(document.readyState==="complete")hide();else window.addEventListener("load",hide,{once:true});
-  setTimeout(hide,1200);
+  setTimeout(hide,1800);
 }
 function initVoucherPromo(){
   const backdrop=document.getElementById("promoBackdrop"),modal=document.getElementById("promoModal");if(!backdrop||!modal)return;
