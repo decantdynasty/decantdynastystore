@@ -572,7 +572,7 @@ body.cart-panel-open .compare-tray,body.cart-panel-open .mobile-pd-bar{opacity:0
 
 /* Cinematic, scroll-synchronised 3D bottle reveal */
 .hero-cinematic{
-  min-height:clamp(1480px,225svh,2050px);
+  min-height:clamp(2350px,340svh,3300px);
   padding-top:var(--header-total);padding-bottom:0;
   align-items:flex-start;overflow:clip;
   background:
@@ -599,8 +599,26 @@ body.cart-panel-open .compare-tray,body.cart-panel-open .mobile-pd-bar{opacity:0
   isolation:isolate;
 }
 .hero-cinematic .hero-copy{
-  grid-area:1/1;position:relative;z-index:2;display:grid;justify-items:center;
-  width:min(920px,100%);padding:48px 38px;text-align:center;will-change:opacity,transform,filter;
+  grid-area:1/1;position:relative;z-index:2;display:grid;place-items:center;
+  width:min(920px,100%);height:100%;padding:48px 38px;text-align:center;
+}
+.hero-copy-content{
+  position:relative;z-index:3;display:grid;justify-items:center;width:100%;
+  pointer-events:none;will-change:opacity,transform,filter;
+}
+.hero-perfume-stage{
+  position:absolute;z-index:1;left:50%;top:47%;width:min(56vw,610px);height:min(72svh,650px);
+  transform:translate(-50%,-50%);touch-action:pan-y;cursor:grab;opacity:0;
+  filter:drop-shadow(0 28px 46px rgba(0,0,0,.28));transition:opacity .7s var(--ease);
+}
+.hero-perfume-stage.model-ready{opacity:1}
+.hero-perfume-stage.is-dragging{cursor:grabbing}
+.hero-perfume-stage canvas{display:block;width:100%!important;height:100%!important;transition:opacity .12s linear;outline:none}
+.hero-copy-content::before{
+  content:"";position:absolute;z-index:-1;left:50%;top:46%;width:min(84vw,820px);height:72%;
+  transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(ellipse,color-mix(in srgb,var(--paper) 58%,transparent) 0 28%,transparent 72%);
+  filter:blur(15px);opacity:.62;pointer-events:none;
 }
 .hero-stage-halo{
   position:absolute;z-index:-1;left:50%;top:48%;width:min(82vw,800px);height:min(52svh,480px);transform:translate(-50%,-50%);pointer-events:none;
@@ -611,11 +629,11 @@ body.cart-panel-open .compare-tray,body.cart-panel-open .mobile-pd-bar{opacity:0
 .hero-stage-halo::before{width:88%;height:62%;animation:heroHaloDrift 8s ease-in-out infinite}
 .hero-stage-halo::after{width:68%;height:92%;border-color:color-mix(in srgb,var(--ink) 8%,transparent);animation:heroHaloDrift 10s ease-in-out infinite reverse}
 @keyframes heroHaloDrift{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.55}50%{transform:translate(-50%,-50%) scale(1.035);opacity:1}}
-.hero-cinematic .hero-title-art{position:relative;width:min(78vw,700px,64svh);margin:0 auto 34px!important;filter:drop-shadow(0 18px 38px rgba(0,0,0,.16))}
+.hero-cinematic .hero-title-art{position:relative;z-index:3;width:min(78vw,700px,64svh);margin:0 auto 34px!important;filter:drop-shadow(0 5px 2px var(--paper)) drop-shadow(0 18px 38px rgba(0,0,0,.3))}
 .hero-cinematic .hero-title-art::before,.hero-cinematic .hero-title-art::after{content:"";position:absolute;top:50%;width:clamp(28px,6vw,82px);height:1px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--gold) 62%,transparent))}
 .hero-cinematic .hero-title-art::before{right:calc(100% + 28px)}
 .hero-cinematic .hero-title-art::after{left:calc(100% + 28px);transform:rotate(180deg)}
-.hero-cinematic .hero-actions{position:relative;z-index:2;justify-content:center;gap:13px}
+.hero-cinematic .hero-actions{position:relative;z-index:2;justify-content:center;gap:13px;pointer-events:auto}
 .hero-scroll-cue{position:relative;width:24px;height:60px;margin-top:30px;opacity:.62}
 .hero-scroll-cue::before{content:"";position:absolute;left:50%;top:0;width:1px;height:100%;background:linear-gradient(to bottom,color-mix(in srgb,var(--gold) 70%,transparent),transparent)}
 .hero-scroll-cue i{position:absolute;left:50%;top:5px;width:5px;height:5px;border-radius:50%;background:var(--gold);box-shadow:0 0 14px color-mix(in srgb,var(--gold) 65%,transparent);transform:translateX(-50%);animation:heroScrollCue 2.2s cubic-bezier(.22,1,.36,1) infinite}
@@ -675,19 +693,22 @@ body.cart-panel-open .compare-tray,body.cart-panel-open .mobile-pd-bar{opacity:0
 .showcase-rail.is-dragging :is(.brand-card,.product-card){pointer-events:none}
 
 @media(max-width:960px){
-  .hero-cinematic{min-height:212svh}
+  .hero-cinematic{min-height:325svh}
   .hero-cinematic .hero-grid{min-height:0}
   .hero-cinematic .hero-title-art{width:min(84vw,620px);margin-bottom:24px!important}
+  .hero-perfume-stage{width:min(70vw,560px);height:min(68svh,610px)}
   .hero-art-track{height:100%;min-height:0}
   .brand-showcase .brand-card{flex-basis:180px;width:180px}
   .best-seller-showcase .product-card{flex-basis:185px;width:185px}
   .testi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.testi-card:last-child:nth-child(odd){grid-column:1/-1;max-width:520px;justify-self:center;width:100%}
 }
 @media(max-width:640px){
-  .hero-cinematic{min-height:205svh}
+  .hero-cinematic{min-height:315svh}
   .hero-cinematic::before{height:68svh;background:radial-gradient(circle at 50% 44%,transparent 0 27%,color-mix(in srgb,var(--gold) 13%,transparent) calc(27% + 1px),transparent calc(27% + 2px))}
   .hero-cinematic::after{top:calc(var(--header-total) + 7svh);width:94vw;height:56svh}
   .hero-cinematic .hero-copy{padding:26px 8px}
+  .hero-copy-content::before{width:98vw;height:68%;opacity:.72}
+  .hero-perfume-stage{top:46%;width:84vw;height:61svh;filter:drop-shadow(0 20px 34px rgba(0,0,0,.25))}
   .hero-cinematic .hero-title-art{width:min(89vw,420px);margin-bottom:26px!important}
   .hero-cinematic .hero-title-art::before,.hero-cinematic .hero-title-art::after{display:none}
   .hero-stage-halo{width:96vw;height:48svh}
@@ -707,15 +728,16 @@ body.cart-panel-open .compare-tray,body.cart-panel-open .mobile-pd-bar{opacity:0
   .testi-grid{display:flex;grid-template-columns:none;gap:12px;overflow-x:auto;margin:0 -16px;padding:4px 16px 18px;scroll-snap-type:x mandatory;scrollbar-width:none}.testi-grid::-webkit-scrollbar{display:none}.testi-card,.testi-card:last-child:nth-child(odd){width:auto;max-width:none;min-height:0;flex:0 0 min(82vw,320px);padding:0;scroll-snap-align:center}.testi-copy{min-height:210px;padding:21px}.testi-card.no-photo .testi-copy{min-height:230px}.testi-card blockquote{font-size:13px;line-height:1.65}.testi-photo{aspect-ratio:4/3}
 }
 @media(max-width:640px) and (max-height:720px){
-  .hero-cinematic{min-height:190svh}
+  .hero-cinematic{min-height:295svh}
   .hero-cinematic .hero-title-art{width:min(72vw,300px);margin-bottom:14px!important}
   .hero-cinematic .hero-actions .btn{min-height:46px;padding:5px 5px 5px 11px;font-size:8px}
 }
 @media(prefers-reduced-motion:reduce){
   .hero-cinematic{min-height:auto;padding-top:calc(var(--header-total) + 20px);padding-bottom:28px}
   .hero-cinematic .hero-grid{position:relative;top:auto;height:auto;min-height:0;grid-template-rows:auto minmax(400px,58svh);gap:10px}
-  .hero-cinematic .hero-copy,.hero-art-track,.hero-annotation-layer{opacity:1!important;transform:none!important;filter:none!important}
+  .hero-cinematic .hero-copy,.hero-copy-content,.hero-art-track,.hero-annotation-layer{opacity:1!important;transform:none!important;filter:none!important}
   .hero-cinematic .hero-copy,.hero-art-track{grid-area:auto}.hero-art-track{pointer-events:auto}
+  .hero-perfume-stage{position:absolute}
   .hero-stage-halo::before,.hero-stage-halo::after,.hero-scroll-cue i{animation:none}
   .section-marquee-track{animation:none!important;transform:none!important}.section-marquee-group[aria-hidden="true"],.showcase-group[aria-hidden="true"]{display:none}
   .showcase-rail{overflow-x:auto;mask-image:none;-webkit-mask-image:none}.showcase-track{transform:none!important}
@@ -890,7 +912,7 @@ body.cart-panel-open .compare-tray,body.cart-panel-open .mobile-pd-bar{opacity:0
     <div class="footer-bottom">
       <p>&copy; 2024 Decant Dynasty. All rights reserved.</p>
       <p>Hand-poured at Valenzuela City, Metro Manila. · <button id="soundToggle" style="color:inherit;font-size:inherit;text-decoration:underline;text-underline-offset:3px" aria-pressed="false">Sound on</button></p>
-      <p><a href="https://sketchfab.com/3d-models/atomizador-para-perfume-1eb44518f21f4da78d26fe40e94b82c7" target="_blank" rel="noopener">3D atomizer by LEOLATO</a> · CC BY 4.0</p>
+      <p><a href="https://sketchfab.com/3d-models/atomizador-para-perfume-1eb44518f21f4da78d26fe40e94b82c7" target="_blank" rel="noopener">Atomizer by LEOLATO</a> · <a href="https://sketchfab.com/3d-models/jean-paul-gaultier-le-male-elixir-75ml-5b972ac9c0784d48a12f5ae51e439926" target="_blank" rel="noopener">Hero model by oddphi5h</a> · CC BY 4.0</p>
     </div>
   </div>
 </footer>

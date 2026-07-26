@@ -55,14 +55,155 @@ function setSoundMuted(muted){ sounds.muted=!!muted; localSet('prefs:sound-muted
 
 /* ---------------- 3D Bottle ---------------- */
 let bottleCleanup = null;
+let heroPerfumeCleanup = null;
 let showcaseCleanup = null;
+function initHeroPerfume(){
+  const container=document.getElementById('heroPerfumeStage');
+  if(!container)return;
+  if(heroPerfumeCleanup)heroPerfumeCleanup();
+  if(!window.THREE||!THREE.GLTFLoader){container.classList.add('model-error');return;}
+  const hero=container.closest('.hero');
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const mobileMedia=matchMedia('(max-width: 960px)');
+  const clamp01=value=>Math.max(0,Math.min(1,value));
+  const smoothstep=(start,end,value)=>{const t=clamp01((value-start)/Math.max(end-start,.0001));return t*t*(3-(2*t));};
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(31,container.clientWidth/Math.max(container.clientHeight,1),.1,100);
+  camera.position.set(0,.12,mobileMedia.matches?8.5:7.6);
+  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,mobileMedia.matches?1.65:2));
+  renderer.setSize(container.clientWidth,container.clientHeight);
+  renderer.outputEncoding=THREE.sRGBEncoding;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure=1.08;
+  container.replaceChildren(renderer.domElement);
+  scene.add(new THREE.HemisphereLight(0xfff4d8,0x11131b,1.35));
+  const key=new THREE.DirectionalLight(0xffd980,3.4);key.position.set(4,5,6);scene.add(key);
+  const rim=new THREE.PointLight(0x8bbcff,2.2);rim.position.set(-4,1,-2);scene.add(rim);
+  const fill=new THREE.PointLight(0xffffff,1.25);fill.position.set(0,-1,5);scene.add(fill);
+  const group=new THREE.Group();scene.add(group);
+  const loader=new THREE.GLTFLoader();
+  const disposables=[];
+  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
+  let modelRoot=null,modelScale=1,raf=0,visible=true,lastFrame=performance.now();
+  let pointerDown=false,dragging=false,pointerId=null,startX=0,startY=0,lastX=0,lastY=0;
+  let userYaw=-.18,userPitch=-.035,velocityYaw=.0018,velocityPitch=0;
+  let hoverX=0,hoverY=0,hoverTargetX=0,hoverTargetY=0;
+  let scrollTarget=0,scrollCurrent=0,heroStart=0,heroRange=1;
+  loader.load('models/hero-perfume.glb',gltf=>{
+    modelRoot=gltf.scene;
+    modelRoot.traverse(node=>{
+      if(!node.isMesh)return;
+      node.castShadow=false;node.receiveShadow=false;
+      const materials=Array.isArray(node.material)?node.material:[node.material];
+      materials.filter(Boolean).forEach(material=>{disposables.push(material);material.needsUpdate=true;});
+      if(node.geometry)disposables.push(node.geometry);
+    });
+    const initialBox=new THREE.Box3().setFromObject(modelRoot);
+    const size=initialBox.getSize(new THREE.Vector3());
+    modelScale=(mobileMedia.matches?5.25:5.75)/Math.max(size.y,size.x,size.z);
+    modelRoot.scale.setScalar(modelScale);
+    const box=new THREE.Box3().setFromObject(modelRoot),center=box.getCenter(new THREE.Vector3());
+    modelRoot.position.sub(center);
+    group.add(modelRoot);
+    container.classList.add('model-ready');
+  },undefined,()=>container.classList.add('model-error'));
+  const hitModel=e=>{
+    if(!modelRoot)return false;
+    const rect=renderer.domElement.getBoundingClientRect();
+    pointer.x=((e.clientX-rect.left)/Math.max(rect.width,1))*2-1;
+    pointer.y=-((e.clientY-rect.top)/Math.max(rect.height,1))*2+1;
+    raycaster.setFromCamera(pointer,camera);
+    return raycaster.intersectObject(modelRoot,true).length>0;
+  };
+  const moveHover=e=>{
+    const rect=container.getBoundingClientRect();
+    hoverTargetX=clamp01((e.clientX-rect.left)/Math.max(rect.width,1))*2-1;
+    hoverTargetY=clamp01((e.clientY-rect.top)/Math.max(rect.height,1))*2-1;
+  };
+  const down=e=>{
+    moveHover(e);
+    if(!hitModel(e))return;
+    pointerDown=true;pointerId=e.pointerId;startX=lastX=e.clientX;startY=lastY=e.clientY;
+    if(e.pointerType==='mouse'){dragging=true;container.classList.add('is-dragging');renderer.domElement.setPointerCapture?.(pointerId);}
+  };
+  const move=e=>{
+    moveHover(e);
+    if(!pointerDown)return;
+    const totalX=e.clientX-startX,totalY=e.clientY-startY;
+    if(!dragging){
+      if(Math.abs(totalY)>Math.abs(totalX)*1.15&&Math.abs(totalY)>8){pointerDown=false;return;}
+      if(Math.abs(totalX)>8){dragging=true;container.classList.add('is-dragging');renderer.domElement.setPointerCapture?.(pointerId);}
+    }
+    if(!dragging)return;
+    velocityYaw=(e.clientX-lastX)*.007;
+    velocityPitch=(e.clientY-lastY)*.0045;
+    lastX=e.clientX;lastY=e.clientY;
+    if(e.cancelable)e.preventDefault();
+  };
+  const up=()=>{pointerDown=false;dragging=false;pointerId=null;container.classList.remove('is-dragging');};
+  const leave=()=>{hoverTargetX=0;hoverTargetY=0;if(!dragging)up();};
+  container.addEventListener('pointerdown',down);
+  container.addEventListener('pointermove',move);
+  container.addEventListener('pointerup',up);
+  container.addEventListener('pointercancel',up);
+  container.addEventListener('pointerleave',leave);
+  const measure=()=>{
+    const rect=hero?.getBoundingClientRect();
+    heroStart=(rect?.top||0)+window.scrollY;
+    heroRange=Math.max((hero?.offsetHeight||window.innerHeight)-window.innerHeight,1);
+    scrollTarget=reduced?0:clamp01((window.scrollY-heroStart)/heroRange);
+  };
+  const onScroll=()=>{scrollTarget=reduced?0:clamp01((window.scrollY-heroStart)/heroRange);};
+  const resize=()=>{
+    const w=container.clientWidth,h=container.clientHeight;
+    camera.aspect=w/Math.max(h,1);camera.position.z=mobileMedia.matches?8.5:7.6;camera.updateProjectionMatrix();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,mobileMedia.matches?1.65:2));renderer.setSize(w,h);measure();
+  };
+  function animate(now=performance.now()){
+    if(!visible){raf=0;return;}
+    raf=requestAnimationFrame(animate);
+    const delta=Math.min(Math.max((now-lastFrame)/1000,0),.05),frameScale=delta*60;lastFrame=now;
+    const follow=1-Math.exp(-7*delta);scrollCurrent+=(scrollTarget-scrollCurrent)*follow;
+    hoverX+=(hoverTargetX-hoverX)*(1-Math.exp(-5*delta));
+    hoverY+=(hoverTargetY-hoverY)*(1-Math.exp(-5*delta));
+    if(!dragging){
+      velocityYaw*=Math.pow(.955,frameScale);velocityPitch*=Math.pow(.91,frameScale);
+      if(Math.abs(velocityYaw)<.0007&&!reduced)velocityYaw=.00115;
+    }
+    userYaw+=velocityYaw*frameScale;userPitch=Math.max(-.22,Math.min(.18,userPitch+(velocityPitch*frameScale)));
+    const exit=smoothstep(mobileMedia.matches?.49:.47,mobileMedia.matches?.73:.70,scrollCurrent);
+    const travel=smoothstep(.08,.70,scrollCurrent);
+    group.rotation.y=userYaw+(scrollCurrent*(mobileMedia.matches?1.35:1.7))+(hoverX*.12);
+    group.rotation.x=userPitch-(travel*.09)-(hoverY*.055);
+    group.rotation.z=(hoverX*.025)+(travel*(mobileMedia.matches?.07:.1));
+    group.position.x=hoverX*(mobileMedia.matches?.10:.18);
+    group.position.y=(hoverY*-.08)+(travel*(mobileMedia.matches?.52:.7));
+    group.scale.setScalar(1-(travel*.10));
+    renderer.domElement.style.opacity=String((1-exit)*.88);
+    renderer.render(scene,camera);
+  }
+  const resizeObserver='ResizeObserver' in window?new ResizeObserver(resize):null;resizeObserver?.observe(container);
+  const visibilityObserver='IntersectionObserver' in window?new IntersectionObserver(entries=>{
+    visible=entries[0]?.isIntersecting!==false;
+    if(visible&&!raf){lastFrame=performance.now();raf=requestAnimationFrame(animate);}
+  },{rootMargin:'160px 0px'}):null;visibilityObserver?.observe(hero||container);
+  window.addEventListener('resize',resize,{passive:true});window.addEventListener('scroll',onScroll,{passive:true});
+  measure();animate();
+  heroPerfumeCleanup=()=>{
+    cancelAnimationFrame(raf);resizeObserver?.disconnect();visibilityObserver?.disconnect();
+    window.removeEventListener('resize',resize);window.removeEventListener('scroll',onScroll);
+    container.removeEventListener('pointerdown',down);container.removeEventListener('pointermove',move);container.removeEventListener('pointerup',up);container.removeEventListener('pointercancel',up);container.removeEventListener('pointerleave',leave);
+    renderer.dispose();disposables.forEach(item=>item?.dispose?.());
+  };
+}
 function initHeroBottle(){
   const container=document.getElementById('heroBottleContainer');
   if(!container)return;
   const track=container.closest('.hero-art-track')||container;
   const hero=container.closest('.hero');
   const heroGrid=container.closest('.hero-grid');
-  const heroCopy=hero?.querySelector('.hero-copy');
+  const heroCopy=hero?.querySelector('.hero-copy-content')||hero?.querySelector('.hero-copy');
   const annotations=container.querySelector('.hero-annotation-layer');
   if(bottleCleanup)bottleCleanup();
   if(!window.THREE||!THREE.GLTFLoader){container.innerHTML='<div class="ph">Interactive decant bottle</div>';return;}
@@ -160,11 +301,11 @@ function initHeroBottle(){
   };
   const syncCinematicMotion=progress=>{
     const mobile=mobileMedia.matches;
-    const focus=smoothstep(mobile?.22:.19,mobile?.70:.66,progress);
-    const departure=smoothstep(mobile?.89:.86,1,progress);
-    const copyExit=smoothstep(mobile?.07:.06,mobile?.39:.35,progress);
-    const annotationIn=smoothstep(mobile?.59:.55,mobile?.76:.72,progress);
-    const annotationOut=smoothstep(mobile?.83:.80,mobile?.94:.92,progress);
+    const focus=smoothstep(mobile?.60:.56,mobile?.86:.83,progress);
+    const departure=smoothstep(mobile?.96:.95,1,progress);
+    const copyExit=smoothstep(mobile?.30:.28,mobile?.60:.57,progress);
+    const annotationIn=smoothstep(mobile?.79:.76,mobile?.90:.88,progress);
+    const annotationOut=smoothstep(mobile?.92:.91,mobile?.98:.97,progress);
     const viewportTravel=window.innerHeight*(mobile?.10:.16);
     const entranceTravel=window.innerHeight*(mobile?.48:.43);
     const trackX=centerShift*focus;
@@ -741,18 +882,21 @@ function renderHome(){
     <div class="wrap hero-grid">
       <div class="hero-copy">
         <div class="hero-stage-halo" aria-hidden="true"></div>
-        <h1 class="hero-title-art"><img src="images/find-your-signature-scent.png" alt="Find Your Signature Scent" /></h1>
-        <div class="hero-actions">
-          <a href="#/collection" class="btn btn-cta btn-cta-build">
-            <span>Shop Decants</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 7l5 5-5 5"/></svg>
-          </a>
-          <a href="#/build" class="btn btn-cta btn-cta-browse">
-            <span>Find Your Scent</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 13.8 9l5.7 1.8-5.7 1.8-1.8 5.9-1.8-5.9-5.7-1.8L10.2 9 12 3.5Z"/></svg>
-          </a>
+        <div class="hero-perfume-stage" id="heroPerfumeStage" aria-label="Interactive perfume bottle"></div>
+        <div class="hero-copy-content">
+          <h1 class="hero-title-art"><img src="images/find-your-signature-scent.png" alt="Find Your Signature Scent" /></h1>
+          <div class="hero-actions">
+            <a href="#/collection" class="btn btn-cta btn-cta-build">
+              <span>Shop Decants</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 7l5 5-5 5"/></svg>
+            </a>
+            <a href="#/build" class="btn btn-cta btn-cta-browse">
+              <span>Find Your Scent</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 13.8 9l5.7 1.8-5.7 1.8-1.8 5.9-1.8-5.9-5.7-1.8L10.2 9 12 3.5Z"/></svg>
+            </a>
+          </div>
+          <div class="hero-scroll-cue" aria-hidden="true"><i></i></div>
         </div>
-        <div class="hero-scroll-cue" aria-hidden="true"><i></i></div>
       </div>
       <div class="hero-art-track">
         <div class="hero-art" id="heroBottleContainer" aria-label="Interactive Decant Dynasty atomizer bottle. Drag to rotate.">
@@ -1531,6 +1675,7 @@ async function route({restoreY=0}={}){
   const r = parseHash();
   if(showcaseCleanup)showcaseCleanup();
   if(r.page!=="home"&&bottleCleanup){bottleCleanup();bottleCleanup=null;}
+  if(r.page!=="home"&&heroPerfumeCleanup){heroPerfumeCleanup();heroPerfumeCleanup=null;}
   state.route = r;
   const app = document.getElementById("app");
   document.querySelectorAll(".nav-links a").forEach(a=>a.classList.toggle("active", a.dataset.nav === "/"+ (r.page==="home"?"":r.page)));
@@ -1554,7 +1699,7 @@ async function route({restoreY=0}={}){
   track("page_view",{page_title:document.title,page_location:location.href,page_path:`/${r.page}${r.id?`/${r.id}`:""}`});
   postRenderBind(r);
   initReveal(document,true);
-  if(r.page==="home"){initHeroBottle();initShowcaseRails();}
+  if(r.page==="home"){initHeroPerfume();initHeroBottle();initShowcaseRails();}
   const settleScroll=()=>{
     if(serial!==routeSerial)return;
     const max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
