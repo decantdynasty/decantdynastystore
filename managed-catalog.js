@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-25T07:53:26.835Z",
+  "updatedAt": "2026-07-27T06:24:54.568Z",
   "brands": [
     {
       "id": "afnan",
@@ -693,7 +693,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong",
       "inspiredBy": "Parfums de Marly Percival",
       "recommended": true,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 4,
       "projectionScore": 4,
       "accords": [
@@ -788,7 +788,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong",
       "inspiredBy": "Louis Vuitton Imagination",
       "recommended": false,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 5,
       "projectionScore": 4,
       "accords": [
@@ -1189,7 +1189,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong",
       "inspiredBy": "Dior Sauvage",
       "recommended": false,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 4,
       "projectionScore": 4,
       "accords": [
@@ -3491,7 +3491,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Louis Vuitton Symphony",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "citrus",
+        "fresh spicy",
+        "musky",
+        "amber",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "khadlaj-0050",
@@ -5006,7 +5016,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Parfums de Marly Palatine",
       "recommended": false,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 3,
       "projectionScore": 3,
       "accords": [
@@ -5887,7 +5897,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong",
       "inspiredBy": "Valentino Donna Born in Roma Intense",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "fruity",
+        "amber",
+        "vanilla",
+        "sweet",
+        "powdery"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "rasasi-0101",
@@ -7514,7 +7534,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "id": "marga-quezon-city",
         "name": "blackrodz26",
         "text": "Maganda pagka balot. Siguradong di mababasag kasi bote sya. Very secured talaga items mo. Tungkol sa pabango di ko pa naamoy. Gamitin ko lang naman yan for testing kasi bili ako full bottle kung sakali magustohan ko amoy. Thank you sa seller bilis ang process. Pag place order mo, ipadala agad.",
-        "photo": ""
+        "photo": "images/reviews/marga-quezon-city.webp"
       },
       {
         "id": "jerome-cebu",
@@ -7526,13 +7546,19 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "id": "angeli-davao",
         "name": "m3c1szp2tk",
         "text": "1st time umorder sa shop nato dahil dumaan lang sa feed ko. Di ko inexpect na mabilis darating and the frag itself. Yung packaging sobrang safe, pati yung label, ang ganda hindi lang tinype yung itsura. compared sa ibang shop tapos ung bottle mismo sobrang sealed, walang leak nung nareceive ko. Mauulit ako umorder ulit, thank you sellerrr ❤️❤️",
-        "photo": ""
+        "photo": "images/reviews/angeli-davao.webp"
       },
       {
         "id": "migsyyyyy",
         "name": "migsyyyyy",
         "text": "totoo talaga chismis sa mga to! said na naman ako pag nag full bottle HAHAHAHAHA\n\nsalamat Decant Dynasty!",
-        "photo": ""
+        "photo": "images/reviews/migsyyyyy.png"
+      },
+      {
+        "id": "justeezy12",
+        "name": "justeezy12",
+        "text": "Legit scents. +100 stars sa packaging kahit 3 decants lang kinuha ko sobrang secure padin ng pagkakapack. Kudos sa seller",
+        "photo": "images/reviews/justeezy12.png"
       }
     ]
   }
