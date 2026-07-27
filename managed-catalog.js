@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-27T06:24:54.568Z",
+  "updatedAt": "2026-07-27T14:14:34.684Z",
   "brands": [
     {
       "id": "afnan",
@@ -762,7 +762,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "1ml": 85,
         "2ml": 175,
         "3ml": 255,
-        "5ml": 425
+        "5ml": 435
       },
       "concentration": "Extrait de Parfum",
       "gender": "Unisex",
