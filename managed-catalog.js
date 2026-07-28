@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-27T14:14:34.684Z",
+  "updatedAt": "2026-07-28T10:25:07.605Z",
   "brands": [
     {
       "id": "afnan",
@@ -341,7 +341,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": true
+      "outOfStock": false,
+      "longevityScore": 5,
+      "projectionScore": 5,
+      "accords": [
+        "woody",
+        "fruity",
+        "warm spicy",
+        "sweet",
+        "tropical"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "afnan-managed-9pm-rebel",
@@ -477,7 +487,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": "Creed Absolu Aventus",
       "recommended": true,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 5,
       "projectionScore": 5,
       "accords": [
@@ -1136,7 +1146,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Creed Silver Mountain Water",
       "recommended": false,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 4,
       "projectionScore": 4,
       "accords": [
@@ -1466,7 +1476,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong",
       "inspiredBy": "Parfums de Marly Delina Exclusif",
       "recommended": false,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 4,
       "projectionScore": 4,
       "accords": [
@@ -1690,7 +1700,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 3,
       "projectionScore": 3,
       "accords": [
@@ -3021,7 +3031,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Stéphane Humbert Lucas Pink Boa",
       "recommended": false,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 3,
       "projectionScore": 3,
       "accords": [
@@ -3798,7 +3808,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Burberry Goddess",
       "recommended": false,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 4,
       "projectionScore": 4,
       "accords": [
@@ -4124,7 +4134,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Giardini di Toscana Bianco Latte",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": false,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "sweet",
+        "vanilla",
+        "caramel",
+        "lactonic",
+        "honey"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0036",
@@ -4209,7 +4229,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Carolina Herrera Very Good Girl",
       "recommended": false,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 4,
       "projectionScore": 3,
       "accords": [
@@ -4661,7 +4681,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "vanilla",
+        "fruity",
+        "powdery",
+        "citrus",
+        "white floral"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "lattafa-0024",
@@ -4697,7 +4727,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Kayali Yum Boujee Marshmallow 81",
       "recommended": true,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 4,
       "projectionScore": 3,
       "accords": [
@@ -4789,7 +4819,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Soft to moderate",
       "inspiredBy": "Rabanne Fame",
       "recommended": false,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 3,
       "projectionScore": 3,
       "accords": [
@@ -5476,7 +5506,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 4,
       "projectionScore": 3,
       "accords": [
@@ -7387,7 +7417,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Strong to very strong",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 4,
       "projectionScore": 4,
       "accords": [
@@ -7433,7 +7463,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 4,
       "projectionScore": 4,
       "accords": [
