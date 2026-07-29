@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-28T10:25:07.605Z",
+  "updatedAt": "2026-07-29T08:29:32.499Z",
   "brands": [
     {
       "id": "afnan",
@@ -5893,6 +5893,41 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "similarProductIds": []
     },
     {
+      "id": "rasasi-managed-hawas-chrome",
+      "brandId": "rasasi",
+      "brand": "Rasasi",
+      "name": "Hawas Chrome",
+      "image": "images/products/rasasi/hawas-chrome.png",
+      "image2": "images/products/rasasi/hawas-chrome-decant.png",
+      "prices": {
+        "1ml": 75,
+        "2ml": 145,
+        "3ml": 215,
+        "5ml": 365
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Unisex",
+      "description": "A radiant tropical fragrance bursting with juicy yellow fruits, sweet orange, and peach. Mango, passion fruit, and watery notes flow into a smooth amber, vanilla, and clean-musk base.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": "Xerjoff Erba Gold",
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "fruity",
+        "sweet",
+        "tropical",
+        "musky",
+        "aquatic"
+      ],
+      "similarProductIds": [],
+      "recommended": false,
+      "outOfStock": true
+    },
+    {
       "id": "rasasi-0154",
       "brandId": "rasasi",
       "brand": "Rasasi",
@@ -5986,6 +6021,41 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "powdery"
       ],
       "similarProductIds": []
+    },
+    {
+      "id": "rasasi-managed-hawas-fire",
+      "brandId": "rasasi",
+      "brand": "Rasasi",
+      "name": "Hawas Fire",
+      "image": "images/products/rasasi/hawas-fire.png",
+      "image2": "images/products/rasasi/hawas-fire-decant.png",
+      "prices": {
+        "1ml": 75,
+        "2ml": 145,
+        "3ml": 215,
+        "5ml": 365
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Unisex",
+      "description": "A bold aromatic-aquatic fragrance blending fresh clary sage with marine notes and Egyptian jasmine. Mineral amber and ambergris create a warm, salty finish that feels clean, confident, and intensely modern.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": "Gissah Imperial Valley",
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "amber",
+        "aromatic",
+        "mineral",
+        "aquatic",
+        "soft spicy"
+      ],
+      "similarProductIds": [],
+      "recommended": true,
+      "outOfStock": true
     },
     {
       "id": "rasasi-0097",
