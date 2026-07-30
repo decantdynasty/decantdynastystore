@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-29T08:29:32.499Z",
+  "updatedAt": "2026-07-30T09:48:55.386Z",
   "brands": [
     {
       "id": "afnan",
@@ -6255,6 +6255,76 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "powdery"
       ],
       "similarProductIds": []
+    },
+    {
+      "id": "rasasi-managed-hawas-nautilus",
+      "brandId": "rasasi",
+      "brand": "Rasasi",
+      "name": "Hawas Nautilus",
+      "image": "images/products/rasasi/hawas-nautilus.png",
+      "image2": "images/products/rasasi/hawas-nautilus-decant.png",
+      "prices": {
+        "1ml": 95,
+        "2ml": 185,
+        "3ml": 275,
+        "5ml": 455
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Men",
+      "description": "A crisp marine fragrance capturing the atmosphere of open water and sun-warmed shores. Salty seawater and ambergris flow into aromatic cedar and cypress before settling over mineral sand and weathered driftwood.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": "Xerjoff 40 Knots",
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "woody",
+        "aromatic",
+        "aquatic",
+        "sand",
+        "salty"
+      ],
+      "similarProductIds": [],
+      "recommended": false,
+      "outOfStock": true
+    },
+    {
+      "id": "rasasi-managed-hawas-thunder",
+      "brandId": "rasasi",
+      "brand": "Rasasi",
+      "name": "Hawas Thunder",
+      "image": "images/products/rasasi/hawas-thunder.png",
+      "image2": "images/products/rasasi/hawas-thunder-decant.png",
+      "prices": {
+        "1ml": 85,
+        "2ml": 165,
+        "3ml": 245,
+        "5ml": 415
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Men",
+      "description": "A vibrant woody-spicy fragrance opening with crisp bergamot, juicy apple, and energizing ginger. Warm spices, amber, and smooth woods create a confident, versatile finish with freshness and depth.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": "Yves Saint Laurent MYSLF L'Absolu",
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "citrus",
+        "fresh spicy",
+        "woody",
+        "fresh",
+        "fruity"
+      ],
+      "similarProductIds": [],
+      "recommended": false,
+      "outOfStock": false
     },
     {
       "id": "rayhaan-0110",
