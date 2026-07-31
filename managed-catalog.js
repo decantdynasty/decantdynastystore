@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-30T09:48:55.386Z",
+  "updatedAt": "2026-07-31T23:29:31.221Z",
   "brands": [
     {
       "id": "afnan",
@@ -4727,7 +4727,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": "Kayali Yum Boujee Marshmallow 81",
       "recommended": true,
-      "outOfStock": false,
+      "outOfStock": true,
       "longevityScore": 4,
       "projectionScore": 3,
       "accords": [
@@ -7603,7 +7603,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": null,
       "recommended": true,
-      "outOfStock": false,
+      "outOfStock": true,
       "longevityScore": 4,
       "projectionScore": 4,
       "accords": [
