@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-07-31T23:29:31.221Z",
+  "updatedAt": "2026-08-03T11:21:10.087Z",
   "brands": [
     {
       "id": "afnan",
@@ -905,6 +905,41 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "similarProductIds": []
     },
     {
+      "id": "arabiyat-prestige-managed-bois-blanc",
+      "brandId": "arabiyat-prestige",
+      "brand": "Arabiyat Prestige",
+      "name": "Bois Blanc",
+      "image": "images/products/arabiyat-prestige/bois-blanc.png",
+      "image2": "images/products/arabiyat-prestige/bois-blanc-decant.png",
+      "prices": {
+        "1ml": 75,
+        "2ml": 145,
+        "3ml": 215,
+        "5ml": 325
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Unisex",
+      "description": "A clean, contemporary woody fragrance opening with sparkling grapefruit, resinous elemi, and pink pepper. Violet, lily of the valley, and amber soften the composition before patchouli and mineral ambergris leave an elegant, diffusive trail.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": "Essential Parfums Bois Impérial",
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "aromatic",
+        "balsamic",
+        "amber",
+        "fresh spicy"
+      ],
+      "similarProductIds": [],
+      "recommended": false,
+      "outOfStock": false
+    },
+    {
       "id": "arabiyat-prestige-0133",
       "brandId": "arabiyat-prestige",
       "brand": "Arabiyat Prestige",
@@ -1536,10 +1571,10 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "image": "images/products/azzaro/the-most-wanted-parfum.png",
       "image2": "images/products/azzaro/the-most-wanted-parfum-decant.png",
       "prices": {
-        "1ml": 159,
-        "2ml": 309,
-        "3ml": 459,
-        "5ml": 749
+        "1ml": 95,
+        "2ml": 195,
+        "3ml": 285,
+        "5ml": 480
       },
       "concentration": "Parfum",
       "gender": "Men",
@@ -1557,7 +1592,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate to strong",
       "inspiredBy": null,
       "recommended": false,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 4,
       "projectionScore": 4,
       "accords": [
@@ -2807,6 +2842,40 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "similarProductIds": []
     },
     {
+      "id": "french-avenue-managed-irida-extrait",
+      "brandId": "french-avenue",
+      "brand": "French Avenue",
+      "name": "Irida Extrait",
+      "image": "images/products/french-avenue/irida-extrait.png",
+      "image2": "images/products/french-avenue/irida-extrait-decant.png",
+      "prices": {
+        "1ml": 79,
+        "2ml": 149,
+        "3ml": 229,
+        "5ml": 389
+      },
+      "concentration": "Extrait de Parfum",
+      "gender": "Women",
+      "description": "A vibrant cherry fragrance energized by spicy ginger and an elegant jasmine heart. Pink pepper adds a lively sparkle while amber and clean musk form a warm, sensual finish that remains smooth rather than overly sweet.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": "Tom Ford Electric Cherry",
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "cherry",
+        "musky",
+        "white floral",
+        "sweet"
+      ],
+      "similarProductIds": [],
+      "recommended": false,
+      "outOfStock": false
+    },
+    {
       "id": "french-avenue-0079",
       "brandId": "french-avenue",
       "brand": "French Avenue",
@@ -3644,7 +3713,17 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Guerlain Herbes Troublantes",
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": false,
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "musky",
+        "white floral",
+        "green",
+        "amber"
+      ],
+      "similarProductIds": []
     },
     {
       "id": "khadlaj-0052",
@@ -3819,6 +3898,41 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "powdery"
       ],
       "similarProductIds": []
+    },
+    {
+      "id": "lattafa-managed-angham-second-song",
+      "brandId": "lattafa",
+      "brand": "Lattafa",
+      "name": "Angham Second Song",
+      "image": "images/products/lattafa/angham-second-song.png",
+      "image2": "images/products/lattafa/angham-second-song-decant.png",
+      "prices": {
+        "1ml": 80,
+        "2ml": 145,
+        "3ml": 225,
+        "5ml": 375
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Women",
+      "description": "A luminous fruity-floral gourmand opening with sparkling bergamot and delicate pear blossom. Peony, orange blossom, and praline create a softly addictive heart before melting into creamy vanilla, tonka bean, musk, and polished ambroxan.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": "Dolce&Gabbana My Devotion Eau de Parfum Intense",
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "floral",
+        "sweet",
+        "vanilla",
+        "fresh",
+        "citrus"
+      ],
+      "similarProductIds": [],
+      "recommended": true,
+      "outOfStock": false
     },
     {
       "id": "lattafa-0032",
@@ -4952,7 +5066,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "projection": "Moderate",
       "inspiredBy": "Parfums de Marly Valaya",
       "recommended": false,
-      "outOfStock": true,
+      "outOfStock": false,
       "longevityScore": 3,
       "projectionScore": 3,
       "accords": [
@@ -6174,6 +6288,39 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "outOfStock": false
     },
     {
+      "id": "rasasi-managed-hawas-la-mer",
+      "brandId": "rasasi",
+      "brand": "Rasasi",
+      "name": "Hawas La Mer",
+      "image": "images/products/rasasi/hawas-la-mer.png",
+      "image2": "images/products/rasasi/hawas-la-mer-decant.png",
+      "prices": {
+        "1ml": 85,
+        "2ml": 169,
+        "3ml": 255,
+        "5ml": 425
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Unisex",
+      "description": "A refreshing fruity-woody scent that opens with cooling peppermint, bright bergamot, and juicy mandarin. Blackcurrant, jasmine, carrot, and creamy fig bring unexpected depth before settling into warm amber and smooth woods.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": "Louis Vuitton Pacific Chill",
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "fresh spicy",
+        "green"
+      ],
+      "similarProductIds": [],
+      "recommended": false,
+      "outOfStock": true
+    },
+    {
       "id": "rasasi-0150",
       "brandId": "rasasi",
       "brand": "Rasasi",
@@ -6264,10 +6411,10 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "image": "images/products/rasasi/hawas-nautilus.png",
       "image2": "images/products/rasasi/hawas-nautilus-decant.png",
       "prices": {
-        "1ml": 95,
-        "2ml": 185,
+        "1ml": 85,
+        "2ml": 175,
         "3ml": 275,
-        "5ml": 455
+        "5ml": 445
       },
       "concentration": "Eau de Parfum",
       "gender": "Men",
@@ -6289,7 +6436,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       ],
       "similarProductIds": [],
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": false
     },
     {
       "id": "rasasi-managed-hawas-thunder",
@@ -7568,6 +7715,39 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "cinnamon"
       ],
       "similarProductIds": []
+    },
+    {
+      "id": "yves-saint-laurent-managed-y-eau-de-parfum-intense",
+      "brandId": "yves-saint-laurent",
+      "brand": "Yves Saint Laurent",
+      "name": "Y Eau de Parfum Intense",
+      "image": "images/products/yves-saint-laurent/y-eau-de-parfum-intense.png",
+      "image2": "images/products/yves-saint-laurent/y-eau-de-parfum-intense-decant.png",
+      "prices": {
+        "1ml": 115,
+        "2ml": 225,
+        "3ml": 325,
+        "5ml": 535
+      },
+      "concentration": "Eau de Parfum Intense",
+      "gender": "Men",
+      "description": "A cool, commanding woody-aromatic fragrance built around vibrant juniper berries, crisp sage, and fresh geranium. French lavender brings refined freshness before deep Balinese patchouli creates a sensual, sophisticated finish.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": null,
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "aromatic",
+        "fresh spicy",
+        "woody"
+      ],
+      "similarProductIds": [],
+      "recommended": false,
+      "outOfStock": false
     },
     {
       "id": "yves-saint-laurent-0130",
