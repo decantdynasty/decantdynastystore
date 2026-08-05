@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-08-04T06:59:49.063Z",
+  "updatedAt": "2026-08-05T10:07:32.499Z",
   "brands": [
     {
       "id": "afnan",
@@ -6862,6 +6862,41 @@ globalThis.DECANT_MANAGED_CATALOG = {
       ],
       "similarProductIds": [],
       "recommended": true,
+      "outOfStock": false
+    },
+    {
+      "id": "rayhaan-managed-nava-sol",
+      "brandId": "rayhaan",
+      "brand": "Rayhaan",
+      "name": "Nava Sol",
+      "image": "images/products/rayhaan/nava-sol.png",
+      "image2": "images/products/rayhaan/nava-sol-decant.png",
+      "prices": {
+        "1ml": 75,
+        "2ml": 135,
+        "3ml": 205,
+        "5ml": 365
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Unisex",
+      "description": "An airy floral-woody musk opening with the softly fruity warmth of sapodilla and ambrette. Magnolia, violet, and creamy sandalwood create an elegant heart before cedar, clean musk, and ambergris leave a smooth, powdery trail.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": "Byredo Mojave Ghost Absolu",
+      "longevityScore": 3,
+      "projectionScore": 3,
+      "accords": [
+        "musky",
+        "floral",
+        "powdery",
+        "woody",
+        "violet"
+      ],
+      "similarProductIds": [],
+      "recommended": false,
       "outOfStock": false
     },
     {
