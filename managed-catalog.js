@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-08-05T10:07:32.499Z",
+  "updatedAt": "2026-08-06T14:51:06.469Z",
   "brands": [
     {
       "id": "afnan",
@@ -6433,6 +6433,41 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "aquatic",
         "sand",
         "salty"
+      ],
+      "similarProductIds": [],
+      "recommended": false,
+      "outOfStock": false
+    },
+    {
+      "id": "rasasi-managed-hawas-sapphire",
+      "brandId": "rasasi",
+      "brand": "Rasasi",
+      "name": "Hawas Sapphire",
+      "image": "images/products/rasasi/hawas-sapphire.png",
+      "image2": "images/products/rasasi/hawas-sapphire-decant.png",
+      "prices": {
+        "1ml": 95,
+        "2ml": 175,
+        "3ml": 265,
+        "5ml": 455
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Unisex",
+      "description": "Is a vibrant unisex fragrance that opens with sparkling bergamot, juicy blackcurrant, and tropical guava. Creamy sandalwood and elegant orange blossom soften the fruitiness before settling into a smooth, subtly sweet trail of musk, tonka bean, and ambergris. Energetic, modern, and attention-grabbing without losing its refined character. It is marketed as an original creation, not an inspired fragrance.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": null,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "fruity",
+        "citrus",
+        "woody",
+        "white floral",
+        "tropical"
       ],
       "similarProductIds": [],
       "recommended": false,
