@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-08-06T14:51:06.469Z",
+  "updatedAt": "2026-08-06T15:32:24.730Z",
   "brands": [
     {
       "id": "afnan",
@@ -300,6 +300,41 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "fruity"
       ],
       "similarProductIds": []
+    },
+    {
+      "id": "afnan-managed-9pm-elixir",
+      "brandId": "afnan",
+      "brand": "Afnan",
+      "name": "9PM Elixir",
+      "image": "images/products/afnan/9pm-elixir.png",
+      "image2": "images/products/afnan/9pm-elixir-decant.png",
+      "prices": {
+        "1ml": 75,
+        "2ml": 145,
+        "3ml": 215,
+        "5ml": 365
+      },
+      "concentration": "Parfum Intense",
+      "gender": "Unisex",
+      "description": "Is a rich, magnetic unisex fragrance built around warm spices and dark sensuality. Nutmeg, elemi, and cardamom create a vibrant opening before revealing aromatic lavender, fiery pimento, and smooth leather. The dry-down combines vanilla, patchouli, and resinous labdanum for a deep, sweet, and confidently seductive finish—ideal for evenings, dates, and cooler weather.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": "Jean Paul Gaultier Le Male Elixir Absolu",
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "warm spicy",
+        "vanilla",
+        "aromatic",
+        "fresh spicy",
+        "leather"
+      ],
+      "similarProductIds": [],
+      "recommended": false,
+      "outOfStock": false
     },
     {
       "id": "afnan-0001",
