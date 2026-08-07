@@ -53,6 +53,12 @@ function playSound(name){
 }
 function setSoundMuted(muted){ sounds.muted=!!muted; localSet('prefs:sound-muted',String(sounds.muted)); }
 
+function optimizedPixelRatio(mobile,desktopCap=2,mobileCap=1.5){
+  const memory=Number(navigator.deviceMemory)||8;
+  const lowMemoryMobile=mobile&&memory<=4;
+  return Math.min(window.devicePixelRatio||1,mobile?(lowMemoryMobile?1.35:mobileCap):desktopCap);
+}
+
 /* ---------------- 3D Bottle ---------------- */
 let bottleCleanup = null;
 let heroPerfumeCleanup = null;
@@ -71,7 +77,7 @@ function initHeroPerfume(){
   const camera=new THREE.PerspectiveCamera(31,container.clientWidth/Math.max(container.clientHeight,1),.1,100);
   camera.position.set(0,.12,mobileMedia.matches?9.4:9);
   const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,mobileMedia.matches?1.65:2));
+  renderer.setPixelRatio(optimizedPixelRatio(mobileMedia.matches));
   renderer.setSize(container.clientWidth,container.clientHeight);
   renderer.outputEncoding=THREE.sRGBEncoding;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -88,7 +94,7 @@ function initHeroPerfume(){
   loader.setDRACOLoader(dracoLoader);
   const disposables=[];
   const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
-  let modelRoot=null,modelScale=1,raf=0,visible=true,lastFrame=performance.now();
+  let modelRoot=null,modelScale=1,raf=0,visible=true,pageVisible=!document.hidden,lastFrame=performance.now(),lastRender=0;
   let pointerDown=false,dragging=false,pointerId=null,startX=0,startY=0,lastX=0,lastY=0;
   let userYaw=-.18,userPitch=-.035,velocityYaw=.0018,velocityPitch=0;
   let hoverX=0,hoverY=0,hoverTargetX=0,hoverTargetY=0;
@@ -173,15 +179,19 @@ function initHeroPerfume(){
     heroRange=Math.max((hero?.offsetHeight||window.innerHeight)-window.innerHeight,1);
     scrollTarget=reduced?0:clamp01((window.scrollY-heroStart)/heroRange);
   };
-  const onScroll=()=>{scrollTarget=reduced?0:clamp01((window.scrollY-heroStart)/heroRange);};
+  const shouldAnimate=()=>visible&&pageVisible&&(dragging||scrollTarget<.82);
+  const ensureAnimation=()=>{if(shouldAnimate()&&!raf){lastFrame=performance.now();raf=requestAnimationFrame(animate);}};
+  const onScroll=()=>{scrollTarget=reduced?0:clamp01((window.scrollY-heroStart)/heroRange);if(scrollTarget>=.82)renderer.domElement.style.opacity='0';ensureAnimation();};
   const resize=()=>{
     const w=container.clientWidth,h=container.clientHeight;
     camera.aspect=w/Math.max(h,1);camera.position.z=mobileMedia.matches?9.4:9;camera.updateProjectionMatrix();
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,mobileMedia.matches?1.65:2));renderer.setSize(w,h);measure();
+    renderer.setPixelRatio(optimizedPixelRatio(mobileMedia.matches));renderer.setSize(w,h);measure();ensureAnimation();
   };
   function animate(now=performance.now()){
-    if(!visible){raf=0;return;}
+    if(!shouldAnimate()){if(scrollTarget>=.82)renderer.domElement.style.opacity='0';raf=0;return;}
     raf=requestAnimationFrame(animate);
+    if(mobileMedia.matches&&!dragging&&now-lastRender<22)return;
+    lastRender=now;
     const delta=Math.min(Math.max((now-lastFrame)/1000,0),.05),frameScale=delta*60;lastFrame=now;
     const follow=1-Math.exp(-7*delta);scrollCurrent+=(scrollTarget-scrollCurrent)*follow;
     hoverX+=(hoverTargetX-hoverX)*(1-Math.exp(-5*delta));
@@ -205,13 +215,16 @@ function initHeroPerfume(){
   const resizeObserver='ResizeObserver' in window?new ResizeObserver(resize):null;resizeObserver?.observe(container);
   const visibilityObserver='IntersectionObserver' in window?new IntersectionObserver(entries=>{
     visible=entries[0]?.isIntersecting!==false;
-    if(visible&&!raf){lastFrame=performance.now();raf=requestAnimationFrame(animate);}
+    ensureAnimation();
   },{rootMargin:'160px 0px'}):null;visibilityObserver?.observe(hero||container);
+  const onVisibilityChange=()=>{pageVisible=!document.hidden;ensureAnimation();};
+  document.addEventListener('visibilitychange',onVisibilityChange);
   window.addEventListener('resize',resize,{passive:true});window.addEventListener('scroll',onScroll,{passive:true});
-  measure();animate();
+  measure();ensureAnimation();
   heroPerfumeCleanup=()=>{
     cancelAnimationFrame(raf);resizeObserver?.disconnect();visibilityObserver?.disconnect();
     window.removeEventListener('resize',resize);window.removeEventListener('scroll',onScroll);
+    document.removeEventListener('visibilitychange',onVisibilityChange);
     container.removeEventListener('pointerdown',down);container.removeEventListener('pointermove',move);container.removeEventListener('pointerup',up);container.removeEventListener('pointercancel',up);container.removeEventListener('pointerleave',leave);
     renderer.dispose();dracoLoader.dispose();disposables.forEach(item=>item?.dispose?.());
   };
@@ -230,7 +243,7 @@ function initHeroBottle(){
   const camera=new THREE.PerspectiveCamera(34,container.clientWidth/Math.max(container.clientHeight,1),.1,100);
   camera.position.set(0,.05,window.innerWidth<=960?12.8:9.6);
   const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(container.clientWidth,container.clientHeight);
+  renderer.setPixelRatio(optimizedPixelRatio(window.innerWidth<=960));renderer.setSize(container.clientWidth,container.clientHeight);
   renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   container.querySelector('canvas')?.remove();container.prepend(renderer.domElement);
   scene.add(new THREE.HemisphereLight(0xfffaf0,0x10131a,1.65));
@@ -244,7 +257,12 @@ function initHeroBottle(){
   const guideLines={seal:container.querySelector('[data-guide="seal"]'),atomizer:container.querySelector('[data-guide="atomizer"]'),sticker:container.querySelector('[data-guide="sticker"]'),glass:container.querySelector('[data-guide="glass"]')};
   const guideDots={seal:container.querySelector('[data-dot="seal"]'),atomizer:container.querySelector('[data-dot="atomizer"]'),sticker:container.querySelector('[data-dot="sticker"]'),glass:container.querySelector('[data-dot="glass"]')};
   const callouts={seal:container.querySelector('[data-callout="seal"]'),atomizer:container.querySelector('[data-callout="atomizer"]'),sticker:container.querySelector('[data-callout="sticker"]'),glass:container.querySelector('[data-callout="glass"]')};
-  function updateGuides(){const rect=container.getBoundingClientRect();Object.keys(featurePoints).forEach(key=>{const p=group.localToWorld(featurePoints[key].clone()).project(camera);const x=(p.x*.5+.5)*rect.width,y=(-p.y*.5+.5)*rect.height;const calloutRect=callouts[key]?.getBoundingClientRect();const tx=calloutRect?calloutRect.left-rect.left+(calloutRect.width/2):x,ty=calloutRect?calloutRect.top-rect.top+(calloutRect.height/2):y;guideLines[key]?.setAttribute('x1',x);guideLines[key]?.setAttribute('y1',y);guideLines[key]?.setAttribute('x2',tx);guideLines[key]?.setAttribute('y2',ty);guideDots[key]?.setAttribute('cx',x);guideDots[key]?.setAttribute('cy',y);});}
+  const guideTargets={};
+  function measureGuideTargets(){
+    const rect=container.getBoundingClientRect();
+    Object.keys(featurePoints).forEach(key=>{const calloutRect=callouts[key]?.getBoundingClientRect();guideTargets[key]=calloutRect?{x:calloutRect.left-rect.left+(calloutRect.width/2),y:calloutRect.top-rect.top+(calloutRect.height/2)}:null;});
+  }
+  function updateGuides(){const rect=container.getBoundingClientRect();Object.keys(featurePoints).forEach(key=>{const p=group.localToWorld(featurePoints[key].clone()).project(camera);const x=(p.x*.5+.5)*rect.width,y=(-p.y*.5+.5)*rect.height,target=guideTargets[key];const tx=target?.x??x,ty=target?.y??y;guideLines[key]?.setAttribute('x1',x);guideLines[key]?.setAttribute('y1',y);guideLines[key]?.setAttribute('x2',tx);guideLines[key]?.setAttribute('y2',ty);guideDots[key]?.setAttribute('cx',x);guideDots[key]?.setAttribute('cy',y);});}
   const labelCanvas=document.createElement('canvas');labelCanvas.width=2048;labelCanvas.height=640;
   const labelContext=labelCanvas.getContext('2d');
   const drawLabel=logo=>{
@@ -289,8 +307,8 @@ function initHeroBottle(){
   let dragging=false,lastX=0,lastY=0,velocityX=0,velocityY=.004,raf=0;
   let userRotationX=group.rotation.x,userRotationY=group.rotation.y;
   let scrollTarget=0,scrollCurrent=0,heroStart=0,heroRange=Math.max(window.innerHeight*.35,1),centerShift=0,centerShiftY=0;
-  let heroVisible=true;
-  let lastFrameTime=performance.now();
+  let heroVisible=true,pageVisible=!document.hidden,annotationsActive=false;
+  let lastFrameTime=performance.now(),lastRenderTime=0,lastGuideTime=0;
   const down=e=>{
     if(!modelRoot||(!reduced&&!hero?.classList.contains('is-bottle-active')))return;
     const rect=renderer.domElement.getBoundingClientRect();
@@ -304,7 +322,9 @@ function initHeroBottle(){
   const move=e=>{if(!dragging)return;velocityY=(e.clientX-lastX)*.008;velocityX=(e.clientY-lastY)*.006;lastX=e.clientX;lastY=e.clientY;};
   const up=()=>{dragging=false;container.classList.remove('is-dragging');};
   container.addEventListener('pointerdown',down);container.addEventListener('pointermove',move);container.addEventListener('pointerup',up);container.addEventListener('pointercancel',up);
-  const syncScrollTarget=()=>{scrollTarget=reduced?0:clamp01((window.scrollY-heroStart)/heroRange);};
+  const shouldAnimate=()=>heroVisible&&pageVisible&&(dragging||scrollTarget>.50);
+  const ensureAnimation=()=>{if(shouldAnimate()&&!raf){lastFrameTime=performance.now();raf=requestAnimationFrame(animate);}};
+  const syncScrollTarget=()=>{scrollTarget=reduced?0:clamp01((window.scrollY-heroStart)/heroRange);if(scrollTarget<=.50){scrollCurrent=scrollTarget;syncCinematicMotion(scrollCurrent);}ensureAnimation();};
   const measureScroll=()=>{
     const heroRect=hero?.getBoundingClientRect();
     heroStart=(heroRect?.top||0)+window.scrollY;
@@ -316,7 +336,7 @@ function initHeroBottle(){
     const layoutCenterY=trackRect.top+(trackRect.height/2)-matrix.m42;
     centerShift=mobileMedia.matches?0:((gridRect?.left||0)+((gridRect?.width||trackRect.width)/2))-layoutCenterX;
     centerShiftY=mobileMedia.matches?((gridRect?.top||0)+((gridRect?.height||trackRect.height)/2))-layoutCenterY:0;
-    syncScrollTarget();
+    measureGuideTargets();syncScrollTarget();
   };
   const syncCinematicMotion=progress=>{
     const mobile=mobileMedia.matches;
@@ -331,14 +351,15 @@ function initHeroBottle(){
     const trackY=(entranceTravel*(1-focus))+(centerShiftY*focus)-(10*focus)-(viewportTravel*departure);
     track.style.transform=`translate3d(${trackX.toFixed(2)}px,${trackY.toFixed(2)}px,0)`;
     track.style.opacity=String(focus*(1-(departure*(mobile?.62:.78))));
-    track.style.filter=`blur(${(((1-focus)*(mobile?4:7))+(departure*(mobile?1.5:3.5))).toFixed(2)}px)`;
+    track.style.filter=mobile?'none':`blur(${(((1-focus)*7)+(departure*3.5)).toFixed(2)}px)`;
     if(heroCopy){
       heroCopy.style.opacity=String(1-copyExit);
       heroCopy.style.transform=`translate3d(0,${(-58*copyExit).toFixed(2)}px,0)`;
-      heroCopy.style.filter=`blur(${(copyExit*(mobile?3:6)).toFixed(2)}px)`;
+      heroCopy.style.filter=mobile?'none':`blur(${(copyExit*6).toFixed(2)}px)`;
     }
     if(annotations){
       const annotationVisibility=annotationIn*(1-annotationOut);
+      annotationsActive=annotationVisibility>.015;
       annotations.style.opacity=String(annotationVisibility);
       annotations.style.transform=`scale(${(.965+(annotationVisibility*.035)).toFixed(4)})`;
     }
@@ -353,8 +374,10 @@ function initHeroBottle(){
     group.scale.setScalar(.94+(focus*(mobile?.12:.16))-(departure*(mobile?.14:.22)));
   };
   function animate(frameTime=performance.now()){
-    if(!heroVisible){raf=0;return;}
+    if(!shouldAnimate()){raf=0;return;}
     raf=requestAnimationFrame(animate);
+    if(mobileMedia.matches&&!dragging&&frameTime-lastRenderTime<22)return;
+    lastRenderTime=frameTime;
     const delta=Math.min(Math.max((frameTime-lastFrameTime)/1000,0),.05),frameScale=delta*60;
     lastFrameTime=frameTime;
     if(!dragging){velocityX*=Math.pow(.94,frameScale);velocityY*=Math.pow(.965,frameScale);if(Math.abs(velocityY)<.001&&!reduced)velocityY=.0015;}
@@ -363,19 +386,22 @@ function initHeroBottle(){
     const follow=reduced?1:1-Math.exp(-(mobileMedia.matches?8:7)*delta);
     scrollCurrent+=(scrollTarget-scrollCurrent)*follow;
     syncCinematicMotion(scrollCurrent);
-    updateGuides();renderer.render(scene,camera);
-  }animate();
-  const resize=()=>{const w=container.clientWidth,h=container.clientHeight;camera.aspect=w/Math.max(h,1);camera.position.z=window.innerWidth<=960?12.8:9.6;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(w,h);measureScroll();};
+    if(annotationsActive&&(!mobileMedia.matches||frameTime-lastGuideTime>=32)){lastGuideTime=frameTime;updateGuides();}
+    renderer.render(scene,camera);
+  }
+  const resize=()=>{const w=container.clientWidth,h=container.clientHeight;camera.aspect=w/Math.max(h,1);camera.position.z=window.innerWidth<=960?12.8:9.6;camera.updateProjectionMatrix();renderer.setPixelRatio(optimizedPixelRatio(window.innerWidth<=960));renderer.setSize(w,h);measureScroll();ensureAnimation();};
   const resizeObserver='ResizeObserver' in window?new ResizeObserver(resize):null;
   resizeObserver?.observe(container);
   const visibilityObserver='IntersectionObserver' in window?new IntersectionObserver(entries=>{
     heroVisible=entries[0]?.isIntersecting!==false;
-    if(heroVisible&&!raf){lastFrameTime=performance.now();raf=requestAnimationFrame(animate);}
+    ensureAnimation();
   },{rootMargin:'180px 0px'}):null;
   visibilityObserver?.observe(hero||container);
+  const onVisibilityChange=()=>{pageVisible=!document.hidden;ensureAnimation();};
+  document.addEventListener('visibilitychange',onVisibilityChange);
   window.addEventListener('resize',resize,{passive:true});
-  window.addEventListener('scroll',syncScrollTarget,{passive:true});measureScroll();
-  bottleCleanup=()=>{cancelAnimationFrame(raf);resizeObserver?.disconnect();visibilityObserver?.disconnect();window.removeEventListener('resize',resize);window.removeEventListener('scroll',syncScrollTarget);container.removeEventListener('pointerdown',down);container.removeEventListener('pointermove',move);container.removeEventListener('pointerup',up);container.removeEventListener('pointercancel',up);hero?.classList.remove('is-bottle-active');renderer.dispose();disposables.forEach(x=>x.dispose?.());};
+  window.addEventListener('scroll',syncScrollTarget,{passive:true});measureScroll();syncCinematicMotion(scrollCurrent);ensureAnimation();
+  bottleCleanup=()=>{cancelAnimationFrame(raf);resizeObserver?.disconnect();visibilityObserver?.disconnect();window.removeEventListener('resize',resize);window.removeEventListener('scroll',syncScrollTarget);document.removeEventListener('visibilitychange',onVisibilityChange);container.removeEventListener('pointerdown',down);container.removeEventListener('pointermove',move);container.removeEventListener('pointerup',up);container.removeEventListener('pointercancel',up);hero?.classList.remove('is-bottle-active');renderer.dispose();disposables.forEach(x=>x.dispose?.());};
 }
 
 function initShowcaseRails(){
@@ -392,8 +418,9 @@ function initShowcaseRails(){
     const render=()=>{track.style.transform=`translate3d(${x.toFixed(2)}px,0,0)`;};
     const wrap=()=>{while(x>=0)x-=groupWidth;while(x<-groupWidth)x+=groupWidth;};
     const frame=now=>{
+      if(!visible){raf=0;return;}
       const delta=Math.min(Math.max(now-lastFrame,0),40);lastFrame=now;
-      if(!reduced&&visible){
+      if(!reduced){
         if(!dragging){
           const target=hovered?0:-baseSpeed/1000;
           velocity+=(target-velocity)*(1-Math.exp(-delta/(hovered?90:650)));
@@ -433,7 +460,7 @@ function initShowcaseRails(){
     const enter=e=>{if(e.pointerType!=='touch')hovered=true;};
     const leave=e=>{if(e.pointerType!=='touch')hovered=false;pointerEnd();};
     const focusIn=()=>{hovered=true;},focusOut=e=>{if(!rail.contains(e.relatedTarget))hovered=false;};
-    const observer='IntersectionObserver' in window?new IntersectionObserver(entries=>{visible=entries[0]?.isIntersecting!==false;},{rootMargin:'160px 0px'}):null;
+    const observer='IntersectionObserver' in window?new IntersectionObserver(entries=>{visible=entries[0]?.isIntersecting!==false;if(visible&&!raf){lastFrame=performance.now();raf=requestAnimationFrame(frame);}},{rootMargin:'160px 0px'}):null;
     rail.addEventListener('pointerdown',pointerDown);rail.addEventListener('pointermove',pointerMove);rail.addEventListener('pointerup',pointerEnd);rail.addEventListener('pointercancel',pointerEnd);rail.addEventListener('pointerenter',enter);rail.addEventListener('pointerleave',leave);rail.addEventListener('click',captureClick,true);rail.addEventListener('focusin',focusIn);rail.addEventListener('focusout',focusOut);window.addEventListener('resize',measure,{passive:true});observer?.observe(rail);
     measure();x=-groupWidth;render();raf=requestAnimationFrame(frame);
     return()=>{cancelAnimationFrame(raf);clearTimeout(clickReset);observer?.disconnect();window.removeEventListener('resize',measure);rail.removeEventListener('pointerdown',pointerDown);rail.removeEventListener('pointermove',pointerMove);rail.removeEventListener('pointerup',pointerEnd);rail.removeEventListener('pointercancel',pointerEnd);rail.removeEventListener('pointerenter',enter);rail.removeEventListener('pointerleave',leave);rail.removeEventListener('click',captureClick,true);rail.removeEventListener('focusin',focusIn);rail.removeEventListener('focusout',focusOut);};
@@ -592,6 +619,31 @@ function imgTag(src, alt, cls, fallbackText){
   return `<img src="${esc(src)}" alt="${safeAlt}" class="${cls||''}"
     onerror="this.onerror=null;this.hidden=true;this.nextElementSibling.classList.remove('hidden')" loading="lazy" decoding="async" />
     <div class="ph hidden">${esc(fallbackText||alt)}</div>`;
+}
+function expandableImageHTML(src,alt,className="",fallbackText=alt,caption=alt){
+  return `<button class="media-expand ${className}" type="button" data-image-view="${esc(src)}" data-image-alt="${esc(alt)}" data-image-caption="${esc(caption)}" data-stop aria-label="View ${esc(alt)} full screen">
+    ${imgTag(src,alt,"",fallbackText)}
+    <span class="media-expand-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5"/></svg></span>
+  </button>`;
+}
+
+let imageViewerTrigger=null;
+function openImageViewer(src,alt,caption){
+  const viewer=document.getElementById("imageViewer"),image=document.getElementById("imageViewerImage"),label=document.getElementById("imageViewerCaption");
+  if(!viewer||!image||!src)return;
+  imageViewerTrigger=document.activeElement;
+  image.hidden=false;image.src=src;image.alt=alt||"Expanded image";
+  label.textContent=caption||alt||"";label.hidden=!label.textContent;
+  viewer.classList.add("open");viewer.setAttribute("aria-hidden","false");document.body.classList.add("image-viewer-open");
+  viewer.querySelector("[data-close-image]")?.focus();
+}
+function closeImageViewer({restoreFocus=true}={}){
+  const viewer=document.getElementById("imageViewer"),image=document.getElementById("imageViewerImage");
+  if(!viewer?.classList.contains("open"))return;
+  viewer.classList.remove("open");viewer.setAttribute("aria-hidden","true");document.body.classList.remove("image-viewer-open");
+  if(restoreFocus&&imageViewerTrigger?.isConnected)imageViewerTrigger.focus();
+  imageViewerTrigger=null;
+  setTimeout(()=>{if(!viewer.classList.contains("open")&&image){image.hidden=true;image.removeAttribute("src");}},320);
 }
 
 /* ---------------- persistence bootstrap ---------------- */
@@ -891,6 +943,7 @@ function homeReviews(){
 
 function renderHome(){
   const bestSellers = allProducts().filter(p=>p.recommended);
+  const bestSellerShowcase=bestSellers.slice(0,window.innerWidth<=640?12:20);
   const brands = allBrands();
   const homeCatalog=allProducts();
   const initialCatalogCount=Math.min(catalogPageSize(),homeCatalog.length);
@@ -957,7 +1010,7 @@ function renderHome(){
         <div class="eyebrow">Loved by the Dynasty</div>
         <h2>Best Sellers</h2>
       </div>
-      ${showcaseRailHTML(bestSellers.map(productCardHTML).join(""),'best-seller-showcase','Explore best sellers',38)}
+      ${showcaseRailHTML(bestSellerShowcase.map(productCardHTML).join(""),'best-seller-showcase','Explore best sellers',38)}
       <div style="text-align:center;margin-top:32px"><a class="btn btn-ghost" href="#/bestsellers">View All Best Sellers</a></div>
     </div>
   </section>
@@ -1036,7 +1089,8 @@ function whyCard(path, title, body){
   return `<div class="why-card"><div class="why-icon"><svg viewBox="0 0 24 24"><path d="${path}"/></svg></div><h3>${esc(title)}</h3><p>${esc(body)}</p></div>`;
 }
 function testiCard(t){
-  const photo=t.photo?`<figure class="testi-photo"><img src="${esc(t.photo)}" alt="Photo shared with ${esc(t.name)}'s Decant Dynasty review" loading="lazy" decoding="async" onerror="this.closest('.testi-card').classList.add('no-photo');this.parentElement.remove()"/></figure>`:"";
+  const photoAlt=`Photo shared with ${t.name}'s Decant Dynasty review`;
+  const photo=t.photo?`<button class="testi-photo media-expand" type="button" data-image-view="${esc(t.photo)}" data-image-alt="${esc(photoAlt)}" data-image-caption="${esc(t.name)} · Customer review" aria-label="View ${esc(t.name)}'s review photo full screen"><img src="${esc(t.photo)}" alt="${esc(photoAlt)}" loading="lazy" decoding="async" onerror="this.closest('.testi-card').classList.add('no-photo');this.parentElement.remove()"/><span class="media-expand-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5"/></svg></span></button>`:"";
   return `<article class="testi-card ${t.photo?"has-photo":"no-photo"}">
     ${photo}
     <div class="testi-copy">
@@ -1074,7 +1128,7 @@ function productCardHTML(p){
   return `<div class="product-card" data-go="/product/${p.id}">
     ${p.recommended ? `<div class="badge-rec">Best Seller</div>` : ""}
     <div class="product-media">
-      ${imgTag(p.image, `${p.brand} ${p.name}`, "", `${p.brand} — ${p.name}`)}
+      ${expandableImageHTML(p.image,`${p.brand} ${p.name}`,"product-image-button",`${p.brand} — ${p.name}`,`${p.brand} · ${p.name}`)}
       ${stockStampHTML(p)}
       <button class="wish-toggle ${isWish?'active':''}" data-wish-toggle="${p.id}" data-stop aria-label="Wishlist">
         <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.2 2.4 5 6 5c2 0 3.4 1 4.5 2.4l1.5 1.9 1.5-1.9C14.6 6 16 5 18 5c3.6 0 5.5 3.2 4 6.7C19.5 16.3 12 21 12 21z"/></svg>
@@ -1248,8 +1302,8 @@ function renderProductDetail(productId){
   <div class="wrap pd-grid" id="pdWrap" data-pid="${p.id}" data-size="${firstSize}">
     <div>
       ${backButtonHTML("#/collection")}
-      <div class="pd-media">${imgTag(p.image, `${p.brand} ${p.name}`, "", `${p.brand} — ${p.name}`)}${stockStampHTML(p)}</div>
-      ${hasImage2 ? `<div class="pd-media pd-media-2"><img src="${esc(p.image2)}" alt="${esc(`${p.brand} ${p.name} decant bottle`)}" loading="lazy" onerror="this.parentElement.remove()" /></div>` : ""}
+      <div class="pd-media">${expandableImageHTML(p.image,`${p.brand} ${p.name}`,"pd-image-button",`${p.brand} — ${p.name}`,`${p.brand} · ${p.name}`)}${stockStampHTML(p)}</div>
+      ${hasImage2 ? `<div class="pd-media pd-media-2">${expandableImageHTML(p.image2,`${p.brand} ${p.name} decant bottle`,"pd-image-button",`${p.brand} ${p.name}`,`${p.brand} · ${p.name} decant`)}</div>` : ""}
     </div>
     <div>
       <div class="breadcrumb"><a href="#/">Home</a> / <a href="#/brand/${p.brandId}">${esc(p.brand)}</a> / ${esc(p.name)}</div>
@@ -1295,7 +1349,7 @@ function openQuickView(productId){
   modal.innerHTML = `
     <button class="modal-close" data-close-modal>&times;</button>
     <div class="modal-inner" data-pid="${p.id}" data-size="${firstSize}">
-      <div class="modal-media">${imgTag(p.image, `${p.brand} ${p.name}`, "", `${p.brand} — ${p.name}`)}${stockStampHTML(p)}</div>
+      <div class="modal-media">${expandableImageHTML(p.image,`${p.brand} ${p.name}`,"modal-image-button",`${p.brand} — ${p.name}`,`${p.brand} · ${p.name}`)}${stockStampHTML(p)}</div>
       <div class="modal-body">
         <div class="pd-brand">${esc(p.brand)}</div>
         <h2 class="pd-name" style="font-size:26px;">${esc(p.name)}</h2>
@@ -1920,6 +1974,7 @@ function closeAllPanels(){
   document.getElementById('searchPopover')?.classList.remove('open');
   document.body.classList.remove('cart-panel-open');
   closeModal();
+  closeImageViewer({restoreFocus:false});
 }
 function initLoadingScreen(){
   const loader=document.getElementById("loadingScreen");if(!loader)return;
@@ -2014,6 +2069,14 @@ function initGlobalUI(){
   clear.onclick=()=>{input.value='';input.focus();renderSearch();};document.addEventListener('click',e=>{if(!e.target.closest('#searchBox')&&!e.target.closest('#searchBtn')){popover.classList.remove('open');input.setAttribute('aria-expanded','false');}});
   document.addEventListener('click',e=>{const control=e.target.closest('button,.btn,a');if(control&&!['themeBtn','searchBtn','soundToggle'].includes(control.id))playSound('click');});
   document.addEventListener('click',e=>{
+    const trigger=e.target.closest('[data-image-view]');if(!trigger)return;
+    e.preventDefault();e.stopPropagation();
+    openImageViewer(trigger.dataset.imageView,trigger.dataset.imageAlt,trigger.dataset.imageCaption);
+  });
+  const imageViewer=document.getElementById('imageViewer'),imageViewerImage=document.getElementById('imageViewerImage');
+  imageViewer?.addEventListener('click',e=>{if(e.target.closest('[data-close-image]'))closeImageViewer();});
+  if(imageViewerImage)imageViewerImage.onerror=()=>{toast('That photo could not be opened.');closeImageViewer();};
+  document.addEventListener('click',e=>{
     const link=e.target.closest('a[href^="#/"]');
     if(!link||e.defaultPrevented||(typeof e.button==="number"&&e.button!==0)||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||link.target==="_blank")return;
     e.preventDefault();navigateTo(link.getAttribute('href'));
@@ -2050,7 +2113,7 @@ function initGlobalUI(){
     const remove=e.target.closest("[data-compare-remove]");if(remove)removeComparedProduct(remove.dataset.compareRemove);
   };
   compareBackdrop.onclick=closeCompare;
-  document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeCompare();closeModal();}});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeImageViewer();closeCompare();closeModal();}});
 
   window.addEventListener("popstate",e=>{
     clearTimeout(scrollSaveTimer);scrollSaveTimer=0;
