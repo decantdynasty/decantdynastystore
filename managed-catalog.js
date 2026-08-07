@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-08-06T15:32:24.730Z",
+  "updatedAt": "2026-08-07T07:41:00.604Z",
   "brands": [
     {
       "id": "afnan",
@@ -533,6 +533,41 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "amber"
       ],
       "similarProductIds": []
+    },
+    {
+      "id": "afnan-managed-supremacy-in-heaven",
+      "brandId": "afnan",
+      "brand": "Afnan",
+      "name": "Supremacy in Heaven",
+      "image": "images/products/afnan/supremacy-in-heaven.png",
+      "image2": "images/products/afnan/supremacy-in-heaven-decant.png",
+      "prices": {
+        "1ml": 85,
+        "2ml": 165,
+        "3ml": 245,
+        "5ml": 415
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Men",
+      "description": "Is a bright, refreshing fragrance that opens with crisp bergamot and juicy mandarin. Green tea and blackcurrant create a cool, subtly fruity heart before settling into clean musk, smooth sandalwood, and airy woods. Fresh, refined, and effortlessly wearable—an excellent choice for warm days, casual occasions, and everyday use.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": "Creed Silver Mountain Water",
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "citrus",
+        "fruity",
+        "woody",
+        "green",
+        "musky"
+      ],
+      "similarProductIds": [],
+      "recommended": false,
+      "outOfStock": false
     },
     {
       "id": "afnan-0007",
@@ -8014,6 +8049,12 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "name": "justeezy12",
         "text": "Legit scents. +100 stars sa packaging kahit 3 decants lang kinuha ko sobrang secure padin ng pagkakapack. Kudos sa seller",
         "photo": "images/reviews/justeezy12.png"
+      },
+      {
+        "id": "k-pphoenix",
+        "name": "k.pphoenix",
+        "text": "Fast shipping and securely packed! As for the scent its a fizzy lime and a bit sweeter than velixir demeter. Demeter smells more mellow and chill, dry down almost the same but as i said platine being a bit sweeter and last longer too. Never smelled the OG but best way to describe these dupes; picture youre in a spa with a white tea and jasmine diffuser. Calming and relaxing vibes.",
+        "photo": "images/reviews/k-pphoenix.webp"
       }
     ]
   }
