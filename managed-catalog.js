@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-08-07T07:41:00.604Z",
+  "updatedAt": "2026-08-08T15:39:58.064Z",
   "brands": [
     {
       "id": "afnan",
@@ -4650,6 +4650,41 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "similarProductIds": []
     },
     {
+      "id": "lattafa-managed-musamam-black-intense",
+      "brandId": "lattafa",
+      "brand": "Lattafa",
+      "name": "Musamam Black Intense",
+      "image": "images/products/lattafa/musamam-black-intense.png",
+      "image2": "images/products/lattafa/musamam-black-intense-decant.png",
+      "prices": {
+        "1ml": 95,
+        "2ml": 185,
+        "3ml": 275,
+        "5ml": 455
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Unisex",
+      "description": "Dark, bold, and sophisticated. Aromatic freshness blends with rich woods, patchouli, tonka bean, and a deep cocoa-like warmth for an intense, masculine scent with serious presence.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": null,
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "woody",
+        "aromatic",
+        "fresh spicy",
+        "lavender",
+        "floral"
+      ],
+      "similarProductIds": [],
+      "recommended": false,
+      "outOfStock": false
+    },
+    {
       "id": "lattafa-0043",
       "brandId": "lattafa",
       "brand": "Lattafa",
@@ -5658,6 +5693,40 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "outOfStock": false
     },
     {
+      "id": "maison-asrar-managed-vanguard",
+      "brandId": "maison-asrar",
+      "brand": "Maison Asrar",
+      "name": "Vanguard",
+      "image": "images/products/maison-asrar/vanguard.png",
+      "image2": "images/products/maison-asrar/vanguard-decant.png",
+      "prices": {
+        "1ml": 85,
+        "2ml": 169,
+        "3ml": 249,
+        "5ml": 415
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Men",
+      "description": "Fresh, fruity, and powerful. Juicy pineapple, blackcurrant, and citrus lead into spicy woods, leather, musk, and ambergris for a confident, polished scent with a darker edge.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": "Creed Aventus Absolu",
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "fruity",
+        "citrus",
+        "fresh",
+        "woody"
+      ],
+      "similarProductIds": [],
+      "recommended": false,
+      "outOfStock": false
+    },
+    {
       "id": "montblanc-0122",
       "brandId": "montblanc",
       "brand": "Montblanc",
@@ -6391,6 +6460,40 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "outOfStock": true
     },
     {
+      "id": "rasasi-managed-hawas-london",
+      "brandId": "rasasi",
+      "brand": "Rasasi",
+      "name": "Hawas London",
+      "image": "images/products/rasasi/hawas-london.png",
+      "image2": "images/products/rasasi/hawas-london-decant.png",
+      "prices": {
+        "1ml": 65,
+        "2ml": 125,
+        "3ml": 195,
+        "5ml": 295
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Unisex",
+      "description": "Elegant, spicy, and smooth. Pear and saffron meet rose and incense before settling into warm amber, vanilla, musk, and woods. A refined Hawas with a richer, more luxurious character.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": "Ex Nihilo Brompton Immortals Extrait de Parfum",
+      "longevityScore": 4,
+      "projectionScore": 4,
+      "accords": [
+        "rose",
+        "amber",
+        "warm spicy",
+        "musky"
+      ],
+      "similarProductIds": [],
+      "recommended": false,
+      "outOfStock": false
+    },
+    {
       "id": "rasasi-0150",
       "brandId": "rasasi",
       "brand": "Rasasi",
@@ -6657,6 +6760,41 @@ globalThis.DECANT_MANAGED_CATALOG = {
         "white floral"
       ],
       "similarProductIds": []
+    },
+    {
+      "id": "rayhaan-managed-cedrus-blanc",
+      "brandId": "rayhaan",
+      "brand": "Rayhaan",
+      "name": "Cedrus Blanc",
+      "image": "images/products/rayhaan/cedrus-blanc.png",
+      "image2": "images/products/rayhaan/cedrus-blanc-decant.png",
+      "prices": {
+        "1ml": 85,
+        "2ml": 155,
+        "3ml": 235,
+        "5ml": 390
+      },
+      "concentration": "Eau de Parfum",
+      "gender": "Unisex",
+      "description": "Clean, fresh, and effortlessly refined. Bright bergamot and airy aldehydes blend with orange blossom, smooth cedarwood, and white musk for a crisp woody-musky scent that feels modern and sophisticated.",
+      "topNotes": [],
+      "heartNotes": [],
+      "baseNotes": [],
+      "longevity": "",
+      "projection": "",
+      "inspiredBy": "Carolina Herrera Cedar Chic",
+      "longevityScore": 4,
+      "projectionScore": 3,
+      "accords": [
+        "aldehydic",
+        "citrus",
+        "woody",
+        "fresh",
+        "soapy"
+      ],
+      "similarProductIds": [],
+      "recommended": false,
+      "outOfStock": false
     },
     {
       "id": "rayhaan-0111",
@@ -6977,10 +7115,10 @@ globalThis.DECANT_MANAGED_CATALOG = {
       "image": "images/products/rayhaan/nava-sol.png",
       "image2": "images/products/rayhaan/nava-sol-decant.png",
       "prices": {
-        "1ml": 75,
-        "2ml": 135,
-        "3ml": 205,
-        "5ml": 365
+        "1ml": 85,
+        "2ml": 155,
+        "3ml": 235,
+        "5ml": 390
       },
       "concentration": "Eau de Parfum",
       "gender": "Unisex",
