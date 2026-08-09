@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-08-09T05:00:21.672Z",
+  "updatedAt": "2026-08-09T10:37:51.513Z",
   "brands": [
     {
       "id": "afnan",
@@ -6178,7 +6178,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       ],
       "similarProductIds": [],
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": false
     },
     {
       "id": "rasasi-0154",
@@ -6308,7 +6308,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       ],
       "similarProductIds": [],
       "recommended": true,
-      "outOfStock": true
+      "outOfStock": false
     },
     {
       "id": "rasasi-0097",
@@ -6457,7 +6457,7 @@ globalThis.DECANT_MANAGED_CATALOG = {
       ],
       "similarProductIds": [],
       "recommended": false,
-      "outOfStock": true
+      "outOfStock": false
     },
     {
       "id": "rasasi-managed-hawas-london",
