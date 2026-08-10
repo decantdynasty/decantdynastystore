@@ -1128,7 +1128,7 @@ function productCardHTML(p){
   return `<div class="product-card" data-go="/product/${p.id}">
     ${p.recommended ? `<div class="badge-rec">Best Seller</div>` : ""}
     <div class="product-media">
-      ${expandableImageHTML(p.image,`${p.brand} ${p.name}`,"product-image-button",`${p.brand} — ${p.name}`,`${p.brand} · ${p.name}`)}
+      ${imgTag(p.image,`${p.brand} ${p.name}`,"",`${p.brand} — ${p.name}`)}
       ${stockStampHTML(p)}
       <button class="wish-toggle ${isWish?'active':''}" data-wish-toggle="${p.id}" data-stop aria-label="Wishlist">
         <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.2 2.4 5 6 5c2 0 3.4 1 4.5 2.4l1.5 1.9 1.5-1.9C14.6 6 16 5 18 5c3.6 0 5.5 3.2 4 6.7C19.5 16.3 12 21 12 21z"/></svg>
@@ -1295,7 +1295,6 @@ function renderProductDetail(productId){
   const p = getProduct(productId);
   if(!p) return `<div class="center-empty">Fragrance not found. <a href="#/collection">Back to collection</a></div>`;
   const firstSize = Object.keys(p.prices)[0];
-  const hasImage2 = !!p.image2;
   const profile=productProfile(p);
   const similar=similarProducts(p);
   return `
@@ -1303,7 +1302,6 @@ function renderProductDetail(productId){
     <div>
       ${backButtonHTML("#/collection")}
       <div class="pd-media">${expandableImageHTML(p.image,`${p.brand} ${p.name}`,"pd-image-button",`${p.brand} — ${p.name}`,`${p.brand} · ${p.name}`)}${stockStampHTML(p)}</div>
-      ${hasImage2 ? `<div class="pd-media pd-media-2">${expandableImageHTML(p.image2,`${p.brand} ${p.name} decant bottle`,"pd-image-button",`${p.brand} ${p.name}`,`${p.brand} · ${p.name} decant`)}</div>` : ""}
     </div>
     <div>
       <div class="breadcrumb"><a href="#/">Home</a> / <a href="#/brand/${p.brandId}">${esc(p.brand)}</a> / ${esc(p.name)}</div>
@@ -1349,7 +1347,7 @@ function openQuickView(productId){
   modal.innerHTML = `
     <button class="modal-close" data-close-modal>&times;</button>
     <div class="modal-inner" data-pid="${p.id}" data-size="${firstSize}">
-      <div class="modal-media">${expandableImageHTML(p.image,`${p.brand} ${p.name}`,"modal-image-button",`${p.brand} — ${p.name}`,`${p.brand} · ${p.name}`)}${stockStampHTML(p)}</div>
+      <div class="modal-media">${imgTag(p.image,`${p.brand} ${p.name}`,"",`${p.brand} — ${p.name}`)}${stockStampHTML(p)}</div>
       <div class="modal-body">
         <div class="pd-brand">${esc(p.brand)}</div>
         <h2 class="pd-name" style="font-size:26px;">${esc(p.name)}</h2>
@@ -1995,7 +1993,8 @@ function initVoucherPromo(){
   document.querySelectorAll("[data-close-promo]").forEach(button=>button.onclick=close);backdrop.onclick=close;
   document.getElementById("copyPromoCode").onclick=()=>{navigator.clipboard?.writeText("DD50");toast("DD50 copied");};
   document.getElementById("shopPromo").onclick=()=>{close();navigateTo("#/collection");};
-  if(!seen)setTimeout(()=>{backdrop.classList.add("open");modal.classList.add("open");},1750);
+  const show=()=>{if(seen)return;setTimeout(()=>{backdrop.classList.add("open");modal.classList.add("open");},10000);};
+  if(document.readyState==="complete")show();else window.addEventListener("load",show,{once:true});
 }
 function syncFooterPartners(){
   const grid=document.querySelector(".footer-grid");
