@@ -3,7 +3,7 @@
  */
 globalThis.DECANT_MANAGED_CATALOG = {
   "version": 1,
-  "updatedAt": "2026-08-09T10:37:51.513Z",
+  "updatedAt": "2026-08-10T02:14:37.791Z",
   "brands": [
     {
       "id": "afnan",
